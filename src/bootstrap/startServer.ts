@@ -1,13 +1,12 @@
 
+import { appConfig } from '@/config/app.config';
 
 import { createApp } from './createApp';
 import { logger } from './logger';
 import { disconnectPrisma, getPrisma } from './prisma';
-// import { connectRedis, disconnectRedis } from './redis';
-import { startTelemetry, stopTelemetry } from './telemetry';
-import { appConfig } from '../config/app.config';
 
 import type { Server } from 'node:http';
+
 
 const shutdown = async (server: Server, signal: string): Promise<void> => {
   logger.info({ signal }, 'Received shutdown signal');
@@ -25,9 +24,11 @@ const shutdown = async (server: Server, signal: string): Promise<void> => {
 
   await disconnectPrisma();
   // await disconnectRedis();
-  await stopTelemetry();
   logger.info('Shutdown completed');
 };
+
+
+
 
 export const startServer = async (): Promise<Server> => {
   const app = createApp();
