@@ -18,7 +18,7 @@ export default [
         project: ['./tsconfig.json'],
         tsconfigRootDir: import.meta.dirname,
         ecmaVersion: 'latest',
-        sourceType: 'script',
+        sourceType: 'module',
       },
       globals: {
         ...globals.node,
@@ -51,9 +51,12 @@ export default [
           ],
         },
       ],
-      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+      '@typescript-eslint/consistent-type-imports': "off",
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: false }],
       '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-unused-vars': ['error',{ argsIgnorePattern: '^_' },
+      
+],
     },
   },
   eslintConfigPrettier,

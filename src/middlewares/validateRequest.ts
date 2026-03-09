@@ -1,9 +1,16 @@
-import type { RequestHandler } from 'express';
+import type { RequestHandler } from 'express'
+import type { ZodTypeAny } from 'zod'
 
-export const validateRequest = <T>(validator: (input: unknown) => T): RequestHandler => {
-  return (req, _res, next) => {
-    const validatedBody = validator(req.body);
-    req.body = validatedBody;
-    next();
-  };
-};
+export const validateRequest =(schema: ZodTypeAny): RequestHandler => async (req, _res, next) => {
+    try {
+      await schema.parseAsync({
+        body: req.body as unknown,
+        query: req.query as unknown,
+        params: req.params as unknown,
+      })
+
+      next()
+    } catch (error) {
+      next(error)
+    }
+  }

@@ -1,4 +1,4 @@
-import { createHttpError } from '../common/httpError';
+import { AppError } from '../common/errors/AppError';
 import { verifyAccessToken } from '../modules/auth/infrastructure/auth.token';
 
 import type { RequestHandler } from 'express';
@@ -16,13 +16,13 @@ export const authenticate: RequestHandler = (req, _res, next) => {
   const authHeader = req.header('authorization');
 
   if (!authHeader) {
-    next(createHttpError(401, 'Unauthorized'));
+    next(new AppError(401, 'Unauthorized'));
     return;
   }
 
   const token = authHeader.replace(/^Bearer\s+/iu, '').trim();
   if (!token) {
-    next(createHttpError(401, 'Unauthorized'));
+    next(new AppError(401, 'Unauthorized'));
     return;
   }
 
@@ -31,6 +31,6 @@ export const authenticate: RequestHandler = (req, _res, next) => {
     req.user = { id: payload.sub, role: payload.role };
     next();
   } catch {
-    next(createHttpError(401, 'Unauthorized'));
+    next(new AppError(401, 'Unauthorized'));
   }
 };

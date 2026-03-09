@@ -10,6 +10,10 @@ export const openApiDocument = {
       url: '/api/v1',
       description: 'Version 1 API',
     },
+    {
+      url: '/api/v2',
+      description: 'Version 2 API',
+    },
   ],
   tags: [
     { name: 'Health' },

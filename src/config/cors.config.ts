@@ -2,6 +2,7 @@ import { env } from './env';
 
 import type { CorsOptions } from 'cors';
 
+
 const normalizeOrigins = (origins: string): CorsOptions['origin'] => {
   const trimmed = origins.trim();
   if (trimmed === '*') {
@@ -20,10 +21,10 @@ const normalizeOrigins = (origins: string): CorsOptions['origin'] => {
   return values;
 };
 
+
+
+
 export const corsConfig: CorsOptions = {
   origin: normalizeOrigins(env.corsOrigins),
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
-  maxAge: 600,
 };
