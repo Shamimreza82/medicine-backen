@@ -1,0 +1,43 @@
+import { z } from 'zod';
+
+export type NodeEnvironment = 'development' | 'test' | 'production';
+
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  PORT: z.coerce.number().int().positive().default(4000),
+  HOST: z.string().min(1).default('0.0.0.0'),
+  DATABASE_URL: z.string().default(''),
+  CORS_ORIGINS: z.string().default('*'),
+  TRUST_PROXY: z
+    .string()
+    .optional()
+    .transform((value) => value === '1' || value === 'true'),
+  RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60_000),
+  RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(120),
+  JWT_ACCESS_SECRET: z.string().min(16).default('dev-access-secret-change-me'),
+  JWT_EXPIRES_IN: z.string().min(1).default('15m'),
+  REDIS_URL: z.string().url().default('redis://127.0.0.1:6379'),
+});
+
+const parsed = envSchema.safeParse(process.env);
+if (!parsed.success) {
+  const formattedErrors = parsed.error.issues
+    .map((issue) => `${issue.path.join('.') || 'ENV'}: ${issue.message}`)
+    .join('; ');
+  throw new Error(`Invalid environment configuration: ${formattedErrors}`);
+}
+
+
+export const env = {
+  nodeEnv: parsed.data.NODE_ENV as NodeEnvironment,
+  port: parsed.data.PORT,
+  host: parsed.data.HOST,
+  databaseUrl: parsed.data.DATABASE_URL,
+  corsOrigins: parsed.data.CORS_ORIGINS,
+  trustProxy: parsed.data.TRUST_PROXY ?? false,
+  rateLimitWindowMs: parsed.data.RATE_LIMIT_WINDOW_MS,
+  rateLimitMaxRequests: parsed.data.RATE_LIMIT_MAX_REQUESTS,
+  jwtAccessSecret: parsed.data.JWT_ACCESS_SECRET,
+  jwtExpiresIn: parsed.data.JWT_EXPIRES_IN,
+  redisUrl: parsed.data.REDIS_URL,
+} as const;

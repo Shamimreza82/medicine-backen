@@ -1,0 +1,24 @@
+enum UserRole {
+  ADMIN
+  DOCTOR
+  NURSE
+  RECEPTIONIST
+  PATIENT
+}
+
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  phone        String?        @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         UserRole       @default(PATIENT)
+  isActive     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  sessions     AuthSession[]
+  tokens       RefreshToken[]
+
+  @@map("users")
+}
