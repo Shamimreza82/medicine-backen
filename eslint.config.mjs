@@ -7,7 +7,14 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 
 export default [
   {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**', '.turbo/**', '*.d.ts'],
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      'coverage/**',
+      '.turbo/**',
+      '*.d.ts',
+      'prisma/seeds/**',
+    ],
   },
   js.configs.recommended,
   {
@@ -36,6 +43,18 @@ export default [
     rules: {
       ...tseslint.configs['recommended-type-checked'].rules,
       ...tseslint.configs['stylistic-type-checked'].rules,
+
+      // Prisma / Express friendly overrides
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      'no-console': 'warn',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/require-await': 'error',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unsafe-argument': 'warn',
+
       'import/order': [
         'error',
         {
@@ -49,14 +68,21 @@ export default [
             'object',
             'type',
           ],
+          pathGroups: [
+            {
+              pattern: '@/**',
+              group: 'internal',
+            },
+          ],
+          pathGroupsExcludedImportTypes: ['builtin'],
         },
       ],
-      '@typescript-eslint/consistent-type-imports': "off",
+
+      '@typescript-eslint/consistent-type-imports': 'off',
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: false }],
       '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-unused-vars': ['error',{ argsIgnorePattern: '^_' },
-      
-],
+
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
   eslintConfigPrettier,

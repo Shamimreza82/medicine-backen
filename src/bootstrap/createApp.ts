@@ -6,11 +6,13 @@ import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import swaggerUi from 'swagger-ui-express';
 
+import { corsConfig } from '@/config/cors.config';
+import globalErrorHandler from '@/middlewares/globalErrorHandler';
+import { sendResponse } from '@/shared/utils/sendResponse';
+
 import { logger } from './logger';
 import { appConfig } from '../config/app.config';
-import { corsConfig } from '../config/cors.config';
 import { openApiDocument } from '../docs/openapi';
-import { errorHandler } from '../middlewares/errorHandler';
 import { notFound } from '../middlewares/notFound';
 import { rateLimiter } from '../middlewares/rateLimiter';
 import { apiRouter } from '../routes';
@@ -33,16 +35,16 @@ export const createApp = (): express.Express => {
   app.use(express.urlencoded({ extended: false }));
 
   app.get('/', (_req, res) => {
-    res.status(200).json({
+    sendResponse(res, 200, {
       success: true,
-      message: 'Hospital Management API',
+      message: 'api work file',
     });
   });
 
   app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
   app.use('/api/v1', apiRouter);
   app.use(notFound);
-  app.use(errorHandler);
+  app.use(globalErrorHandler);
 
   return app;
 };

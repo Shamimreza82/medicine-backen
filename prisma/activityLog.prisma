@@ -1,0 +1,19 @@
+model ActivityLog {
+    id         String  @id @default(uuid())
+    hospitalId String  @map("hospital_id")
+    userId     String? @map("user_id")
+
+    hospital Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+    user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+    type      String
+    message   String
+    module    String?
+    entityId  String?  @map("entity_id")
+    metadata  Json?
+    createdAt DateTime @default(now()) @map("created_at")
+
+    @@index([hospitalId])
+    @@index([userId])
+    @@map("activity_logs")
+}

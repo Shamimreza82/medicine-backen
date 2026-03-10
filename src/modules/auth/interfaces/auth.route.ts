@@ -9,11 +9,6 @@ authRouter.post('/login', login);
 authRouter.post('/refresh-token', refreshToken);
 authRouter.post('/logout', logout);
 
-
-
-
-
-
 // import { Router } from 'express'
 // import {
 //   loginController,

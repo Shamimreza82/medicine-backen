@@ -1,26 +1,19 @@
+import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 
-import { env } from '../config/env';
+import { envConfig } from '@/config/env.config';
 
-let prismaClient: PrismaClient | null = null;
+const connectionString = envConfig.databaseUrl;
+const adapter = new PrismaPg({ connectionString });
 
-export const getPrisma = (): PrismaClient => {
-  if (prismaClient) {
-    return prismaClient;
-  }
-
-  prismaClient = new PrismaClient({
-    adapter: new PrismaPg({ connectionString: env.databaseUrl }),
-  });
-  return prismaClient;
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
 };
 
-export const disconnectPrisma = async (): Promise<void> => {
-  if (!prismaClient) {
-    return;
-  }
+export const prisma =
+  globalForPrisma.prisma ?? new PrismaClient({ adapter, log: ['error', 'warn'] });
 
-  await prismaClient.$disconnect();
-  prismaClient = null;
-};
+if (envConfig.nodeEnv !== 'production') {
+  globalForPrisma.prisma = prisma;
+}

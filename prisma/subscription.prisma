@@ -1,0 +1,53 @@
+model SubscriptionPlan {
+  id           String   @id @default(uuid())
+  code         String   @unique
+  name         String
+  description  String?
+  priceMonthly Decimal  @map("price_monthly") @db.Decimal(10, 2)
+  priceYearly  Decimal? @map("price_yearly") @db.Decimal(10, 2)
+
+  maxUsers     Int? @map("max_users")
+  maxDoctors   Int? @map("max_doctors")
+  maxPatients  Int? @map("max_patients")
+  maxStorageGb Int? @map("max_storage_gb")
+
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  subscriptions HospitalSubscription[]
+
+
+  @@map("subscription_plans")
+}
+
+model HospitalSubscription {
+  id         String @id @default(uuid())
+  hospitalId String @map("hospital_id")
+  planId     String @map("plan_id")
+
+  hospital Hospital         @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  plan     SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  status      SubscriptionStatus @default(TRIALING)
+  startsAt    DateTime           @map("starts_at")
+  endsAt      DateTime?          @map("ends_at")
+  trialEndsAt DateTime?          @map("trial_ends_at")
+  cancelledAt DateTime?          @map("cancelled_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+   invoices      BillingInvoice[]
+
+  @@index([hospitalId])
+  @@index([planId])
+  @@map("hospital_subscriptions")
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  EXPIRED
+}
