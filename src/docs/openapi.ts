@@ -15,11 +15,7 @@ export const openApiDocument = {
       description: 'Version 2 API',
     },
   ],
-  tags: [
-    { name: 'Health' },
-    { name: 'Auth' },
-    { name: 'Users' },
-  ],
+  tags: [{ name: 'Health' }, { name: 'Auth' }, { name: 'Users' }],
   paths: {
     '/health': {
       get: {

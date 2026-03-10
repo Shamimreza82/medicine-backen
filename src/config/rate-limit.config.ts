@@ -1,6 +1,6 @@
-import { env } from './env';
+import { envConfig } from './env.config';
 
 export const rateLimitConfig = {
-  windowMs: env.rateLimitWindowMs,
-  maxRequests: env.rateLimitMaxRequests,
+  windowMs: envConfig.rateLimitWindowMs,
+  maxRequests: envConfig.rateLimitMaxRequests,
 };

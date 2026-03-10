@@ -1,5 +1,5 @@
-import { AppError } from '../common/errors/AppError';
 import { verifyAccessToken } from '../modules/auth/infrastructure/auth.token';
+import { AppError } from '../shared/errors/AppError';
 
 import type { RequestHandler } from 'express';
 
@@ -12,18 +12,18 @@ declare module 'express-serve-static-core' {
   }
 }
 
-export const authenticate: RequestHandler = (req, _res, next) => {
+
+
+export const auth: RequestHandler = (req, _res, next) => {
   const authHeader = req.header('authorization');
 
   if (!authHeader) {
-    next(new AppError(401, 'Unauthorized'));
-    return;
+    throw new AppError(401, 'Unauthorized');
   }
 
   const token = authHeader.replace(/^Bearer\s+/iu, '').trim();
   if (!token) {
-    next(new AppError(401, 'Unauthorized'));
-    return;
+    throw new AppError(401, 'Unauthorized');
   }
 
   try {
@@ -31,6 +31,6 @@ export const authenticate: RequestHandler = (req, _res, next) => {
     req.user = { id: payload.sub, role: payload.role };
     next();
   } catch {
-    next(new AppError(401, 'Unauthorized'));
+    throw new AppError(401, 'Unauthorized');
   }
 };

@@ -1,12 +1,10 @@
-
 import { appConfig } from '@/config/app.config';
 
 import { createApp } from './createApp';
 import { logger } from './logger';
-import { disconnectPrisma, getPrisma } from './prisma';
+
 
 import type { Server } from 'node:http';
-
 
 const shutdown = async (server: Server, signal: string): Promise<void> => {
   logger.info({ signal }, 'Received shutdown signal');
@@ -22,19 +20,16 @@ const shutdown = async (server: Server, signal: string): Promise<void> => {
     });
   });
 
-  await disconnectPrisma();
   // await disconnectRedis();
   logger.info('Shutdown completed');
 };
 
-
-
-
+// eslint-disable-next-line @typescript-eslint/require-await
 export const startServer = async (): Promise<Server> => {
   const app = createApp();
 
   // startTelemetry();
-  await getPrisma().$connect();
+  // await getPrisma().$connect();
   // await connectRedis();
 
   const server = app.listen(appConfig.port, appConfig.host, () => {

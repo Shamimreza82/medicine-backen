@@ -1,8 +1,8 @@
-import { env } from './env';
+import { envConfig } from './env.config';
 
 export const appConfig = {
-  host: env.host,
-  port: env.port,
-  trustProxy: env.trustProxy,
-  isProduction: env.nodeEnv === 'production',
+  host: envConfig.host,
+  port: envConfig.port,
+  trustProxy: envConfig.trustProxy,
+  isProduction: envConfig.nodeEnv === 'production',
 };

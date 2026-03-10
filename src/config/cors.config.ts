@@ -1,30 +1,32 @@
-import { env } from './env';
+import { envConfig } from './env.config';
 
 import type { CorsOptions } from 'cors';
 
-
-const normalizeOrigins = (origins: string): CorsOptions['origin'] => {
-  const trimmed = origins.trim();
-  if (trimmed === '*') {
-    return true;
-  }
-
-  const values = trimmed
+const parseOrigins = (origins: string): string[] => {
+  return origins
     .split(',')
-    .map((origin) => origin.trim())
+    .map((o) => o.trim())
     .filter(Boolean);
-
-  if (values.length === 0) {
-    return true;
-  }
-
-  return values;
 };
 
-
-
+const allowedOrigins = parseOrigins(envConfig.corsOrigins);
 
 export const corsConfig: CorsOptions = {
-  origin: normalizeOrigins(env.corsOrigins),
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error('CORS origin not allowed'));
+  },
+
   credentials: true,
+
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };

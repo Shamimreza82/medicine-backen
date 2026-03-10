@@ -1,24 +1,140 @@
-enum UserRole {
-  ADMIN
-  DOCTOR
-  NURSE
-  RECEPTIONIST
-  PATIENT
+model Permission {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  resource    String
+  action      String
+  description String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model Role {
+  id String @id @default(uuid())
+
+  hospitalId String?   @map("hospital_id")
+  hospital   Hospital? @relation(fields: [hospitalId], references: [id])
+
+  name        String
+  slug        String
+  description String?
+  isSystem    Boolean @default(false) @map("is_system")
+
+  users           User[]
+  rolePermissions RolePermission[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([hospitalId, slug])
+  @@map("roles")
+}
+
+model RolePermission {
+  id String @id @default(uuid())
+
+  roleId       String @map("role_id")
+  permissionId String @map("permission_id")
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  LOCKED
 }
 
 model User {
-  id           String         @id @default(cuid())
-  email        String         @unique
-  phone        String?        @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  role         UserRole       @default(PATIENT)
-  isActive     Boolean        @default(true)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  sessions     AuthSession[]
-  tokens       RefreshToken[]
+  id String @id @default(uuid())
 
+  // Multi Tenant
+  hospitalId String   @map("hospital_id")
+  hospital   Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  roleId String @map("role_id")
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  // Identity
+  name     String
+  email    String
+  phone    String?
+  password String
+
+  avatar String?
+
+  // Account status
+  status UserStatus @default(ACTIVE)
+
+  // Security
+  emailVerified Boolean @default(false) @map("email_verified")
+  phoneVerified Boolean @default(false) @map("phone_verified")
+
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until")
+
+  passwordChangedAt DateTime? @map("password_changed_at")
+
+  // MFA
+  mfaEnabled Boolean @default(false) @map("mfa_enabled")
+  mfaSecret  String? @map("mfa_secret")
+
+  // Login tracking
+  lastLoginAt         DateTime?     @map("last_login_at")
+  lastLoginIp         String?       @map("last_login_ip")
+  lastUserAgent       String?       @map("last_user_agent")
+
+  // Session control
+  refreshTokenVersion Int           @default(0) @map("refresh_token_version")
+
+  // Audit
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  createdBy String? @map("created_by")
+  updatedBy String? @map("updated_by")
+
+  deletedAt DateTime? @map("deleted_at")
+
+  // Relations
+  sessions UserSession[]
+  activityLogs   ActivityLog[]
+  auditLogs AuditLog[]
+  uploadedFiles File[] 
+
+  @@unique([hospitalId, email])
+  @@index([hospitalId])
+  @@index([roleId])
   @@map("users")
+}
+
+model UserSession {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  refreshToken String @map("refresh_token")
+
+  ipAddress String? @map("ip_address")
+  userAgent String? @map("user_agent")
+
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("user_sessions")
 }

@@ -8,9 +8,9 @@ export const AUTH_MESSAGES = {
   USER_ALREADY_EXISTS: 'User already exists',
   USER_NOT_FOUND: 'User not found',
   INVALID_REFRESH_TOKEN: 'Invalid refresh token',
-} as const
+} as const;
 
 export const AUTH_TOKEN_TYPES = {
   ACCESS: 'ACCESS',
   REFRESH: 'REFRESH',
-} as const
+} as const;

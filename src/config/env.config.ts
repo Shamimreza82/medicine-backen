@@ -1,10 +1,14 @@
+import { StatusCodes } from 'http-status-codes';
 import { z } from 'zod';
+
+import { AppError } from '@/shared/errors/AppError';
 
 export type NodeEnvironment = 'development' | 'test' | 'production';
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
+  CORS_ENABLED: z.coerce.boolean(),
   HOST: z.string().min(1).default('0.0.0.0'),
   DATABASE_URL: z.string().default(''),
   CORS_ORIGINS: z.string().default('*'),
@@ -24,11 +28,13 @@ if (!parsed.success) {
   const formattedErrors = parsed.error.issues
     .map((issue) => `${issue.path.join('.') || 'ENV'}: ${issue.message}`)
     .join('; ');
-  throw new Error(`Invalid environment configuration: ${formattedErrors}`);
+  throw new AppError(
+    StatusCodes.BAD_REQUEST,
+    `Invalid environment configuration: ${formattedErrors}`,
+  );
 }
 
-
-export const env = {
+export const envConfig = {
   nodeEnv: parsed.data.NODE_ENV as NodeEnvironment,
   port: parsed.data.PORT,
   host: parsed.data.HOST,
@@ -40,4 +46,5 @@ export const env = {
   jwtAccessSecret: parsed.data.JWT_ACCESS_SECRET,
   jwtExpiresIn: parsed.data.JWT_EXPIRES_IN,
   redisUrl: parsed.data.REDIS_URL,
+  corsEnabled: parsed.data.CORS_ENABLED,
 } as const;

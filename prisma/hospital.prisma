@@ -1,0 +1,92 @@
+enum HospitalStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model Hospital {
+  id      String         @id @default(uuid())
+  name    String
+  slug    String         @unique
+  email   String?        @unique
+  phone   String?
+  address String?
+  logo    String?
+  website String?
+  status  HospitalStatus @default(ACTIVE)
+
+  deletedAt DateTime?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  users            User[]
+  tenantSetting    TenantSetting?
+  tenantFeatures   TenantFeature[]
+  subscriptions    HospitalSubscription[]
+  invoices         BillingInvoice[]
+  payments         BillingPayment[]
+  // usageMetrics     UsageMetric[]
+  auditLogs        AuditLog[]
+  // apiKeys          ApiKey[]
+  webhookEndpoints WebhookEndpoint[]
+  activityLogs     ActivityLog[]
+  roles Role[] 
+  files            File[]
+
+  @@index([name])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("hospitals")
+}
+
+model TenantSetting {
+  id         String   @id @default(uuid())
+  hospitalId String   @unique @map("hospital_id")
+  hospital   Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  timezone            String  @default("Asia/Dhaka")
+  currency            String  @default("BDT")
+  language            String  @default("en")
+  dateFormat          String  @default("YYYY-MM-DD") @map("date_format")
+  timeFormat          String  @default("24h") @map("time_format")
+  appointmentDuration Int     @default(15) @map("appointment_duration")
+  prescriptionFooter  String? @map("prescription_footer")
+  invoicePrefix       String? @map("invoice_prefix")
+  patientIdPrefix     String? @map("patient_id_prefix")
+  logoUrl             String? @map("logo_url")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("tenant_settings")
+}
+
+model Feature {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  tenantFeatures TenantFeature[]
+
+  @@map("features")
+}
+
+model TenantFeature {
+  id         String @id @default(uuid())
+  hospitalId String @map("hospital_id")
+  featureId  String @map("feature_id")
+
+  hospital Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  feature  Feature  @relation(fields: [featureId], references: [id], onDelete: Cascade)
+
+  enabled   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([hospitalId, featureId])
+  @@index([hospitalId])
+  @@index([featureId])
+  @@map("tenant_features")
+}
