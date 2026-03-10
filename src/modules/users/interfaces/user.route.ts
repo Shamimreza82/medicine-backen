@@ -4,7 +4,6 @@ import { auth } from '@/middlewares/auth';
 
 import { createUser, deleteUser, getUserById, getUsers, updateUser } from './user.controller';
 
-
 export const userRouter = Router();
 
 userRouter.use(auth);

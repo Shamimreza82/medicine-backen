@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { StatusCodes } from 'http-status-codes';
 import { z } from 'zod';
 
@@ -21,6 +22,10 @@ const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(16).default('dev-access-secret-change-me'),
   JWT_EXPIRES_IN: z.string().min(1).default('15m'),
   REDIS_URL: z.string().url().default('redis://127.0.0.1:6379'),
+
+  REDIS_HOST: z.string().default('127.0.0.1'),
+  REDIS_PORT: z.coerce.number().int().positive().default(6379),
+  REDIS_PASSWORD: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -47,4 +52,7 @@ export const envConfig = {
   jwtExpiresIn: parsed.data.JWT_EXPIRES_IN,
   redisUrl: parsed.data.REDIS_URL,
   corsEnabled: parsed.data.CORS_ENABLED,
+  redisHost: parsed.data.REDIS_HOST,
+  redisPort: parsed.data.REDIS_PORT,
+  redisPassword: parsed.data.REDIS_PASSWORD,
 } as const;

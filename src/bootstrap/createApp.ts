@@ -16,8 +16,9 @@ import { openApiDocument } from '../docs/openapi';
 import { notFound } from '../middlewares/notFound';
 import { rateLimiter } from '../middlewares/rateLimiter';
 import { apiRouter } from '../routes';
+import '@/workers';
 
-export const createApp = (): express.Express => {
+export const createApp = () => {
   const app = express();
 
   app.disable('x-powered-by');

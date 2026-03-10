@@ -1,16 +1,20 @@
+import { logger } from '@/bootstrap/logger';
 import { prisma } from '@/bootstrap/prisma';
 
-import { seedHospital } from './seeds/hospital.seed';
+import { seedFeatures, seedHospital } from './seeds/hospital.seed';
 import { seedPermissions } from './seeds/permission.seed';
 import { seedRoles } from './seeds/role.seed';
 import { seedSuperAdmin } from './seeds/user.seed';
 
 async function main() {
-  console.log('🌱 Seeding started');
+  logger.info('🌱 Seeding started');
 
   await seedPermissions();
-
+  logger.info('🌱 Permissions seeded');
   await seedRoles();
+  logger.info('🌱 Roles seeded');
+  await seedFeatures();
+  logger.info('🌱 Features seeded');
 
   const hospital = await seedHospital();
 
@@ -19,12 +23,11 @@ async function main() {
   }
 
   await seedSuperAdmin(hospital.id);
-
-  console.log('✅ Seeding completed');
+  logger.info('✅ Seeding completed');
 }
 
 main()
-  .catch(console.error)
+  .catch(logger.error)
   .finally(async () => {
     await prisma.$disconnect();
   });

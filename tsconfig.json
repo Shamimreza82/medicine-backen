@@ -17,10 +17,17 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "rootDir": "."
   },
-  "include": ["src", "tests", "prisma.config.ts", "prisma/seeds/**/*.ts", "prisma/seed.ts"],
+  "include": [
+    "src",
+    "tests",
+    "prisma.config.ts",
+    "prisma/seeds/**/*.ts",
+    "prisma/seed.ts",
+    "vitest.config.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

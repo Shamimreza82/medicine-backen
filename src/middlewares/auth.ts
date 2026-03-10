@@ -12,8 +12,6 @@ declare module 'express-serve-static-core' {
   }
 }
 
-
-
 export const auth: RequestHandler = (req, _res, next) => {
   const authHeader = req.header('authorization');
 

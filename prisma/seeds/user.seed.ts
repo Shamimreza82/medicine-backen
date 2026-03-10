@@ -13,9 +13,13 @@ export async function seedSuperAdmin(hospitalId: string) {
   }
 
   const password = await bcrypt.hash('admin123', 10);
-
   await prisma.user.upsert({
-    where: { email: 'admin@system.com' },
+    where: {
+      hospitalId_email: {
+        hospitalId: hospitalId,
+        email: 'admin@system.com',
+      },
+    },
     update: {},
     create: {
       name: 'System Admin',

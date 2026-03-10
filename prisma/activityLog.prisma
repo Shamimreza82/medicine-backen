@@ -1,19 +1,31 @@
 model ActivityLog {
-    id         String  @id @default(uuid())
-    hospitalId String  @map("hospital_id")
-    userId     String? @map("user_id")
+  id String @id @default(uuid()) @map("id")
 
-    hospital Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
-    user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  hospitalId String?  @map("hospital_id")
+  hospital   Hospital? @relation(fields: [hospitalId], references: [id], onDelete: SetNull)
 
-    type      String
-    message   String
-    module    String?
-    entityId  String?  @map("entity_id")
-    metadata  Json?
-    createdAt DateTime @default(now()) @map("created_at")
+  userId String? @map("user_id")
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-    @@index([hospitalId])
-    @@index([userId])
-    @@map("activity_logs")
+  action   String  @map("action")
+  resource String  @map("resource")
+
+  description String? @map("description")
+
+  method   String? @map("method")
+  endpoint String? @map("endpoint")
+
+  ipAddress String? @map("ip_address")
+  userAgent String? @map("user_agent")
+
+  metadata Json? @map("metadata")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([hospitalId], map: "idx_activity_hospital")
+  @@index([userId], map: "idx_activity_user")
+  @@index([hospitalId, createdAt], map: "idx_activity_tenant_time")
+  @@index([createdAt], map: "idx_activity_time")
+
+  @@map("activity_logs")
 }

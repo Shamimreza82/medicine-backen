@@ -1,24 +1,41 @@
 model AuditLog {
-    id         String  @id @default(uuid())
-    hospitalId String? @map("hospital_id")
-    userId     String? @map("user_id")
+  id String @id @default(uuid())
 
-    hospital Hospital? @relation(fields: [hospitalId], references: [id], onDelete: SetNull)
-    user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  hospitalId String? @map("hospital_id")
+  userId     String? @map("user_id")
 
-    module    String
-    entity    String
-    entityId  String? @map("entity_id")
-    action    String
-    oldValues Json?   @map("old_values")
-    newValues Json?   @map("new_values")
-    ipAddress String? @map("ip_address")
-    userAgent String? @map("user_agent")
+  hospital Hospital? @relation(fields: [hospitalId], references: [id], onDelete: SetNull)
+  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-    createdAt DateTime @default(now()) @map("created_at")
+  module   String
+  entity   String
+  entityId String? @map("entity_id")
 
-    @@index([hospitalId])
-    @@index([userId])
-    @@index([entity, entityId])
-    @@map("audit_logs")
+  action String
+  status String @default("SUCCESS")
+
+  actorRole String? @map("actor_role")
+
+  oldValues Json? @map("old_values")
+  newValues Json? @map("new_values")
+
+  ipAddress String? @map("ip_address")
+  userAgent String? @map("user_agent")
+
+  method   String?
+  endpoint String?
+
+  requestId String? @map("request_id")
+  severity  String? @default("INFO")
+
+  metadata Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([hospitalId])
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([hospitalId, createdAt])
+
+  @@map("audit_logs")
 }
