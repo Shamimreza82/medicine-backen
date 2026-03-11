@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken';
 
+import { envConfig } from '@/config/env.config';
 import { AppError } from '@/shared/errors/AppError';
 
-import { envConfig } from '../../../config/env.config';
+
 
 import type { JwtPayload } from 'jsonwebtoken';
 

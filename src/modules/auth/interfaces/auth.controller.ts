@@ -3,26 +3,20 @@ import { StatusCodes } from 'http-status-codes';
 import { sendResponse } from '@/shared/utils/sendResponse'
 
 import { catchAsync } from '../../../shared/utils/catchAsync'
-import { register } from '../application/register'
+// import { register } from '../application/service/register'
 import { AUTH_MESSAGES } from '../domain/auth.constants';
-
-const cookieOptions = {
-  httpOnly: true,
-  secure: true,
-  sameSite: 'none' as const,
-}
 
 export const registerController = catchAsync(async (req, res) => {
 
   console.log("jjjjjjjj")
-  const result = await register(req.body)
+  // const result = await register(req.body)
 
   // res.cookie('refreshToken', result.tokens.refreshToken, cookieOptions)
 
   sendResponse(res, StatusCodes.NOT_FOUND, {
     success: true,
     message: AUTH_MESSAGES.REGISTER_SUCCESS,
-    data: result
+    data: {}
   })
 })
 

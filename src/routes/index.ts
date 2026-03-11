@@ -1,11 +1,14 @@
 import { Router } from 'express';
 
-import { authRouter } from '../modules/auth';
-import { healthRouter } from '../modules/health';
-import { userRouter } from '../modules/users';
+import { authRoutes } from '@/modules/auth/interfaces/auth.route';
+import { healthRouter } from '@/modules/health/interfaces/health.route';
+import { hospitalRoutes } from '@/modules/hospital/interfaces/hospital.routes';
+
+
+
 
 export const apiRouter = Router();
 
-apiRouter.use('/health', healthRouter);
-apiRouter.use('/auth', authRouter);
-apiRouter.use('/users', userRouter);
+apiRouter.use('/health', healthRouter );
+apiRouter.use('/auth', authRoutes);
+apiRouter.use('/hospitals', hospitalRoutes);

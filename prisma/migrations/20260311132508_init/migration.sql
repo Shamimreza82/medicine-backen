@@ -224,7 +224,7 @@ CREATE TABLE "permissions" (
     "resource" TEXT NOT NULL,
     "action" TEXT NOT NULL,
     "description" TEXT,
-    "isSystem" BOOLEAN NOT NULL DEFAULT true,
+    "is_system" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 

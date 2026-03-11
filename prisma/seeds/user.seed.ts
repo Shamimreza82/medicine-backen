@@ -21,13 +21,23 @@ export async function seedSuperAdmin(hospitalId: string) {
         email: 'admin@system.com',
       },
     },
-    update: {},
+    update: {
+      name: 'System Admin',
+      email: 'admin@system.com',
+      password,
+      hospitalId,
+      roleId: role.id,
+      emailVerified: true,
+      phoneVerified: true,
+    },
     create: {
       name: 'System Admin',
       email: 'admin@system.com',
       password,
       hospitalId,
       roleId: role.id,
+      emailVerified: true,
+      phoneVerified: true,
     },
   });
 }

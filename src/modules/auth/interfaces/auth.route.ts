@@ -4,12 +4,15 @@ import { registerController } from './auth.controller';
 
 
 
-export const authRouter = Router();
+const router = Router();
 
-authRouter.post('/register', registerController);
-// authRouter.post('/login', login);
-// authRouter.post('/refresh-token', refreshToken);
-// authRouter.post('/logout', logout);
+router.post('/register', registerController);
+
+export const authRoutes = router;
+
+// router.post('/login', login);
+// router.post('/refresh-token', refreshToken);
+// router.post('/logout', logout);
 
 // import { Router } from 'express'
 // import {

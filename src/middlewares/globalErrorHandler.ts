@@ -26,8 +26,10 @@ const globalErrorHandler = (err: unknown, req: Request, res: Response, _next: Ne
 
   ///-----------------------------------------------------------------------------------------------------------------------
 
+
+
   if (err instanceof TokenExpiredError) {
-    sendError(res, StatusCodes.REQUEST_TIMEOUT, {
+    return sendError(res, StatusCodes.REQUEST_TIMEOUT, {
       success: false,
       message: 'Session expired. Please refresh your token or log in again.',
       error: err,
@@ -36,7 +38,7 @@ const globalErrorHandler = (err: unknown, req: Request, res: Response, _next: Ne
   }
 
   if (err instanceof SyntaxError) {
-    sendError(res, StatusCodes.CONFLICT, {
+    return sendError(res, StatusCodes.CONFLICT, {
       success: false,
       message: err.message || 'Something went wrong',
       error: err,
@@ -50,7 +52,9 @@ const globalErrorHandler = (err: unknown, req: Request, res: Response, _next: Ne
 
   //generics error handle(
   if (err instanceof AppError) {
-    sendError(res, err.statusCode, {
+
+
+    return sendError(res, err.statusCode, {
       success: false,
       message: err.message || 'Something went wrong',
       error: err,
@@ -58,14 +62,13 @@ const globalErrorHandler = (err: unknown, req: Request, res: Response, _next: Ne
     });
   }
 
-  //Zod Validation Error handle
   if (err instanceof ZodError) {
     const errors = err.issues.map((issue) => ({
       field: issue.path.join('.'),
       error: issue.message,
     }));
 
-    sendError(res, StatusCodes.CONFLICT, {
+    return sendError(res, StatusCodes.BAD_REQUEST, {
       success: false,
       message: 'Invalid input data',
       error: errors,
@@ -78,32 +81,36 @@ const globalErrorHandler = (err: unknown, req: Request, res: Response, _next: Ne
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === 'P2002') {
       // Unique constraint failed
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: `Validation Error: Unique constraint failed on the field: ${String(err?.meta?.['target'])}`,
         statusCode: StatusCodes.BAD_REQUEST,
         error: err,
+        stack: err.stack,
       });
     } else if (err.code === 'P2025') {
       // Record not found
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
         message: 'The record you are trying to update or delete does not exist.',
         error: err,
+        stack: err.stack,
       });
     } else if (err.code === 'P2003') {
       // Foreign key constraint failed
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: 'Foreign key constraint failed.',
         error: err,
+        stack: err.stack,
       });
     } else if (err.code === 'P2000') {
       // Value too long for column
-      res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: 'Value is too long for the column.',
         error: err,
+        stack: err.stack,
       });
     } else {
       // Default for other Prisma errors
@@ -111,16 +118,18 @@ const globalErrorHandler = (err: unknown, req: Request, res: Response, _next: Ne
         success: false,
         message: 'Database error occurred. Please try again later.',
         error: err,
+        stack: err.stack,
       });
     }
   }
 
   // Handle Prisma Unknown Errors
   if (err instanceof Prisma.PrismaClientUnknownRequestError) {
-    res.status(500).json({
+    return res.status(500).json({
       status: 'error',
       message: 'Unknown database error',
       details: err.message,
+      stack: err.stack,
     });
   }
 
@@ -158,7 +167,7 @@ const globalErrorHandler = (err: unknown, req: Request, res: Response, _next: Ne
 
   ///-----------------------------------------------------------------------------------------------------------------------
 
-  sendError(res, StatusCodes.INTERNAL_SERVER_ERROR, {
+  return sendError(res, StatusCodes.INTERNAL_SERVER_ERROR, {
     success: false,
     message: newMessage,
     error: err,

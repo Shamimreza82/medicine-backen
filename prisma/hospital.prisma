@@ -39,27 +39,93 @@ model Hospital {
   @@map("hospitals")
 }
 
+
+
+
+
+
+
+
 model TenantSetting {
   id         String   @id @default(uuid())
   hospitalId String   @unique @map("hospital_id")
   hospital   Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
 
-  timezone            String  @default("Asia/Dhaka")
-  currency            String  @default("BDT")
-  language            String  @default("en")
-  dateFormat          String  @default("YYYY-MM-DD") @map("date_format")
-  timeFormat          String  @default("24h") @map("time_format")
-  appointmentDuration Int     @default(15) @map("appointment_duration")
-  prescriptionFooter  String? @map("prescription_footer")
+  // 🌍 Localization
+  timezone   String  @default("Asia/Dhaka")
+  currency   String  @default("BDT")
+  language   String  @default("bn")
+  dateFormat String  @default("DD-MM-YYYY") @map("date_format")
+  timeFormat String  @default("24h") @map("time_format")
+
+  // 👤 Patient Settings
+  patientIdPrefix        String? @map("patient_id_prefix")
+  autoGeneratePatientId  Boolean @default(true) @map("auto_generate_patient_id")
+  requireNID             Boolean @default(false) @map("require_nid")
+  requireBirthCertificate Boolean @default(false) @map("require_birth_certificate")
+
+  // 🏥 Appointment Settings
+  appointmentDuration      Int  @default(15) @map("appointment_duration")
+  allowOverlappingBooking  Boolean @default(false) @map("allow_overlapping_booking")
+  maxAppointmentsPerDay    Int? @map("max_appointments_per_day")
+  allowOnlineBooking       Boolean @default(true) @map("allow_online_booking")
+
+  // 👨‍⚕️ Doctor Settings
+  allowMultipleChambers Boolean @default(true) @map("allow_multiple_chambers")
+  enableDoctorSchedule  Boolean @default(true) @map("enable_doctor_schedule")
+  enableDoctorLeave     Boolean @default(true) @map("enable_doctor_leave")
+
+  // 💊 Prescription Settings
+  prescriptionFooter      String? @map("prescription_footer")
+  showDoctorSignature     Boolean @default(true) @map("show_doctor_signature")
+  enableDigitalSignature  Boolean @default(false) @map("enable_digital_signature")
+  prescriptionLanguage    String  @default("en") @map("prescription_language")
+
+  // 🧪 Lab / Diagnostic Settings
+  enableLabModule Boolean @default(false) @map("enable_lab_module")
+  labReportFooter String? @map("lab_report_footer")
+  labAutoApprove  Boolean @default(false) @map("lab_auto_approve")
+
+  // 💰 Billing Settings
   invoicePrefix       String? @map("invoice_prefix")
-  patientIdPrefix     String? @map("patient_id_prefix")
-  logoUrl             String? @map("logo_url")
+  taxPercentage       Float?  @map("tax_percentage")
+  allowPartialPayment Boolean @default(false) @map("allow_partial_payment")
+  enableInsuranceBilling Boolean @default(false) @map("enable_insurance_billing")
+
+  // 💊 Pharmacy Settings
+  enablePharmacyModule Boolean @default(false) @map("enable_pharmacy_module")
+  medicineDatabase     String? @map("medicine_database") // DGDA / custom
+
+  // 📱 Notification Settings
+  enableSmsNotification Boolean @default(false) @map("enable_sms_notification")
+  enableEmailNotification Boolean @default(true) @map("enable_email_notification")
+  smsProvider String? @map("sms_provider") // SSL Wireless / BulkSMS
+
+  // 🖼 Branding
+  logoUrl       String? @map("logo_url")
+  faviconUrl    String? @map("favicon_url")
+  primaryColor  String? @map("primary_color")
+  secondaryColor String? @map("secondary_color")
+
+  // 🔐 Security
+  sessionTimeoutMinutes Int @default(60) @map("session_timeout_minutes")
+  require2FA Boolean @default(false) @map("require_2fa")
+
+  // 🧩 Advanced Customization
+  customConfig Json? @map("custom_config")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index([hospitalId])
   @@map("tenant_settings")
 }
+
+
+
+
+
+
 
 model Feature {
   id          String   @id @default(uuid())
