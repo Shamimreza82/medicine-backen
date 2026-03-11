@@ -6,6 +6,10 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    include: [
+      "src/modules/**/tests/**/*.test.ts",
+      "src/tests/**/*.test.ts"
+    ]
   },
   resolve: {
     alias: {

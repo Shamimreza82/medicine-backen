@@ -25,7 +25,10 @@
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "prepare": "husky",
-    "test": "vitest"
+    "test": "vitest run",   
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:auth": "vitest src/modules/auth/tests"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
