@@ -3,14 +3,13 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
-import pinoHttp from 'pino-http';
 import swaggerUi from 'swagger-ui-express';
 
 import { corsConfig } from '@/config/cors.config';
 import globalErrorHandler from '@/middlewares/globalErrorHandler';
 import { sendResponse } from '@/shared/utils/sendResponse';
 
-import { logger } from './logger';
+import { httpLogger } from './logger';
 import { appConfig } from '../config/app.config';
 import { openApiDocument } from '../docs/openapi';
 import { notFound } from '../middlewares/notFound';
@@ -26,7 +25,7 @@ export const createApp = () => {
     app.set('trust proxy', 1);
   }
 
-  app.use(pinoHttp({ logger }));
+  app.use(httpLogger);
   app.use(helmet());
   app.use(cors(corsConfig));
   app.use(rateLimiter);

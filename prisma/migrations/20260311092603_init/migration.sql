@@ -19,12 +19,15 @@ CREATE TYPE "WebhookDeliveryStatus" AS ENUM ('PENDING', 'SUCCESS', 'FAILED');
 -- CreateTable
 CREATE TABLE "activity_logs" (
     "id" TEXT NOT NULL,
-    "hospital_id" TEXT NOT NULL,
+    "hospital_id" TEXT,
     "user_id" TEXT,
-    "type" TEXT NOT NULL,
-    "message" TEXT NOT NULL,
-    "module" TEXT,
-    "entity_id" TEXT,
+    "action" TEXT NOT NULL,
+    "resource" TEXT NOT NULL,
+    "description" TEXT,
+    "method" TEXT,
+    "endpoint" TEXT,
+    "ip_address" TEXT,
+    "user_agent" TEXT,
     "metadata" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -40,10 +43,17 @@ CREATE TABLE "audit_logs" (
     "entity" TEXT NOT NULL,
     "entity_id" TEXT,
     "action" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'SUCCESS',
+    "actor_role" TEXT,
     "old_values" JSONB,
     "new_values" JSONB,
     "ip_address" TEXT,
     "user_agent" TEXT,
+    "method" TEXT,
+    "endpoint" TEXT,
+    "request_id" TEXT,
+    "severity" TEXT DEFAULT 'INFO',
+    "metadata" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "audit_logs_pkey" PRIMARY KEY ("id")
@@ -214,6 +224,7 @@ CREATE TABLE "permissions" (
     "resource" TEXT NOT NULL,
     "action" TEXT NOT NULL,
     "description" TEXT,
+    "isSystem" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -322,10 +333,16 @@ CREATE TABLE "webhook_deliveries" (
 );
 
 -- CreateIndex
-CREATE INDEX "activity_logs_hospital_id_idx" ON "activity_logs"("hospital_id");
+CREATE INDEX "idx_activity_hospital" ON "activity_logs"("hospital_id");
 
 -- CreateIndex
-CREATE INDEX "activity_logs_user_id_idx" ON "activity_logs"("user_id");
+CREATE INDEX "idx_activity_user" ON "activity_logs"("user_id");
+
+-- CreateIndex
+CREATE INDEX "idx_activity_tenant_time" ON "activity_logs"("hospital_id", "created_at");
+
+-- CreateIndex
+CREATE INDEX "idx_activity_time" ON "activity_logs"("created_at");
 
 -- CreateIndex
 CREATE INDEX "audit_logs_hospital_id_idx" ON "audit_logs"("hospital_id");
@@ -335,6 +352,9 @@ CREATE INDEX "audit_logs_user_id_idx" ON "audit_logs"("user_id");
 
 -- CreateIndex
 CREATE INDEX "audit_logs_entity_entity_id_idx" ON "audit_logs"("entity", "entity_id");
+
+-- CreateIndex
+CREATE INDEX "audit_logs_hospital_id_created_at_idx" ON "audit_logs"("hospital_id", "created_at");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "billing_invoices_invoice_number_key" ON "billing_invoices"("invoice_number");
@@ -397,6 +417,9 @@ CREATE INDEX "hospital_subscriptions_plan_id_idx" ON "hospital_subscriptions"("p
 CREATE UNIQUE INDEX "permissions_name_key" ON "permissions"("name");
 
 -- CreateIndex
+CREATE INDEX "permissions_resource_idx" ON "permissions"("resource");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "roles_hospital_id_slug_key" ON "roles"("hospital_id", "slug");
 
 -- CreateIndex
@@ -424,7 +447,7 @@ CREATE INDEX "webhook_deliveries_endpoint_id_idx" ON "webhook_deliveries"("endpo
 CREATE INDEX "webhook_deliveries_status_idx" ON "webhook_deliveries"("status");
 
 -- AddForeignKey
-ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "hospitals"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "hospitals"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;

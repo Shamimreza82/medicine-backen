@@ -12,7 +12,8 @@ export async function seedSuperAdmin(hospitalId: string) {
     throw new AppError(StatusCodes.NOT_FOUND, 'SUPER_ADMIN role not found');
   }
 
-  const password = await bcrypt.hash('admin123', 10);
+  const password = await bcrypt.hash('123456', 10);
+  console.log('🌱 Hashed password for super admin');
   await prisma.user.upsert({
     where: {
       hospitalId_email: {

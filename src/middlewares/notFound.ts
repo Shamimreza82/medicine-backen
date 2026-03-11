@@ -1,7 +1,14 @@
-import { AppError } from '../shared/errors/AppError';
+import { StatusCodes } from 'http-status-codes';
+
+import { sendError } from '@/shared/utils/sendError';
+
+
 
 import type { RequestHandler } from 'express';
 
-export const notFound: RequestHandler = (req, _res, _next) => {
-  throw new AppError(404, `Route not found: ${req.method} ${req.originalUrl}`);
+export const notFound: RequestHandler = (req, res, _next) => {
+  sendError(res, StatusCodes.NOT_FOUND, {
+    success: false,
+    message: `Route not found: ${req.method} ${req.originalUrl}`
+  })
 };

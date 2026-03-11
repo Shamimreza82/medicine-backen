@@ -5,7 +5,7 @@ model Permission {
   action      String
   description String?
 
-  isSystem    Boolean  @default(true) // system permission
+  isSystem    Boolean  @default(true)  @map("is_system") // system permission
 
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")

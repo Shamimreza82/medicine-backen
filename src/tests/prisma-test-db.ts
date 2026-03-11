@@ -1,16 +1,14 @@
 // src/tests/prisma-test-db.ts
 
-import { prisma } from "@/bootstrap/prisma"
+import { prisma } from '@/bootstrap/prisma';
 
 export async function resetDatabase() {
   await prisma.$transaction([
     prisma.user.deleteMany(),
     prisma.role.deleteMany(),
-    prisma.permission.deleteMany()
-  ])
+    prisma.permission.deleteMany(),
+  ]);
 }
-
-
 
 // 2️⃣ prisma-test-db.ts
 // এটা test database helper।

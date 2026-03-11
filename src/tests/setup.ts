@@ -1,19 +1,16 @@
 /* eslint-disable @typescript-eslint/require-await */
 // src/tests/setup.ts
-import { beforeAll, afterAll } from "vitest"
+import { beforeAll, afterAll } from 'vitest';
 
-import { prisma } from "@/bootstrap/prisma"
+import { prisma } from '@/bootstrap/prisma';
 
 beforeAll(async () => {
-  console.log("Test started")
-})
+  console.log('Test started');
+});
 
 afterAll(async () => {
-  await prisma.$disconnect()
-})
-
-
-
+  await prisma.$disconnect();
+});
 
 // 1️⃣ setup.ts
 

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import pino from 'pino';
+import { pinoHttp } from 'pino-http';
 
 import { envConfig } from '@/config/env.config';
 
@@ -42,3 +43,14 @@ export const logger = pino(
         },
       }),
 );
+
+
+export const httpLogger = pinoHttp({
+  logger,
+  autoLogging: false
+// customLogLevel: (req, res, err) => {
+//     if (res.statusCode >= 500 || err) return "error";
+//     if (res.statusCode >= 400) return "warn";
+//     return "silent";
+//   },
+});

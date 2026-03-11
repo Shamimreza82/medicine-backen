@@ -1,4 +1,6 @@
 import { prisma } from '@/bootstrap/prisma';
+import { hospitalFeatures } from '@/shared/lib/data/hospitalFeatures';
+
 import type { Hospital } from '@prisma/client';
 
 export async function seedHospital(): Promise<Hospital> {
@@ -30,16 +32,9 @@ export async function seedHospital(): Promise<Hospital> {
 }
 
 export async function seedFeatures() {
-  const features = [
-    { code: 'PATIENT_MANAGEMENT', name: 'Patient Management' },
-    { code: 'APPOINTMENT_SYSTEM', name: 'Appointment System' },
-    { code: 'PRESCRIPTION_SYSTEM', name: 'Prescription System' },
-    { code: 'BILLING_SYSTEM', name: 'Billing System' },
-    { code: 'INVENTORY_SYSTEM', name: 'Inventory System' },
-    { code: 'LAB_MODULE', name: 'Lab Module' },
-  ];
 
-  for (const feature of features) {
+
+  for (const feature of hospitalFeatures) {
     await prisma.feature.upsert({
       where: { code: feature.code },
       update: {},

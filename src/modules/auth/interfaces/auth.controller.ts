@@ -1,61 +1,31 @@
-import { sendError } from '@/shared/utils/sendError';
+import { StatusCodes } from 'http-status-codes';
 
-import type { RequestHandler } from 'express';
+import { sendResponse } from '@/shared/utils/sendResponse'
 
-export const register: RequestHandler = (_req, res) => {
-  sendError(res, 501, {
-    success: false,
-    message: 'register is not implemented yet',
-  });
-};
+import { catchAsync } from '../../../shared/utils/catchAsync'
+import { register } from '../application/register'
+import { AUTH_MESSAGES } from '../domain/auth.constants';
 
-export const login: RequestHandler = (_req, res) => {
-  sendError(res, 501, {
-    success: false,
-    message: 'login is not implemented yet',
-  });
-};
+const cookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'none' as const,
+}
 
-export const refreshToken: RequestHandler = (_req, res) => {
-  sendError(res, 501, {
-    success: false,
-    message: 'refresh token is not implemented yet',
-  });
-};
+export const registerController = catchAsync(async (req, res) => {
 
-export const logout: RequestHandler = (_req, res) => {
-  sendError(res, 501, {
-    success: false,
-    message: 'logout is not implemented yet',
-  });
-};
+  console.log("jjjjjjjj")
+  const result = await register(req.body)
 
-// import { Request, Response } from 'express'
-// import { login } from '../application/login'
-// import { logout } from '../application/logout'
-// import { refreshToken } from '../application/refreshToken'
-// import { register } from '../application/register'
-// import { AUTH_MESSAGES } from '../domain/auth.constants'
-// import { presentAuthResponse } from './auth.presenter'
-// import { catchAsync } from '../../../shared/utils/catchAsync'
+  // res.cookie('refreshToken', result.tokens.refreshToken, cookieOptions)
 
-// const cookieOptions = {
-//   httpOnly: true,
-//   secure: true,
-//   sameSite: 'none' as const,
-// }
+  sendResponse(res, StatusCodes.NOT_FOUND, {
+    success: true,
+    message: AUTH_MESSAGES.REGISTER_SUCCESS,
+    data: result
+  })
+})
 
-// export const registerController = catchAsync(async (req: Request, res: Response) => {
-//   const result = await register(req.body)
-
-//   res.cookie('refreshToken', result.tokens.refreshToken, cookieOptions)
-
-//   res.status(201).json({
-//     success: true,
-//     message: AUTH_MESSAGES.REGISTER_SUCCESS,
-//     data: presentAuthResponse(result),
-//   })
-// })
 
 // export const loginController = catchAsync(async (req: Request, res: Response) => {
 //   const result = await login(req.body)
@@ -97,3 +67,11 @@ export const logout: RequestHandler = (_req, res) => {
 //     data: null,
 //   })
 // })
+
+
+export const AuthControllers = {
+  registerController,
+  // loginController,
+  // refreshTokenController,
+  // logoutController,
+}

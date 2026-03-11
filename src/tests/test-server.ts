@@ -1,11 +1,10 @@
 // src/tests/test-server.ts
-import { createApp } from "@/app"
+import { createApp } from '@/app';
 
 export function createTestServer() {
-  const app = createApp()
-  return app
+  const app = createApp();
+  return app;
 }
-
 
 // 4️⃣ test-server.ts
 

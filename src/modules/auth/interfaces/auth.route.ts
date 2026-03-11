@@ -1,13 +1,15 @@
 import { Router } from 'express';
 
-import { login, logout, refreshToken, register } from './auth.controller';
+import { registerController } from './auth.controller';
+
+
 
 export const authRouter = Router();
 
-authRouter.post('/register', register);
-authRouter.post('/login', login);
-authRouter.post('/refresh-token', refreshToken);
-authRouter.post('/logout', logout);
+authRouter.post('/register', registerController);
+// authRouter.post('/login', login);
+// authRouter.post('/refresh-token', refreshToken);
+// authRouter.post('/logout', logout);
 
 // import { Router } from 'express'
 // import {

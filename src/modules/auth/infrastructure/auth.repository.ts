@@ -1,16 +1,20 @@
-// import { prisma } from '../../../bootstrap/prisma'
+import { prisma } from '@/bootstrap/prisma';
 
-// export const findUserByEmail = async (email: string) => {
-//   return prisma.user.findUnique({
-//     where: { email },
-//   })
-// }
 
-// export const findUserById = async (id: string) => {
-//   return prisma.user.findUnique({
-//     where: { id },
-//   })
-// }
+export const findUserByEmail = async (email: string) => {
+  return prisma.user.findFirst({
+    where: { email },
+  })
+}
+
+export const findUserById = async (id: string) => {
+  return prisma.user.findUnique({
+    where: { id },
+  })
+}
+
+
+
 
 // export const createAuthUser = async (payload: {
 //   name: string

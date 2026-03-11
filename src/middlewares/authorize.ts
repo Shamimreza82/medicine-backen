@@ -1,8 +1,13 @@
+
+
+import { TAuthPermission } from '@/shared/lib/data/authPermissions';
+import { TRoles } from '@/shared/lib/data/roles';
+
 import { AppError } from '../shared/errors/AppError';
 
 import type { RequestHandler } from 'express';
 
-export const authorize = (...allowedRoles: string[]): RequestHandler => {
+export const authorize = (...requiredPermissions: TAuthPermission[]): RequestHandler => {
   return (req, _res, _next) => {
     const user = req.user;
 
@@ -16,7 +21,7 @@ export const authorize = (...allowedRoles: string[]): RequestHandler => {
       return;
     }
 
-    if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    if (requiredPermissions.length > 0 && !requiredPermissions.includes(user.role as TAuthPermission)) {
       new AppError(403, 'Forbidden');
       return;
     }
