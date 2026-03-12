@@ -77,7 +77,7 @@ const runCreateHospitalRoute = async (body: Record<string, unknown>) =>
       try {
         handler(req, res, next);
       } catch (error) {
-        reject(error);
+        reject(error instanceof Error ? error : new Error(String(error)));
       }
     };
 

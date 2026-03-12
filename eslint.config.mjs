@@ -81,7 +81,6 @@ export default [
       '@typescript-eslint/consistent-type-imports': 'off',
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: false }],
       '@typescript-eslint/no-floating-promises': 'error',
-
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },

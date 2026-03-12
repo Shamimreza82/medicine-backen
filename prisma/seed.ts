@@ -1,3 +1,4 @@
+import { logger } from '@/bootstrap/logger';
 import { prisma } from '@/bootstrap/prisma';
 
 import { seedFeatures, seedHospital } from './seeds/hospital.seed';
@@ -6,27 +7,31 @@ import { seedRoles } from './seeds/role.seed';
 import { seedSuperAdmin } from './seeds/user.seed';
 
 async function main() {
-  console.log('✅ Seeding started......');
-  await seedPermissions();
-  console.log('🌱 Permissions seeded');
+  logger.info('🌱 Seeding started...');
 
-  const hospital = await seedHospital();
-  console.log('🌱 Hospital seeded');
+  await prisma.$transaction(async () => {
 
-  await seedRoles(hospital.id);
-  console.log('🌱 Roles seeded');
+    await seedPermissions();
 
-  await seedSuperAdmin(hospital.id);
+    const hospital = await seedHospital();
 
-  console.log('🌱 Super admin seeded');
-  await seedFeatures();
-  console.log('🌱 Features seeded');
-  
-  console.log('✅ Seeding completed');
+    await seedRoles(hospital.id);
+
+    await seedSuperAdmin(hospital.id);
+
+    await seedFeatures();
+
+  }, { timeout: 60000 }); // Set a timeout of 10 minutes for the transaction
+
+  logger.info('✅ Seeding completed');
 }
 
 main()
-  .catch(console.error)
+  .catch((error) => {
+    logger.error('❌ Error occurred while seeding');
+    logger.error(error);
+    process.exit(1);
+  })
   .finally(async () => {
     await prisma.$disconnect();
   });

@@ -1,4 +1,5 @@
 import { appConfig } from '@/config/app.config';
+import { envConfig } from '@/config/env.config';
 
 import { createApp } from './createApp';
 import { logger } from './logger';
@@ -36,10 +37,12 @@ export const startServer = async (): Promise<Server> => {
       {
         host: appConfig.host,
         port: appConfig.port,
-        environment: process.env['NODE_ENV'] ?? 'development',
+        environment: envConfig.nodeEnv ?? 'development',
       },
       'Server started',
     );
+
+    console.log("server start")
   });
 
   const handleSignal = (signal: 'SIGINT' | 'SIGTERM'): void => {
