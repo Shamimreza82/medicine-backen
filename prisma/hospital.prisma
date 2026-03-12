@@ -43,9 +43,6 @@ model Hospital {
 
 
 
-
-
-
 model TenantSetting {
   id         String   @id @default(uuid())
   hospitalId String   @unique @map("hospital_id")

@@ -1,4 +1,3 @@
-import bcrypt from 'bcrypt'
 import { StatusCodes } from 'http-status-codes';
 
 import { AppError } from '@/shared/errors/AppError';
@@ -20,8 +19,6 @@ export const register = async (payload: TRegisterInput) => {
   if (existingUser) {
     throw new AppError(StatusCodes.CONFLICT, AUTH_MESSAGES.USER_ALREADY_EXISTS)
   }
-
-  const hashedPassword = await bcrypt.hash(payload.password, 10)
 
   // const user = await createAuthUser({
   //   ...payload,

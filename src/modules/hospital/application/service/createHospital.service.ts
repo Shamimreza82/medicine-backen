@@ -1,4 +1,3 @@
-import { prisma } from "@/bootstrap/prisma"
 import { generateSlug } from "@/shared/utils/generateSlug"
 
 import { createHospitalRepository } from "../../infrastructure/hospital.repository"

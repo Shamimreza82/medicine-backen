@@ -5,11 +5,13 @@ import { sendResponse } from "@/shared/utils/sendResponse"
 
 import createHospitalService from '../application/service/createHospital.service';
 import { HOSPITAL_MESSAGES } from "../domain/hospital.constants";
+import { TCreateHospitalInput } from '../validation/hospital.validation';
 
 
 
 const createHospital = catchAsync(async (req, res) => {
-    const body = req.body;
+    
+    const body: TCreateHospitalInput = req.body;
     const result = await createHospitalService(body)
     
     sendResponse(res, StatusCodes.CREATED, {

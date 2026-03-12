@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await */
 import { StatusCodes } from 'http-status-codes';
 
 import { sendResponse } from '@/shared/utils/sendResponse'
