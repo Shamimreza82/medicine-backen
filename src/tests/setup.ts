@@ -2,10 +2,11 @@
 // src/tests/setup.ts
 import { beforeAll, afterAll } from 'vitest';
 
+import { logger } from '@/bootstrap/logger';
 import { prisma } from '@/bootstrap/prisma';
 
 beforeAll(async () => {
-  console.log('Test started');
+  logger.info('Test started');
 });
 
 afterAll(async () => {

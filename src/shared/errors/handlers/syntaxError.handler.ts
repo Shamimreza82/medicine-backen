@@ -1,17 +1,18 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { StatusCodes } from 'http-status-codes';
 
-import { sendError } from "@/shared/utils/sendError";
+import { sendError } from '@/shared/utils/sendError';
 
-export const syntaxErrorHandler = (err: unknown, res: any) => {
-    const stack = err instanceof Error ? err.stack : undefined;
+import type { Response } from 'express';
 
-    const message = err instanceof Error ? err.message : "Invalid JSON syntax";
+export const syntaxErrorHandler = (err: unknown, res: Response) => {
+  const stack = err instanceof Error ? err.stack : undefined;
 
-    return sendError(res, StatusCodes.BAD_REQUEST, {
-        success: false,
-        message: "Syntax Error",
-        error: message || err,
-        stack: stack
-    })
+  const message = err instanceof Error ? err.message : 'Invalid JSON syntax';
+
+  return sendError(res, StatusCodes.BAD_REQUEST, {
+    success: false,
+    message: 'Syntax Error',
+    error: message || err,
+    stack: stack,
+  });
 };

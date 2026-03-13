@@ -1,9 +1,8 @@
 import { z } from 'zod';
 
-
-const phoneValidation = z.string().regex(/^(\+88)?01[3-9]\d{8}$/, 'Invalid Bangladeshi phone number')
-
-
+const phoneValidation = z
+  .string()
+  .regex(/^(\+88)?01[3-9]\d{8}$/, 'Invalid Bangladeshi phone number');
 
 const registerSchema = z.object({
   body: z.object({
@@ -14,7 +13,6 @@ const registerSchema = z.object({
   }),
 });
 
-
 const loginSchema = z.object({
   body: z.object({
     email: z.string().email('Invalid email address'),
@@ -22,22 +20,18 @@ const loginSchema = z.object({
   }),
 });
 
-
 const refreshTokenSchema = z.object({
   cookies: z.object({
     refreshToken: z.string().min(1, 'Refresh token is required'),
   }),
 });
 
-
-
-
-
 export const AuthValidationSchemas = {
   registerSchema,
   loginSchema,
   refreshTokenSchema,
-}
+};
 
 
-export type TRegisterInput = z.infer<typeof registerSchema>['body']
+export type TRegisterInput = z.infer<typeof registerSchema>['body'];
+export type TLoginInput = z.infer<typeof loginSchema>['body'];

@@ -5,10 +5,13 @@ CREATE TYPE "InvoiceStatus" AS ENUM ('DRAFT', 'OPEN', 'PAID', 'VOID', 'OVERDUE')
 CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'SUCCESS', 'FAILED', 'REFUNDED');
 
 -- CreateEnum
-CREATE TYPE "HospitalStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'SUSPENDED');
+CREATE TYPE "SubscriptionStatus" AS ENUM ('TRIALING', 'ACTIVE', 'PAST_DUE', 'CANCELED', 'EXPIRED');
 
 -- CreateEnum
-CREATE TYPE "SubscriptionStatus" AS ENUM ('TRIALING', 'ACTIVE', 'PAST_DUE', 'CANCELLED', 'EXPIRED');
+CREATE TYPE "BillingCycle" AS ENUM ('MONTHLY', 'YEARLY', 'CUSTOM');
+
+-- CreateEnum
+CREATE TYPE "TenantStatus" AS ENUM ('PENDING', 'ACTIVE', 'SUSPENDED', 'INACTIVE', 'ARCHIVED');
 
 -- CreateEnum
 CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'SUSPENDED', 'LOCKED');
@@ -17,9 +20,36 @@ CREATE TYPE "UserStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'SUSPENDED', 'LOCKED');
 CREATE TYPE "WebhookDeliveryStatus" AS ENUM ('PENDING', 'SUCCESS', 'FAILED');
 
 -- CreateTable
+CREATE TABLE "tenant_limits" (
+    "id" TEXT NOT NULL,
+    "tenant_id" TEXT NOT NULL,
+    "key" TEXT NOT NULL,
+    "value" INTEGER NOT NULL,
+    "metadata" JSONB,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "tenant_limits_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tenant_usages" (
+    "id" TEXT NOT NULL,
+    "tenant_id" TEXT NOT NULL,
+    "metric_code" TEXT NOT NULL,
+    "period" TEXT NOT NULL,
+    "used_value" INTEGER NOT NULL DEFAULT 0,
+    "metadata" JSONB,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "tenant_usages_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "activity_logs" (
     "id" TEXT NOT NULL,
-    "hospital_id" TEXT,
+    "tenant_id" TEXT NOT NULL,
     "user_id" TEXT,
     "action" TEXT NOT NULL,
     "resource" TEXT NOT NULL,
@@ -37,8 +67,8 @@ CREATE TABLE "activity_logs" (
 -- CreateTable
 CREATE TABLE "audit_logs" (
     "id" TEXT NOT NULL,
-    "hospital_id" TEXT,
     "user_id" TEXT,
+    "tenant_id" TEXT NOT NULL,
     "module" TEXT NOT NULL,
     "entity" TEXT NOT NULL,
     "entity_id" TEXT,
@@ -62,8 +92,8 @@ CREATE TABLE "audit_logs" (
 -- CreateTable
 CREATE TABLE "billing_invoices" (
     "id" TEXT NOT NULL,
-    "hospital_id" TEXT NOT NULL,
     "subscription_id" TEXT,
+    "tenant_id" TEXT NOT NULL,
     "invoice_number" TEXT NOT NULL,
     "subtotal" DECIMAL(10,2) NOT NULL,
     "tax" DECIMAL(10,2) NOT NULL DEFAULT 0,
@@ -82,7 +112,7 @@ CREATE TABLE "billing_invoices" (
 CREATE TABLE "billing_payments" (
     "id" TEXT NOT NULL,
     "invoice_id" TEXT NOT NULL,
-    "hospital_id" TEXT NOT NULL,
+    "tenant_id" TEXT NOT NULL,
     "provider" TEXT NOT NULL,
     "transaction_id" TEXT,
     "amount" DECIMAL(10,2) NOT NULL,
@@ -99,7 +129,7 @@ CREATE TABLE "billing_payments" (
 -- CreateTable
 CREATE TABLE "files" (
     "id" TEXT NOT NULL,
-    "hospital_id" TEXT NOT NULL,
+    "tenant_id" TEXT NOT NULL,
     "uploaded_by_id" TEXT,
     "file_name" TEXT NOT NULL,
     "original_name" TEXT NOT NULL,
@@ -122,37 +152,97 @@ CREATE TABLE "files" (
 );
 
 -- CreateTable
-CREATE TABLE "hospitals" (
+CREATE TABLE "plans" (
     "id" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "billing_cycle" "BillingCycle" NOT NULL,
+    "price" DECIMAL(12,2) NOT NULL,
+    "currency" TEXT NOT NULL DEFAULT 'USD',
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "metadata" JSONB,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "plans_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tenant_subscriptions" (
+    "id" TEXT NOT NULL,
+    "tenant_id" TEXT NOT NULL,
+    "plan_id" TEXT NOT NULL,
+    "status" "SubscriptionStatus" NOT NULL DEFAULT 'TRIALING',
+    "starts_at" TIMESTAMP(3) NOT NULL,
+    "ends_at" TIMESTAMP(3),
+    "trial_ends_at" TIMESTAMP(3),
+    "canceled_at" TIMESTAMP(3),
+    "external_ref" TEXT,
+    "metadata" JSONB,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "tenant_subscriptions_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tenants" (
+    "id" TEXT NOT NULL,
+    "tenant_type_id" TEXT,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
+    "code" TEXT,
     "email" TEXT,
     "phone" TEXT,
-    "address" TEXT,
-    "logo" TEXT,
     "website" TEXT,
-    "status" "HospitalStatus" NOT NULL DEFAULT 'ACTIVE',
+    "logo_url" TEXT,
+    "status" "TenantStatus" NOT NULL DEFAULT 'PENDING',
+    "owner_user_id" TEXT,
+    "is_trial" BOOLEAN NOT NULL DEFAULT true,
+    "trial_starts_at" TIMESTAMP(3),
+    "trial_ends_at" TIMESTAMP(3),
+    "activated_at" TIMESTAMP(3),
+    "suspended_at" TIMESTAMP(3),
+    "archived_at" TIMESTAMP(3),
+    "metadata" JSONB,
     "deletedAt" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "hospitals_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "tenants_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tenant_types" (
+    "id" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "metadata" JSONB,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "tenant_types_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "tenant_settings" (
     "id" TEXT NOT NULL,
-    "hospital_id" TEXT NOT NULL,
-    "timezone" TEXT NOT NULL DEFAULT 'Asia/Dhaka',
-    "currency" TEXT NOT NULL DEFAULT 'BDT',
+    "tenant_id" TEXT NOT NULL,
+    "timezone" TEXT NOT NULL DEFAULT 'UTC',
+    "currency" TEXT NOT NULL DEFAULT 'USD',
     "language" TEXT NOT NULL DEFAULT 'en',
     "date_format" TEXT NOT NULL DEFAULT 'YYYY-MM-DD',
     "time_format" TEXT NOT NULL DEFAULT '24h',
-    "appointment_duration" INTEGER NOT NULL DEFAULT 15,
-    "prescription_footer" TEXT,
-    "invoice_prefix" TEXT,
-    "patient_id_prefix" TEXT,
-    "logo_url" TEXT,
+    "session_timeout_minutes" INTEGER NOT NULL DEFAULT 60,
+    "require_2fa" BOOLEAN NOT NULL DEFAULT false,
+    "allow_custom_branding" BOOLEAN NOT NULL DEFAULT true,
+    "primary_color" TEXT,
+    "secondary_color" TEXT,
+    "favicon_url" TEXT,
+    "custom_config" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -165,7 +255,10 @@ CREATE TABLE "features" (
     "code" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
+    "category" TEXT,
+    "metadata" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "features_pkey" PRIMARY KEY ("id")
 );
@@ -173,48 +266,16 @@ CREATE TABLE "features" (
 -- CreateTable
 CREATE TABLE "tenant_features" (
     "id" TEXT NOT NULL,
-    "hospital_id" TEXT NOT NULL,
     "feature_id" TEXT NOT NULL,
+    "tenant_id" TEXT NOT NULL,
     "enabled" BOOLEAN NOT NULL DEFAULT false,
+    "config" JSONB,
+    "starts_at" TIMESTAMP(3),
+    "ends_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "tenant_features_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "subscription_plans" (
-    "id" TEXT NOT NULL,
-    "code" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT,
-    "price_monthly" DECIMAL(10,2) NOT NULL,
-    "price_yearly" DECIMAL(10,2),
-    "max_users" INTEGER,
-    "max_doctors" INTEGER,
-    "max_patients" INTEGER,
-    "max_storage_gb" INTEGER,
-    "is_active" BOOLEAN NOT NULL DEFAULT true,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "subscription_plans_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "hospital_subscriptions" (
-    "id" TEXT NOT NULL,
-    "hospital_id" TEXT NOT NULL,
-    "plan_id" TEXT NOT NULL,
-    "status" "SubscriptionStatus" NOT NULL DEFAULT 'TRIALING',
-    "starts_at" TIMESTAMP(3) NOT NULL,
-    "ends_at" TIMESTAMP(3),
-    "trial_ends_at" TIMESTAMP(3),
-    "cancelled_at" TIMESTAMP(3),
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "hospital_subscriptions_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -234,7 +295,7 @@ CREATE TABLE "permissions" (
 -- CreateTable
 CREATE TABLE "roles" (
     "id" TEXT NOT NULL,
-    "hospital_id" TEXT,
+    "tenant_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "description" TEXT,
@@ -258,7 +319,7 @@ CREATE TABLE "role_permissions" (
 -- CreateTable
 CREATE TABLE "users" (
     "id" TEXT NOT NULL,
-    "hospital_id" TEXT NOT NULL,
+    "tenant_id" TEXT NOT NULL,
     "role_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -303,7 +364,7 @@ CREATE TABLE "user_sessions" (
 -- CreateTable
 CREATE TABLE "webhook_endpoints" (
     "id" TEXT NOT NULL,
-    "hospital_id" TEXT NOT NULL,
+    "tenant_id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "url" TEXT NOT NULL,
     "secret" TEXT NOT NULL,
@@ -333,19 +394,34 @@ CREATE TABLE "webhook_deliveries" (
 );
 
 -- CreateIndex
-CREATE INDEX "idx_activity_hospital" ON "activity_logs"("hospital_id");
+CREATE INDEX "tenant_limits_tenant_id_idx" ON "tenant_limits"("tenant_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tenant_limits_tenant_id_key_key" ON "tenant_limits"("tenant_id", "key");
+
+-- CreateIndex
+CREATE INDEX "tenant_usages_tenant_id_idx" ON "tenant_usages"("tenant_id");
+
+-- CreateIndex
+CREATE INDEX "tenant_usages_metric_code_idx" ON "tenant_usages"("metric_code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tenant_usages_tenant_id_metric_code_period_key" ON "tenant_usages"("tenant_id", "metric_code", "period");
+
+-- CreateIndex
+CREATE INDEX "idx_activity_tenant" ON "activity_logs"("tenant_id");
 
 -- CreateIndex
 CREATE INDEX "idx_activity_user" ON "activity_logs"("user_id");
 
 -- CreateIndex
-CREATE INDEX "idx_activity_tenant_time" ON "activity_logs"("hospital_id", "created_at");
+CREATE INDEX "idx_activity_tenant_time" ON "activity_logs"("tenant_id", "created_at");
 
 -- CreateIndex
 CREATE INDEX "idx_activity_time" ON "activity_logs"("created_at");
 
 -- CreateIndex
-CREATE INDEX "audit_logs_hospital_id_idx" ON "audit_logs"("hospital_id");
+CREATE INDEX "audit_logs_tenant_id_idx" ON "audit_logs"("tenant_id");
 
 -- CreateIndex
 CREATE INDEX "audit_logs_user_id_idx" ON "audit_logs"("user_id");
@@ -354,64 +430,76 @@ CREATE INDEX "audit_logs_user_id_idx" ON "audit_logs"("user_id");
 CREATE INDEX "audit_logs_entity_entity_id_idx" ON "audit_logs"("entity", "entity_id");
 
 -- CreateIndex
-CREATE INDEX "audit_logs_hospital_id_created_at_idx" ON "audit_logs"("hospital_id", "created_at");
+CREATE INDEX "audit_logs_tenant_id_created_at_idx" ON "audit_logs"("tenant_id", "created_at");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "billing_invoices_invoice_number_key" ON "billing_invoices"("invoice_number");
 
 -- CreateIndex
-CREATE INDEX "billing_invoices_hospital_id_idx" ON "billing_invoices"("hospital_id");
+CREATE INDEX "billing_invoices_tenant_id_idx" ON "billing_invoices"("tenant_id");
 
 -- CreateIndex
-CREATE INDEX "billing_payments_hospital_id_idx" ON "billing_payments"("hospital_id");
+CREATE INDEX "billing_payments_tenant_id_idx" ON "billing_payments"("tenant_id");
 
 -- CreateIndex
 CREATE INDEX "billing_payments_invoice_id_idx" ON "billing_payments"("invoice_id");
 
 -- CreateIndex
-CREATE INDEX "files_hospital_id_idx" ON "files"("hospital_id");
+CREATE INDEX "files_tenant_id_idx" ON "files"("tenant_id");
 
 -- CreateIndex
 CREATE INDEX "files_entity_type_entity_id_idx" ON "files"("entity_type", "entity_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "hospitals_slug_key" ON "hospitals"("slug");
+CREATE UNIQUE INDEX "plans_code_key" ON "plans"("code");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "hospitals_email_key" ON "hospitals"("email");
+CREATE INDEX "tenant_subscriptions_tenant_id_idx" ON "tenant_subscriptions"("tenant_id");
 
 -- CreateIndex
-CREATE INDEX "hospitals_name_idx" ON "hospitals"("name");
+CREATE INDEX "tenant_subscriptions_plan_id_idx" ON "tenant_subscriptions"("plan_id");
 
 -- CreateIndex
-CREATE INDEX "hospitals_status_idx" ON "hospitals"("status");
+CREATE INDEX "tenant_subscriptions_status_idx" ON "tenant_subscriptions"("status");
 
 -- CreateIndex
-CREATE INDEX "hospitals_deletedAt_idx" ON "hospitals"("deletedAt");
+CREATE UNIQUE INDEX "tenants_slug_key" ON "tenants"("slug");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tenant_settings_hospital_id_key" ON "tenant_settings"("hospital_id");
+CREATE UNIQUE INDEX "tenants_code_key" ON "tenants"("code");
+
+-- CreateIndex
+CREATE INDEX "tenants_tenant_type_id_idx" ON "tenants"("tenant_type_id");
+
+-- CreateIndex
+CREATE INDEX "tenants_status_idx" ON "tenants"("status");
+
+-- CreateIndex
+CREATE INDEX "tenants_deletedAt_idx" ON "tenants"("deletedAt");
+
+-- CreateIndex
+CREATE INDEX "tenants_created_at_idx" ON "tenants"("created_at");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tenant_types_code_key" ON "tenant_types"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "tenant_settings_tenant_id_key" ON "tenant_settings"("tenant_id");
+
+-- CreateIndex
+CREATE INDEX "tenant_settings_tenant_id_idx" ON "tenant_settings"("tenant_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "features_code_key" ON "features"("code");
 
 -- CreateIndex
-CREATE INDEX "tenant_features_hospital_id_idx" ON "tenant_features"("hospital_id");
+CREATE INDEX "tenant_features_tenant_id_idx" ON "tenant_features"("tenant_id");
 
 -- CreateIndex
 CREATE INDEX "tenant_features_feature_id_idx" ON "tenant_features"("feature_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "tenant_features_hospital_id_feature_id_key" ON "tenant_features"("hospital_id", "feature_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "subscription_plans_code_key" ON "subscription_plans"("code");
-
--- CreateIndex
-CREATE INDEX "hospital_subscriptions_hospital_id_idx" ON "hospital_subscriptions"("hospital_id");
-
--- CreateIndex
-CREATE INDEX "hospital_subscriptions_plan_id_idx" ON "hospital_subscriptions"("plan_id");
+CREATE UNIQUE INDEX "tenant_features_tenant_id_feature_id_key" ON "tenant_features"("tenant_id", "feature_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "permissions_name_key" ON "permissions"("name");
@@ -420,25 +508,25 @@ CREATE UNIQUE INDEX "permissions_name_key" ON "permissions"("name");
 CREATE INDEX "permissions_resource_idx" ON "permissions"("resource");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "roles_hospital_id_slug_key" ON "roles"("hospital_id", "slug");
+CREATE UNIQUE INDEX "roles_tenant_id_slug_key" ON "roles"("tenant_id", "slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "role_permissions_role_id_permission_id_key" ON "role_permissions"("role_id", "permission_id");
 
 -- CreateIndex
-CREATE INDEX "users_hospital_id_idx" ON "users"("hospital_id");
+CREATE INDEX "users_tenant_id_idx" ON "users"("tenant_id");
 
 -- CreateIndex
 CREATE INDEX "users_role_id_idx" ON "users"("role_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "users_hospital_id_email_key" ON "users"("hospital_id", "email");
+CREATE UNIQUE INDEX "users_tenant_id_email_key" ON "users"("tenant_id", "email");
 
 -- CreateIndex
 CREATE INDEX "user_sessions_userId_idx" ON "user_sessions"("userId");
 
 -- CreateIndex
-CREATE INDEX "webhook_endpoints_hospital_id_idx" ON "webhook_endpoints"("hospital_id");
+CREATE INDEX "webhook_endpoints_tenant_id_idx" ON "webhook_endpoints"("tenant_id");
 
 -- CreateIndex
 CREATE INDEX "webhook_deliveries_endpoint_id_idx" ON "webhook_deliveries"("endpoint_id");
@@ -447,52 +535,61 @@ CREATE INDEX "webhook_deliveries_endpoint_id_idx" ON "webhook_deliveries"("endpo
 CREATE INDEX "webhook_deliveries_status_idx" ON "webhook_deliveries"("status");
 
 -- AddForeignKey
-ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "hospitals"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "tenant_limits" ADD CONSTRAINT "tenant_limits_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tenant_usages" ADD CONSTRAINT "tenant_usages_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "hospitals"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "billing_invoices" ADD CONSTRAINT "billing_invoices_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "hospitals"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "billing_invoices" ADD CONSTRAINT "billing_invoices_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "billing_invoices" ADD CONSTRAINT "billing_invoices_subscription_id_fkey" FOREIGN KEY ("subscription_id") REFERENCES "hospital_subscriptions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "billing_invoices" ADD CONSTRAINT "billing_invoices_subscription_id_fkey" FOREIGN KEY ("subscription_id") REFERENCES "tenant_subscriptions"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "billing_payments" ADD CONSTRAINT "billing_payments_invoice_id_fkey" FOREIGN KEY ("invoice_id") REFERENCES "billing_invoices"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "billing_payments" ADD CONSTRAINT "billing_payments_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "hospitals"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "billing_payments" ADD CONSTRAINT "billing_payments_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "files" ADD CONSTRAINT "files_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "hospitals"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "files" ADD CONSTRAINT "files_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "files" ADD CONSTRAINT "files_uploaded_by_id_fkey" FOREIGN KEY ("uploaded_by_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tenant_settings" ADD CONSTRAINT "tenant_settings_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "hospitals"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "tenant_subscriptions" ADD CONSTRAINT "tenant_subscriptions_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tenant_features" ADD CONSTRAINT "tenant_features_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "hospitals"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "tenant_subscriptions" ADD CONSTRAINT "tenant_subscriptions_plan_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "plans"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tenants" ADD CONSTRAINT "tenants_tenant_type_id_fkey" FOREIGN KEY ("tenant_type_id") REFERENCES "tenant_types"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tenant_settings" ADD CONSTRAINT "tenant_settings_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tenant_features" ADD CONSTRAINT "tenant_features_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "tenant_features" ADD CONSTRAINT "tenant_features_feature_id_fkey" FOREIGN KEY ("feature_id") REFERENCES "features"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "hospital_subscriptions" ADD CONSTRAINT "hospital_subscriptions_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "hospitals"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "hospital_subscriptions" ADD CONSTRAINT "hospital_subscriptions_plan_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "subscription_plans"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "roles" ADD CONSTRAINT "roles_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "hospitals"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "roles" ADD CONSTRAINT "roles_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -501,7 +598,7 @@ ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_role_id_fkey" FO
 ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_permission_id_fkey" FOREIGN KEY ("permission_id") REFERENCES "permissions"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "hospitals"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "users" ADD CONSTRAINT "users_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "users" ADD CONSTRAINT "users_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -510,7 +607,7 @@ ALTER TABLE "users" ADD CONSTRAINT "users_role_id_fkey" FOREIGN KEY ("role_id") 
 ALTER TABLE "user_sessions" ADD CONSTRAINT "user_sessions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "webhook_endpoints" ADD CONSTRAINT "webhook_endpoints_hospital_id_fkey" FOREIGN KEY ("hospital_id") REFERENCES "hospitals"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "webhook_endpoints" ADD CONSTRAINT "webhook_endpoints_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "webhook_deliveries" ADD CONSTRAINT "webhook_deliveries_endpoint_id_fkey" FOREIGN KEY ("endpoint_id") REFERENCES "webhook_endpoints"("id") ON DELETE CASCADE ON UPDATE CASCADE;

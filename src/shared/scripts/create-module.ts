@@ -1,22 +1,18 @@
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
+
+import { logger } from '@/bootstrap/logger';
 
 const moduleName = process.argv[2];
 
 if (!moduleName) {
-  console.error("❌ Please provide module name");
+  logger.error('❌ Please provide module name');
   process.exit(1);
 }
 
-const basePath = path.join(process.cwd(), "src/modules", moduleName);
+const basePath = path.join(process.cwd(), 'src/modules', moduleName);
 
-const folders = [
-  "application/service",
-  "domain",
-  "infrastructure",
-  "interfaces",
-  "validation",
-];
+const folders = ['application/service', 'domain', 'infrastructure', 'interfaces', 'validation'];
 
 try {
   fs.mkdirSync(basePath, { recursive: true });
@@ -27,64 +23,64 @@ try {
 
   // service
   fs.writeFileSync(
-    path.join(basePath, "application/service", `${moduleName}.service.ts`),
-`export const ${moduleName}Service = {
+    path.join(basePath, 'application/service', `${moduleName}.service.ts`),
+    `export const ${moduleName}Service = {
 
-};`
+};`,
   );
 
   // schema
   fs.writeFileSync(
-    path.join(basePath, "domain", `${moduleName}.schema.ts`),
-`export const ${moduleName}Schema = {
+    path.join(basePath, 'domain', `${moduleName}.schema.ts`),
+    `export const ${moduleName}Schema = {
 
-};`
+};`,
   );
 
   // constants
   fs.writeFileSync(
-    path.join(basePath, "domain", `${moduleName}.constants.ts`),
-`export const ${moduleName.toUpperCase()}_MESSAGES = {
+    path.join(basePath, 'domain', `${moduleName}.constants.ts`),
+    `export const ${moduleName.toUpperCase()}_MESSAGES = {
 
-};`
+};`,
   );
 
   // repository
   fs.writeFileSync(
-    path.join(basePath, "infrastructure", `${moduleName}.repository.ts`),
-`export const ${moduleName}Repository = {
+    path.join(basePath, 'infrastructure', `${moduleName}.repository.ts`),
+    `export const ${moduleName}Repository = {
 
-};`
+};`,
   );
 
   // controller
   fs.writeFileSync(
-    path.join(basePath, "interfaces", `${moduleName}.controller.ts`),
-`export const ${moduleName}Controller = {
+    path.join(basePath, 'interfaces', `${moduleName}.controller.ts`),
+    `export const ${moduleName}Controller = {
 
-};`
+};`,
   );
 
   // routes
   fs.writeFileSync(
-    path.join(basePath, "interfaces", `${moduleName}.routes.ts`),
-`import { Router } from "express";
+    path.join(basePath, 'interfaces', `${moduleName}.routes.ts`),
+    `import { Router } from "express";
 
 const router = Router();
 
 export const ${moduleName}Routes = router;
-`
+`,
   );
 
   // validation
   fs.writeFileSync(
-    path.join(basePath, "validation", `${moduleName}.validation.ts`),
-`export const ${moduleName}Validation = {
+    path.join(basePath, 'validation', `${moduleName}.validation.ts`),
+    `export const ${moduleName}Validation = {
 
-};`
+};`,
   );
 
-  console.log(`✅ Module '${moduleName}' created successfully`);
+  logger.info(`✅ Module '${moduleName}' created successfully`);
 } catch (error) {
-  console.error("❌ Error creating module:", error);
+  logger.error({err: error},'❌ Error creating module:',);
 }

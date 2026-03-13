@@ -10,7 +10,3 @@ export const AUTH_MESSAGES = {
   INVALID_REFRESH_TOKEN: 'Invalid refresh token',
 } as const;
 
-export const AUTH_TOKEN_TYPES = {
-  ACCESS: 'ACCESS',
-  REFRESH: 'REFRESH',
-} as const;

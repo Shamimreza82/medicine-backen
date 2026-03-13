@@ -1,46 +1,32 @@
 import jwt from 'jsonwebtoken';
 
 import { envConfig } from '@/config/env.config';
-import { AppError } from '@/shared/errors/AppError';
+
+import type { JwtPayload, SignOptions } from 'jsonwebtoken';
 
 
 
-import type { JwtPayload } from 'jsonwebtoken';
 
-interface AccessTokenClaims {
-  role: string;
+export const generateAccessToken = (payload: JwtPayload) => {
+  return jwt.sign(payload, envConfig.jwtAccessSecret, {
+    expiresIn: envConfig.jwtExpiresIn as SignOptions["expiresIn"],
+  })
 }
 
-export interface AccessTokenPayload {
-  sub: string;
-  role: string;
+
+export const generateRefreshToken = (payload: JwtPayload) => {
+  return jwt.sign(payload, envConfig.jwtRefreshSecret , {
+    expiresIn: envConfig.jwtRefreshExpiresIn as SignOptions["expiresIn"],
+  })
 }
 
-export const signAccessToken = (subject: string, claims: AccessTokenClaims): string => {
-  return jwt.sign(
-    {
-      sub: subject,
-      role: claims.role,
-    },
-    envConfig.jwtAccessSecret,
-    {
-      expiresIn: envConfig.jwtExpiresIn as jwt.SignOptions['expiresIn'],
-    },
-  );
-};
 
-export const verifyAccessToken = (token: string): AccessTokenPayload => {
-  const decoded = jwt.verify(token, envConfig.jwtAccessSecret);
-  if (typeof decoded === 'string' || decoded === null) {
-    throw new AppError(500, 'Invalid access token');
-  }
+export const verifyAccessToken = (token: string): JwtPayload => {
+  return jwt.verify( token, envConfig.jwtAccessSecret) as JwtPayload
+}
 
-  const payload = decoded as JwtPayload & { role?: unknown };
-  const sub = payload.sub;
-  const role = payload.role;
-  if (typeof sub !== 'string' || typeof role !== 'string') {
-    throw new AppError(500, 'Invalid access token payload');
-  }
 
-  return { sub, role };
-};
+export const verifyRefreshToken = (token: string): JwtPayload => {
+  return jwt.verify( token, envConfig.jwtRefreshSecret ) as JwtPayload
+}
+

@@ -1,10 +1,10 @@
 model AuditLog {
   id String @id @default(uuid())
 
-  hospitalId String? @map("hospital_id")
-  userId     String? @map("user_id")
 
-  hospital Hospital? @relation(fields: [hospitalId], references: [id], onDelete: SetNull)
+  userId     String? @map("user_id")
+     tenantId   String    @map("tenant_id")
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   module   String
@@ -32,10 +32,10 @@ model AuditLog {
 
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@index([hospitalId])
+  @@index([tenantId])
   @@index([userId])
   @@index([entity, entityId])
-  @@index([hospitalId, createdAt])
+  @@index([tenantId, createdAt])
 
   @@map("audit_logs")
 }

@@ -1,17 +1,17 @@
 export const healthSchemas = {
   HealthResponse: {
-    type: "object",
+    type: 'object',
     properties: {
-      success: { type: "boolean", example: true },
-      message: { type: "string", example: "Health check successful" },
+      success: { type: 'boolean', example: true },
+      message: { type: 'string', example: 'Health check successful' },
       data: {
-        type: "object",
+        type: 'object',
         properties: {
-          status: { type: "string", example: "ok" },
-          uptime: { type: "number", example: 123.45 },
-          timestamp: { type: "string", format: "date-time" }
-        }
-      }
-    }
-  }
+          status: { type: 'string', example: 'ok' },
+          uptime: { type: 'number', example: 123.45 },
+          timestamp: { type: 'string', format: 'date-time' },
+        },
+      },
+    },
+  },
 };

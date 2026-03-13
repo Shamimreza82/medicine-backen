@@ -10,10 +10,12 @@ export interface TErrorResponse {
 }
 
 export const sendError = (res: Response, statusCode: number, payload: TErrorResponse): void => {
+  const isDev = envConfig.nodeEnv === "development";
+
   res.status(statusCode).json({
     success: false,
     message: payload.message,
-    error: payload.error,
-    stack: envConfig.nodeEnv === 'development' ? payload.stack : undefined,
+    ...(payload.error ? { error: payload.error } : {}),
+    ...(isDev && payload.stack && { stack: payload.stack }),
   });
 };

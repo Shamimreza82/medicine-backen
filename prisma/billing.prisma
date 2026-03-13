@@ -1,10 +1,10 @@
 model BillingInvoice {
     id             String  @id @default(uuid())
-    hospitalId     String  @map("hospital_id")
     subscriptionId String? @map("subscription_id")
 
-    hospital     Hospital              @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
-    subscription HospitalSubscription? @relation(fields: [subscriptionId], references: [id])
+    tenantId   String    @map("tenant_id")
+    tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+    subscription TenantSubscription? @relation(fields: [subscriptionId], references: [id])
        
     invoiceNumber String  @unique @map("invoice_number")
     subtotal      Decimal @db.Decimal(10, 2)
@@ -22,17 +22,17 @@ model BillingInvoice {
     payments BillingPayment[]
     
 
-    @@index([hospitalId])
+    @@index([tenantId])
     @@map("billing_invoices")
 }
 
 model BillingPayment {
     id         String @id @default(uuid())
     invoiceId  String @map("invoice_id")
-    hospitalId String @map("hospital_id")
 
     invoice  BillingInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-    hospital Hospital       @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+     tenantId   String    @map("tenant_id")
+    tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
     provider      String
     transactionId String?       @map("transaction_id")
@@ -45,7 +45,7 @@ model BillingPayment {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    @@index([hospitalId])
+    @@index([tenantId])
     @@index([invoiceId])
     @@map("billing_payments")
 }

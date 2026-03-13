@@ -2,9 +2,12 @@ import { verifyAccessToken } from '../modules/auth/infrastructure/auth.token';
 import { AppError } from '../shared/errors/AppError';
 
 import type { RequestHandler } from 'express';
+import type { Logger } from 'pino';
 
 declare module 'express-serve-static-core' {
   interface Request {
+    id?: string;
+    log?: Logger;
     user?: {
       id: string;
       role: string;
@@ -27,6 +30,9 @@ export const auth: RequestHandler = (req, _res, next) => {
   try {
     const payload = verifyAccessToken(token);
     req.user = { id: payload.sub, role: payload.role };
+    if (req.log) {
+      req.log = req.log.child({ userId: payload.sub, role: payload.role });
+    }
     next();
   } catch {
     throw new AppError(401, 'Unauthorized');

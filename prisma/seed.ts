@@ -1,27 +1,30 @@
 import { logger } from '@/bootstrap/logger';
 import { prisma } from '@/bootstrap/prisma';
 
-import { seedFeatures, seedHospital } from './seeds/hospital.seed';
+import { seedFeatures } from './seeds/feature.seed';
 import { seedPermissions } from './seeds/permission.seed';
 import { seedRoles } from './seeds/role.seed';
+import { seedTenantTypes } from './seeds/seedTenantTypes';
 import { seedSuperAdmin } from './seeds/user.seed';
+import { seedTenant } from './seeds/tenant.seed';
 
 async function main() {
   logger.info('🌱 Seeding started...');
 
-  await prisma.$transaction(async () => {
+  await prisma.$transaction(
+    async () => {
+      await seedTenantTypes();
+      await seedFeatures();
+      await seedPermissions();
 
-    await seedPermissions();
+      const tenant = await seedTenant();
 
-    const hospital = await seedHospital();
+      await seedRoles(tenant.id);
 
-    await seedRoles(hospital.id);
-
-    await seedSuperAdmin(hospital.id);
-
-    await seedFeatures();
-
-  }, { timeout: 60000 }); // Set a timeout of 10 minutes for the transaction
+      await seedSuperAdmin(tenant.id);
+    },
+    { timeout: 60000 },
+  ); // Set a timeout of 10 minutes for the transaction
 
   logger.info('✅ Seeding completed');
 }

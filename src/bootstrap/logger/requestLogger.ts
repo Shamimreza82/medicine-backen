@@ -14,22 +14,29 @@ const requestStream = isProduction
 
 export const requestPino = pino(
   {
-    level: 'info',
-    base: {
-      service: 'hosp-management-api',
-      environment: envConfig.nodeEnv,
-      loggerType: 'request',
-    },
+    level: envConfig.httpLogLevel,
+    messageKey: 'message',
     timestamp: pino.stdTimeFunctions.isoTime,
+    formatters: {
+      level: (label) => ({ level: label }),
+      bindings: (bindings) => ({
+        pid: bindings['pid'],
+        host: bindings['hostname'],
+        service: 'hosp-management-api',
+        environment: envConfig.nodeEnv,
+        loggerType: 'request',
+      }),
+    },
     redact: {
       paths: [
         'req.headers.authorization',
         'req.headers.cookie',
         'req.body.password',
         'req.body.token',
+        'req.body.refreshToken',
       ],
       remove: true,
     },
   },
-  requestStream
+  requestStream,
 );

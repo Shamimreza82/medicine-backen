@@ -1,1 +1,1 @@
-export const hospitalSchema = {}
+export const hospitalSchema = {};

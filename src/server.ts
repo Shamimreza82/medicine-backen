@@ -1,9 +1,7 @@
-import { logger } from "./bootstrap/logger";
-import { startServer } from "./bootstrap/startServer";
-
+import { errorLogger } from './bootstrap/logger';
+import { startServer } from './bootstrap/startServer';
 
 void startServer().catch((error: unknown) => {
-  const message = error instanceof Error ? error.message : 'Unknown startup error';
-  logger.error(message);
+  errorLogger.fatal({ err: error }, 'Startup failed');
   process.exit(1);
 });

@@ -1,13 +1,13 @@
 export const successResponses = {
   StandardSuccessResponse: {
-    type: "object",
+    type: 'object',
     properties: {
-      success: { type: "boolean", example: true },
-      message: { type: "string", example: "Operation successful" },
+      success: { type: 'boolean', example: true },
+      message: { type: 'string', example: 'Operation successful' },
       data: {
-        type: "object",
-        nullable: true
-      }
-    }
-  }
+        type: 'object',
+        nullable: true,
+      },
+    },
+  },
 };

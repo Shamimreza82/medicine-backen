@@ -1,5 +1,3 @@
-
-
 // import fs from 'node:fs';
 // import path from 'node:path';
 
@@ -75,7 +73,6 @@
 //   ? getFileTransport(path.join(logDir, 'request.log'))
 //   : getPrettyTransport();
 
-  
 // export const requestPino = pino(
 //   {
 //     level: 'info',
@@ -97,10 +94,6 @@
 //   },
 //   requestStream
 // );
-
-
-
-
 
 // export const httpLogger = pinoHttp({
 //   logger: requestPino,

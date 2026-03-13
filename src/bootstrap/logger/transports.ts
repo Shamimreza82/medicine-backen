@@ -19,7 +19,8 @@ export const getPrettyTransport = () =>
     options: {
       colorize: true,
       translateTime: 'SYS:standard',
-      ignore: 'pid,hostname',
+      ignore: 'pid,host',
+      singleLine: true,
     },
   });
 

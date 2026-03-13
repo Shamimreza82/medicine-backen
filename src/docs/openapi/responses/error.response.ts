@@ -1,34 +1,34 @@
 export const errorResponses = {
   ErrorResponse: {
-    type: "object",
+    type: 'object',
     properties: {
-      success: { type: "boolean", example: false },
-      message: { type: "string", example: "Something went wrong" },
+      success: { type: 'boolean', example: false },
+      message: { type: 'string', example: 'Something went wrong' },
       error: {
-        type: "object",
-        nullable: true
-      }
-    }
+        type: 'object',
+        nullable: true,
+      },
+    },
   },
 
   ValidationErrorResponse: {
-    type: "object",
+    type: 'object',
     properties: {
-      success: { type: "boolean", example: false },
-      message: { type: "string", example: "Invalid input data" },
+      success: { type: 'boolean', example: false },
+      message: { type: 'string', example: 'Invalid input data' },
       error: {
-        type: "array",
+        type: 'array',
         items: {
-          type: "object",
+          type: 'object',
           properties: {
-            field: { type: "string", example: "body.name" },
+            field: { type: 'string', example: 'body.name' },
             error: {
-              type: "string",
-              example: "Hospital name must be at least 2 characters"
-            }
-          }
-        }
-      }
-    }
-  }
+              type: 'string',
+              example: 'Hospital name must be at least 2 characters',
+            },
+          },
+        },
+      },
+    },
+  },
 };

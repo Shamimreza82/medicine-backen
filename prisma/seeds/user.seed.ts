@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { AppError } from '@/shared/errors/AppError';
 import { StatusCodes } from 'http-status-codes';
 
-export async function seedSuperAdmin(hospitalId: string) {
+export async function seedSuperAdmin(tenantId: string) {
   const role = await prisma.role.findFirst({
     where: { slug: 'SUPER_ADMIN' },
   });
@@ -16,8 +16,8 @@ export async function seedSuperAdmin(hospitalId: string) {
   console.log('🌱 Hashed password for super admin');
   await prisma.user.upsert({
     where: {
-      hospitalId_email: {
-        hospitalId: hospitalId,
+      tenantId_email: {
+        tenantId: tenantId,
         email: 'admin@system.com',
       },
     },
@@ -25,7 +25,7 @@ export async function seedSuperAdmin(hospitalId: string) {
       name: 'System Admin',
       email: 'admin@system.com',
       password,
-      hospitalId,
+      tenantId: tenantId,
       roleId: role.id,
       emailVerified: true,
       phoneVerified: true,
@@ -34,7 +34,7 @@ export async function seedSuperAdmin(hospitalId: string) {
       name: 'System Admin',
       email: 'admin@system.com',
       password,
-      hospitalId,
+      tenantId: tenantId,
       roleId: role.id,
       emailVerified: true,
       phoneVerified: true,

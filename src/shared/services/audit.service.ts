@@ -1,5 +1,8 @@
 import { Prisma } from '@prisma/client';
 
+import { errorLogger } from '@/bootstrap/logger';
+import { logAuditEvent } from '@/shared/logging/audit';
+
 import { auditQueue } from '../queues/audit.queue';
 
 interface TAuditLogInput {
@@ -20,7 +23,35 @@ interface TAuditLogInput {
 }
 
 export async function auditLog(data: TAuditLogInput) {
-  await auditQueue.add('audit-log', data);
+  try {
+    const job = await auditQueue.add('audit-log', data);
+
+    logAuditEvent({
+      action: data.action,
+      entity: data.entity,
+      entityId: data.entityId,
+      actorUserId: data.userId,
+      hospitalId: data.hospitalId,
+      ip: data.ipAddress,
+      metadata: {
+        queueJobId: job.id,
+        module: data.module,
+      },
+    });
+  } catch (error) {
+    errorLogger.error(
+      {
+        err: error,
+        action: data.action,
+        entity: data.entity,
+        entityId: data.entityId,
+        userId: data.userId,
+      },
+      'Failed to enqueue audit log',
+    );
+
+    throw error;
+  }
 }
 
 // export async function auditLog(data: TAuditLogInput) {

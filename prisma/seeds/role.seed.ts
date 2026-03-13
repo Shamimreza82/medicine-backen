@@ -1,21 +1,19 @@
 import { prisma } from '@/bootstrap/prisma';
 import { roles } from '@/shared/lib/data/roles';
 
-export async function seedRoles(hospitalid: string) {
-  
-
+export async function seedRoles(tenantId: string) {
   for (const role of roles) {
     await prisma.role.upsert({
       where: {
-        hospitalId_slug: {
+        tenantId_slug: {
           slug: role.slug,
-          hospitalId: hospitalid,
+          tenantId: tenantId,
         },
       },
       update: {},
       create: {
         ...role,
-        hospitalId: hospitalid,
+        tenantId: tenantId,
       },
     });
   }

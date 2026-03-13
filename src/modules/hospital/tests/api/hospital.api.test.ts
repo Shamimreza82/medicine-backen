@@ -5,19 +5,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import globalErrorHandler from '@/middlewares/globalErrorHandler';
 import { AppError } from '@/shared/errors/AppError';
 
-import createHospitalService from '../../application/service/createHospital.service';
+import createHospitalService from '../../application/service/createHospita.service';
 import { hospitalRoutes } from '../../interfaces/hospital.routes';
 
 import type { NextFunction, Request, Response } from 'express';
 
-
-
 vi.mock('../../application/service/createHospital.service', () => ({
   default: vi.fn(),
 }));
-
-
-
 
 const getCreateHospitalHandlers = () => {
   const routeLayer = (hospitalRoutes as any).stack.find(

@@ -1,66 +1,57 @@
 # Documentation Guide
 
-This project uses Swagger UI and a hand-written OpenAPI document for API documentation.
+This project serves Swagger UI from `/docs` and builds the OpenAPI document from source files under `src/docs/openapi`.
 
-## Where the docs are available
+## Access
 
-- Run the backend.
-- Open `http://localhost:4000/docs` in the browser.
+Run the backend and open:
 
-The docs UI is mounted in `src/bootstrap/createApp.ts`:
+- `http://localhost:4000/docs`
+
+Swagger is mounted in `src/bootstrap/createApp.ts`:
 
 ```ts
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 ```
 
-## How the docs are built
+The documented API server base URL is:
 
-The Swagger document is assembled from files inside `src/docs/openapi`.
+- `http://localhost:4000/api/v1`
 
-- `src/docs/openapi.ts`
-  Re-exports the final OpenAPI document.
-- `src/docs/openapi/openapi.document.ts`
-  Defines the root document like `info`, `servers`, `tags`, `paths`, and `components.schemas`.
-- `src/docs/openapi/openapi.register.ts`
-  Combines all schema and response definitions.
-- `src/docs/openapi/openapi.registry.ts`
-  Combines all path definitions.
-- `src/docs/openapi/schemas/*`
-  Request/response body schemas.
-- `src/docs/openapi/responses/*`
-  Shared success and error response shapes.
-- `src/docs/openapi/paths/*`
-  Endpoint documentation for each module.
+## OpenAPI Source Layout
 
-## How to update docs
+- `src/docs/openapi.ts`: public export of the final document
+- `src/docs/openapi/openapi.document.ts`: root OpenAPI object (`info`, `servers`, `tags`, `paths`, `components`)
+- `src/docs/openapi/openapi.registry.ts`: aggregates all path definitions
+- `src/docs/openapi/openapi.register.ts`: aggregates schemas and shared responses
+- `src/docs/openapi/paths/*`: endpoint path definitions
+- `src/docs/openapi/schemas/*`: schema definitions used by requests and responses
+- `src/docs/openapi/responses/*`: reusable response payload shapes
 
-When adding a new API feature:
+## Current Tags
 
-1. Add or update the endpoint in the module route/controller.
-2. Add the OpenAPI path entry in `src/docs/openapi/paths`.
-3. Add any new schemas in `src/docs/openapi/schemas`.
-4. If needed, reuse shared responses from `src/docs/openapi/responses`.
-5. Make sure the new file is exported through the existing registry objects.
-
-## Current API groups
-
-The current OpenAPI document includes these tags:
+The current document registers these tag groups:
 
 - `Health`
 - `Auth`
 - `Hospitals`
 
-These match the registered path files:
+Current path source files:
 
+- `src/docs/openapi/paths/health.schema.ts`
 - `src/docs/openapi/paths/auth.paths.ts`
 - `src/docs/openapi/paths/hospital.paths.ts`
-- `src/docs/openapi/paths/health.schema.ts`
 
-## Important note
+## Update Workflow
 
-The API routes are served under `/api/v1`, but the Swagger UI is served under `/docs`.
+When adding or changing an endpoint:
 
-Example:
+1. Update the Express route/controller first.
+2. Add or update the corresponding file in `src/docs/openapi/paths`.
+3. Add any new request or response schemas in `src/docs/openapi/schemas`.
+4. Reuse shared response objects from `src/docs/openapi/responses` where possible.
+5. Ensure the new path/schema is exported through the existing OpenAPI registry/register files.
 
-- Docs UI: `http://localhost:4000/docs`
-- Health API: `http://localhost:4000/api/v1/health`
+## Important Limitation
+
+The codebase and the OpenAPI files should stay in sync manually. Some service files already exist for future auth endpoints, but the currently mounted auth router only exposes `POST /api/v1/auth/register`.

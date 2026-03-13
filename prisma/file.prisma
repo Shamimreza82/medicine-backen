@@ -1,8 +1,8 @@
 model File {
     id String @id @default(uuid())
 
-    hospitalId String   @map("hospital_id")
-    hospital   Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+     tenantId   String    @map("tenant_id")
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
     uploadedById String? @map("uploaded_by_id")
     uploadedBy   User?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
@@ -31,7 +31,7 @@ model File {
     updatedAt DateTime  @updatedAt @map("updated_at")
     deletedAt DateTime? @map("deleted_at")
 
-    @@index([hospitalId])
+    @@index([tenantId])
     @@index([entityType, entityId])
     @@map("files")
 }

@@ -19,8 +19,8 @@ model Permission {
 model Role {
   id String @id @default(uuid())
 
-  hospitalId String?   @map("hospital_id")
-  hospital   Hospital? @relation(fields: [hospitalId], references: [id])
+    tenantId   String    @map("tenant_id")
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   name        String
   slug        String
@@ -33,7 +33,7 @@ model Role {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([hospitalId, slug])
+  @@unique([tenantId, slug])
   @@map("roles")
 }
 
@@ -63,15 +63,15 @@ model User {
   id String @id @default(uuid())
 
   // Multi Tenant
-  hospitalId String   @map("hospital_id")
-  hospital   Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+    tenantId   String    @map("tenant_id")
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   roleId String @map("role_id")
   role   Role   @relation(fields: [roleId], references: [id])
 
   // Identity
   name     String
-  email    String     
+  email    String  
   phone    String?
   password String
 
@@ -116,8 +116,8 @@ model User {
   auditLogs AuditLog[]
   uploadedFiles File[] 
 
-  @@unique([hospitalId, email])
-  @@index([hospitalId])
+  @@unique([tenantId, email])
+  @@index([tenantId])
   @@index([roleId])
   @@map("users")
 }

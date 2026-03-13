@@ -18,7 +18,10 @@ export const authorize = (...requiredPermissions: TAuthPermission[]): RequestHan
       return;
     }
 
-    if (requiredPermissions.length > 0 && !requiredPermissions.includes(user.role as TAuthPermission)) {
+    if (
+      requiredPermissions.length > 0 &&
+      !requiredPermissions.includes(user.role as TAuthPermission)
+    ) {
       new AppError(403, 'Forbidden');
       return;
     }

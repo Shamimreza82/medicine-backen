@@ -1,604 +1,453 @@
-# Project Documentation
+# PROJECT_DOCUMENTATION
 
 ## 1. Project Overview
 
-This repository is a TypeScript-based Express backend for a hospital management SaaS platform. It follows a modular architecture with clear separation between HTTP interfaces, application logic, domain definitions, and infrastructure concerns.
+This repository is a modular backend for a hospital management SaaS platform built with TypeScript, Express, Prisma, and PostgreSQL. The codebase is organized around feature modules and a layered architecture so developers can extend business features without coupling routing, business rules, persistence, and cross-cutting infrastructure.
 
-The backend is designed for:
+At runtime, the service:
 
-- Multi-tenant hospital operations
-- Authentication and authorization
-- Structured validation and error handling
-- PostgreSQL persistence through Prisma
-- Redis-backed background processing and caching patterns
-- API documentation through OpenAPI and Swagger UI
+- boots an Express HTTP server
+- validates environment variables with Zod
+- connects to Redis during startup
+- serves REST APIs under `/api/v1`
+- exposes Swagger UI under `/docs`
+- uses Prisma for database access
+- processes audit jobs with BullMQ workers
 
-This project already contains the base backend skeleton, the `hospital`, `auth`, and `health` modules, Prisma migrations, test scaffolding, and BullMQ worker integration. Some platform concerns mentioned in the wider system design, such as AWS S3 storage and Docker deployment, are not yet implemented in the current repository and should be treated as planned or external infrastructure concerns.
+Current implemented modules:
 
-## 2. High-Level Architecture
+- `health`
+- `auth`
+- `hospital`
 
-At runtime, the request flow is:
+Current active routes:
 
-`server.ts` -> `bootstrap/startServer.ts` -> `bootstrap/createApp.ts` -> global middleware -> `/api/v1` router -> module routes -> controllers -> services -> repositories -> Prisma/PostgreSQL
+- `GET /`
+- `GET /docs`
+- `GET /api/v1/health`
+- `POST /api/v1/auth/register`
+- `POST /api/v1/hospitals`
 
-The non-request flow for background jobs is:
+Important current-state note: the repository already contains additional auth service files for login, logout, refresh token handling, caching, and token helpers, but only the register route is mounted today. The documentation below explains both the current runtime behavior and the intended module structure used by the project.
 
-application/service -> queue publisher -> BullMQ worker -> Prisma -> database
+---
 
-## 3. Folder Structure
+## 2. Request and Runtime Flow
 
-The project is strongly organized around responsibilities. New developers should understand this layout first before changing business logic.
+### Application boot flow
+
+```text
+src/server.ts
+  -> src/bootstrap/startServer.ts
+  -> src/bootstrap/createApp.ts
+  -> middleware + routes + error handlers
+```
+
+### HTTP request flow
+
+```text
+Client Request
+  -> Express middleware
+  -> Versioned route (/api/v1)
+  -> Module route file
+  -> Controller
+  -> Application service
+  -> Repository / Prisma
+  -> PostgreSQL
+  -> Standard response helper
+```
+
+### Background job flow
+
+```text
+Application/service
+  -> BullMQ queue producer
+  -> Redis
+  -> Worker
+  -> Prisma persistence
+```
+
+---
+
+## 3. High-Level Folder Structure
 
 ```text
 src/
-├── bootstrap/
-├── config/
-├── docs/
-├── middlewares/
-├── modules/
-│   ├── auth/
-│   ├── health/
-│   └── hospital/
-├── routes/
-├── shared/
-├── tests/
-├── workers/
-├── app.ts
-└── server.ts
+  bootstrap/
+    logger/
+  config/
+  docs/
+    openapi/
+      paths/
+      responses/
+      schemas/
+  middlewares/
+  modules/
+    auth/
+      application/
+      domain/
+      infrastructure/
+      interfaces/
+      tests/
+    health/
+      interfaces/
+    hospital/
+      application/
+      domain/
+      infrastructure/
+      interfaces/
+      tests/
+      validation/
+  routes/
+  shared/
+    errors/
+      handlers/
+    lib/
+      data/
+    middleware/
+    queues/
+    scripts/
+    services/
+    utils/
+  tests/
+    api/
+  workers/
+  app.ts
+  server.ts
 
 prisma/
-├── migrations/
-├── seeds/
-├── schema.prisma
-├── *.prisma
-└── seed.ts
+  migrations/
+  seeds/
+  activityLog.prisma
+  auditLog.prisma
+  billing.prisma
+  file.prisma
+  hospital.prisma
+  schema.prisma
+  subscription.prisma
+  user.prisma
+  webhook.prisma
+  seed.ts
 ```
 
-### Folder Responsibilities
+---
 
-| Folder | Purpose | Typical Contents |
-|---|---|---|
-| `src/bootstrap` | Runtime startup and core infrastructure bootstrapping | Express app creation, Prisma client, Redis connection, logger, server lifecycle |
-| `src/config` | Environment parsing and runtime configuration | env validation, CORS config, app config, rate-limit config |
-| `src/docs` | OpenAPI and Swagger documentation source files | schemas, path definitions, shared API responses |
-| `src/middlewares` | Cross-cutting HTTP middleware | auth, request validation, rate limiting, not found, global error handling |
-| `src/modules` | Feature modules using a vertical slice structure | `auth`, `health`, `hospital` |
-| `src/routes` | API route composition at application level | `/api/v1` root router |
-| `src/shared` | Reusable cross-module code | errors, queues, services, utility functions, reference data, scripts |
-| `src/tests` | Cross-module and integration test helpers | test server setup, supertest client, test DB support |
-| `src/workers` | Background job processors | BullMQ worker implementations |
-| `prisma` | Database schema, migrations, and seed data | schema fragments, migration SQL, seed scripts |
+## 4. Folder Responsibilities
 
-## 4. Detailed Folder and File Responsibilities
+This section is the primary onboarding reference. New developers should start here.
 
-This section is the main onboarding reference for understanding what each file is supposed to own.
+### `src/`
 
-### `src/bootstrap`
+The application source root. It contains runtime code only: bootstrapping, modules, shared platform code, tests, and workers.
 
-| File | Responsibility |
-|---|---|
-| `src/bootstrap/createApp.ts` | Creates and configures the Express application, attaches global middleware, mounts Swagger UI, registers API routes, and installs fallback error handlers |
-| `src/bootstrap/startServer.ts` | Starts the HTTP server, connects infrastructure such as Redis, and handles graceful shutdown |
-| `src/bootstrap/prisma.ts` | Creates and exports the shared Prisma client instance using the PostgreSQL adapter |
-| `src/bootstrap/redis.ts` | Creates the Redis client, configures reconnection strategy, and exposes connection bootstrap logic |
-| `src/bootstrap/logger.ts` | Central logging setup for application and HTTP logging |
+| Path | Responsibility |
+| --- | --- |
+| `src/server.ts` | Application entry point. Starts the server and handles fatal startup failures. |
+| `src/app.ts` | Re-exports the app factory. Useful for tests or alternate entry points. |
+| `src/routes/` | Version-level API composition. Mounts feature routers into `/api/v1`. |
+| `src/bootstrap/` | Infrastructure bootstrap: app creation, server startup, logger, Redis, Prisma wiring. |
+| `src/config/` | Typed runtime configuration derived from environment variables. |
+| `src/middlewares/` | HTTP middleware shared across modules, such as validation, auth, rate limiting, not-found, and error handling. |
+| `src/modules/` | Feature-based business code. Each module owns its routes, controllers, services, repositories, validation, and tests. |
+| `src/shared/` | Reusable cross-module utilities and platform services. Shared code should remain domain-agnostic. |
+| `src/docs/` | OpenAPI source files used by Swagger UI. |
+| `src/tests/` | Shared test setup, test app bootstrapping, and cross-module integration helpers. |
+| `src/workers/` | Background job consumers that run off Redis/BullMQ. |
 
-### `src/config`
+### `src/bootstrap/`
+
+This folder owns application startup and process-level infrastructure.
 
 | File | Responsibility |
-|---|---|
-| `src/config/env.config.ts` | Validates environment variables with Zod and exposes typed configuration |
-| `src/config/app.config.ts` | Derives app-level settings such as host, port, trust proxy, production mode |
-| `src/config/cors.config.ts` | Builds allowed-origin behavior for Express CORS middleware |
-| `src/config/rate-limit.config.ts` | Centralizes rate limiter settings |
+| --- | --- |
+| `src/bootstrap/createApp.ts` | Builds the Express application, installs middleware, mounts Swagger UI, mounts `/api/v1`, and attaches 404/error handlers. |
+| `src/bootstrap/startServer.ts` | Starts HTTP listening, connects Redis, logs startup metadata, and handles graceful shutdown signals. |
+| `src/bootstrap/prisma.ts` | Creates and exports the shared Prisma client using the PostgreSQL adapter. Uses a global singleton in non-production environments. |
+| `src/bootstrap/redis.ts` | Creates the Redis client for app-level connectivity and handles reconnect strategy plus initial connection. |
+| `src/bootstrap/log.ts` | Logging helper entry point for runtime log access. |
+| `src/bootstrap/logger/` | Encapsulates Pino logger creation, request logging, transports, and redaction behavior. |
 
-### `src/docs`
-
-| File or Folder | Responsibility |
-|---|---|
-| `src/docs/openapi.ts` | Public export for the generated OpenAPI document |
-| `src/docs/openapi/openapi.document.ts` | Root OpenAPI object: metadata, servers, tags, paths, and components |
-| `src/docs/openapi/openapi.register.ts` | Aggregates schema and shared response definitions |
-| `src/docs/openapi/openapi.registry.ts` | Aggregates path definitions from all modules |
-| `src/docs/openapi/schemas` | Request and response body schemas used in the docs |
-| `src/docs/openapi/paths` | Endpoint documentation for each module |
-| `src/docs/openapi/responses` | Shared success and error response shapes |
-
-### `src/middlewares`
+### `src/bootstrap/logger/`
 
 | File | Responsibility |
-|---|---|
-| `src/middlewares/validateRequest.ts` | Runs Zod request validation against `body`, `params`, and `query` |
-| `src/middlewares/globalErrorHandler.ts` | Converts thrown errors into consistent API responses |
-| `src/middlewares/notFound.ts` | Handles unmatched routes |
-| `src/middlewares/rateLimiter.ts` | Applies request throttling to the app |
-| `src/middlewares/auth.ts` | Authentication middleware for protected endpoints |
-| `src/middlewares/authorize.ts` | Authorization middleware for role/permission checks |
+| --- | --- |
+| `src/bootstrap/logger/index.ts` | Exposes application, error, and audit loggers plus the HTTP logger middleware. |
+| `src/bootstrap/logger/createLogger.ts` | Central Pino factory. Applies redaction, metadata, and transport strategy. |
+| `src/bootstrap/logger/httpLogger.ts` | Pino HTTP middleware integration for request/response logging. |
+| `src/bootstrap/logger/requestLogger.ts` | Request-level log helpers. |
+| `src/bootstrap/logger/transports.ts` | Configures pretty logging in development and file transports in production. |
 
-### `src/modules`
+### `src/config/`
 
-Each module should contain only the logic for one bounded business area. The preferred structure is:
+Configuration is centralized here so the rest of the codebase imports typed values instead of using `process.env` directly.
+
+| File | Responsibility |
+| --- | --- |
+| `src/config/env.config.ts` | Source of truth for runtime env validation. Uses Zod to fail fast on invalid or missing variables. |
+| `src/config/app.config.ts` | Small app-level derived config, such as port, host, and production flag. |
+| `src/config/cors.config.ts` | Parses allowed origins and returns Express CORS options. |
+| `src/config/rate-limit.config.ts` | Centralizes window and request count values for rate limiting. |
+
+### `src/middlewares/`
+
+This folder contains request/response pipeline concerns shared by all routes.
+
+| File | Responsibility |
+| --- | --- |
+| `src/middlewares/validateRequest.ts` | Generic Zod request validation wrapper. Validates `body`, `query`, and `params`. |
+| `src/middlewares/auth.ts` | Authentication middleware entry point for JWT-protected routes. |
+| `src/middlewares/authorize.ts` | Authorization middleware for permission or role-based access. |
+| `src/middlewares/rateLimiter.ts` | Express rate-limiter configuration, currently skipping `/api/v1/health`. |
+| `src/middlewares/httpLogger.ts` | Middleware-level request logging bridge. |
+| `src/middlewares/notFound.ts` | Standard 404 handler for unmatched routes. |
+| `src/middlewares/globalErrorHandler.ts` | Central error handler that normalizes Zod, Prisma, JWT, Multer, syntax, and custom app errors. |
+
+### `src/modules/`
+
+This is the most important business folder. Every domain feature should live here as an isolated vertical slice.
+
+Standard module shape:
 
 ```text
-module/
-├── application/
-├── domain/
-├── infrastructure/
-├── interfaces/
-├── validation/   # optional if separate from domain schemas
-└── tests/        # optional
+module-name/
+  application/
+    service/
+  domain/
+  infrastructure/
+  interfaces/
+  validation/
+  tests/
 ```
 
-#### `src/modules/auth`
+Layer meaning:
 
-| File or Folder | Responsibility |
-|---|---|
-| `application/service/*` | Authentication use cases such as register, login, logout, token refresh |
-| `domain/auth.constants.ts` | Auth-specific messages and domain constants |
-| `domain/auth.schema.ts` | Zod validation and domain input contracts for auth |
-| `domain/auth.types.ts` | Shared auth-related TypeScript types |
-| `infrastructure/auth.repository.ts` | Database persistence for auth workflows |
-| `infrastructure/auth.token.ts` | JWT token creation and verification concerns |
-| `infrastructure/auth.cache.ts` | Cache or token/session persistence concerns |
-| `interfaces/auth.route.ts` | Express route definitions for the auth module |
-| `interfaces/auth.controller.ts` | HTTP controllers that map requests to application services |
-| `interfaces/auth.presenter.ts` | Shapes auth responses before returning them to clients |
-| `tests/*` | Auth-focused tests |
+| Layer | Responsibility |
+| --- | --- |
+| `application` | Use cases and orchestration. Coordinates domain rules, repositories, queues, and transactions. |
+| `domain` | Business constants, schema types, domain rules, and non-framework concepts. |
+| `infrastructure` | Database access, external service adapters, cache adapters, token helpers, and implementation details. |
+| `interfaces` | Express routes, controllers, presenters, DTO mapping, and request/response boundaries. |
+| `validation` | Zod request schemas for API input contracts. |
+| `tests` | Module-local tests. Prefer colocating feature-specific tests here. |
 
-#### `src/modules/health`
+### `src/modules/auth/`
 
-| File or Folder | Responsibility |
-|---|---|
-| `interfaces/health.route.ts` | Health check routes |
-| `interfaces/health.controller.ts` | Health check response logic |
+Auth is partially scaffolded and represents the intended module design for identity flows.
 
-#### `src/modules/hospital`
+| Path | Responsibility |
+| --- | --- |
+| `src/modules/auth/interfaces/auth.route.ts` | Auth route definitions. Currently mounts `POST /register`. |
+| `src/modules/auth/interfaces/auth.controller.ts` | Controllers for registration and future login/logout/refresh flows. |
+| `src/modules/auth/interfaces/auth.presenter.ts` | Shapes auth service results into API-facing responses. |
+| `src/modules/auth/application/service/` | Auth use cases such as `register`, `login`, `logout`, and `refreshToken`. |
+| `src/modules/auth/domain/` | Auth constants, validation-related schemas, and types. |
+| `src/modules/auth/infrastructure/auth.repository.ts` | Prisma access for user lookups and auth persistence. |
+| `src/modules/auth/infrastructure/auth.token.ts` | JWT token generation/verification helpers. |
+| `src/modules/auth/infrastructure/auth.cache.ts` | Redis-backed auth/cache coordination. |
+| `src/modules/auth/tests/` | Service and worker-related auth tests. |
 
-| File or Folder | Responsibility |
-|---|---|
-| `application/service/createHospital.service.ts` | Creates the hospital use case orchestration |
-| `domain/hospital.constants.ts` | Hospital-specific messages and constants |
-| `domain/hospital.schema.ts` | Domain shape definitions related to hospital entities |
-| `infrastructure/hospital.repository.ts` | Prisma persistence logic for hospitals and related transactional work |
-| `interfaces/hospital.routes.ts` | HTTP routes for hospital endpoints |
-| `interfaces/hospital.controller.ts` | Request-to-service mapping and response shaping |
-| `validation/hospital.validation.ts` | Request schema validation for hospital APIs |
-| `tests/api/*` | API-level tests for hospital routes |
-| `tests/services/*` | Unit or service-level tests for hospital business logic |
+### `src/modules/health/`
 
-### `src/routes`
+The health module is intentionally small and demonstrates the thinnest valid module.
 
 | File | Responsibility |
-|---|---|
-| `src/routes/index.ts` | Registers feature routers under `/api/v1` and defines top-level route grouping |
+| --- | --- |
+| `src/modules/health/interfaces/health.route.ts` | Mounts the health check endpoint. |
+| `src/modules/health/interfaces/health.controller.ts` | Returns service status, uptime, and timestamp. |
 
-### `src/shared`
+### `src/modules/hospital/`
 
-`shared` is for code reused by multiple modules. It should not become a dumping ground for feature logic.
+This is the clearest example of the intended layered architecture.
 
-| Folder | Responsibility |
-|---|---|
-| `src/shared/errors` | Shared application error classes |
-| `src/shared/lib/data` | Seed-like static reference data such as permissions, roles, and hospital features |
-| `src/shared/middleware` | Shared middleware that is not module-specific |
-| `src/shared/queues` | Queue connection and queue publishers |
-| `src/shared/scripts` | Developer automation scripts such as module scaffolding |
-| `src/shared/services` | Cross-cutting services like activity tracking, audit logging, Redis wrappers |
-| `src/shared/utils` | Small pure helpers such as `catchAsync`, `sendResponse`, `generateSlug` |
+| Path | Responsibility |
+| --- | --- |
+| `src/modules/hospital/interfaces/hospital.routes.ts` | Defines hospital endpoints and attaches request validation middleware. |
+| `src/modules/hospital/interfaces/hospital.controller.ts` | Accepts validated requests and delegates to the application service. |
+| `src/modules/hospital/application/service/createHospita.service.ts` | Main hospital creation use case. Creates the hospital, admin user, and enabled features in one transaction. |
+| `src/modules/hospital/infrastructure/hospital.repository.ts` | Encapsulates Prisma transaction operations for hospital-related persistence. |
+| `src/modules/hospital/domain/hospital.constants.ts` | User-facing domain messages. |
+| `src/modules/hospital/domain/hospital.schema.ts` | Domain schema support for hospital models. |
+| `src/modules/hospital/validation/hospital.validation.ts` | Zod request schema and input typing for hospital creation. |
+| `src/modules/hospital/tests/` | API and service tests covering the module. |
 
-Important shared files:
-
-| File | Responsibility |
-|---|---|
-| `src/shared/errors/AppError.ts` | Standard custom error type for controlled failures |
-| `src/shared/utils/catchAsync.ts` | Async controller wrapper to forward errors |
-| `src/shared/utils/sendResponse.ts` | Standard success response helper |
-| `src/shared/utils/sendError.ts` | Standard error response helper |
-| `src/shared/utils/generateSlug.ts` | Slug generation helper |
-| `src/shared/queues/connection.ts` | Shared BullMQ Redis connection |
-| `src/shared/queues/audit.queue.ts` | Audit queue producer |
-| `src/shared/services/audit.service.ts` | High-level audit logging service |
-| `src/shared/services/activity.service.ts` | Activity tracking logic |
-| `src/shared/services/redis.service.ts` | Redis-related shared service layer |
-| `src/shared/scripts/create-module.ts` | Developer script for bootstrapping a new module |
-
-### `src/tests`
+### `src/routes/`
 
 | File | Responsibility |
-|---|---|
-| `src/tests/setup.ts` | Global test setup |
-| `src/tests/test-server.ts` | Test app/server bootstrap |
-| `src/tests/supertest-client.ts` | Shared Supertest client creation |
-| `src/tests/prisma-test-db.ts` | Test database support for Prisma-backed tests |
-| `src/tests/api/*.test.ts` | Cross-cutting API tests |
+| --- | --- |
+| `src/routes/index.ts` | Top-level API composition. Mounts module routers under `/api/v1`. |
 
-### `src/workers`
+### `src/shared/`
+
+Shared code must remain generic and reusable. If logic belongs only to one feature, keep it inside that module instead of moving it here.
+
+| Path | Responsibility |
+| --- | --- |
+| `src/shared/errors/` | Custom `AppError` type plus specific error translators. |
+| `src/shared/errors/handlers/` | Converts framework/runtime errors into standardized API responses. |
+| `src/shared/utils/` | Helpers such as `catchAsync`, `sendResponse`, `sendError`, and `generateSlug`. |
+| `src/shared/services/` | Cross-cutting services such as audit, activity, and Redis access. |
+| `src/shared/queues/` | BullMQ connection and queue instances. |
+| `src/shared/middleware/` | Generic middleware reused across features. |
+| `src/shared/lib/data/` | Seed-like static business reference data such as roles, permissions, and feature definitions. |
+| `src/shared/scripts/` | Developer automation scripts. Currently includes `create-module.ts`. |
+
+### `src/docs/`
+
+OpenAPI documentation source files live here. API documentation is not generated automatically from controllers, so route changes should be reflected here manually.
+
+| Path | Responsibility |
+| --- | --- |
+| `src/docs/openapi.ts` | Public export for the OpenAPI document used by Swagger UI. |
+| `src/docs/openapi/openapi.document.ts` | Root OpenAPI metadata, servers, tags, paths, and components. |
+| `src/docs/openapi/openapi.registry.ts` | Aggregates path definitions. |
+| `src/docs/openapi/openapi.register.ts` | Aggregates schemas and response definitions. |
+| `src/docs/openapi/paths/` | Endpoint path definitions by feature. |
+| `src/docs/openapi/schemas/` | Reusable request and response object schemas. |
+| `src/docs/openapi/responses/` | Standard success and error response definitions. |
+
+### `src/tests/`
 
 | File | Responsibility |
-|---|---|
-| `src/workers/index.ts` | Worker bootstrap entry point |
-| `src/workers/audit.worker.ts` | BullMQ worker for async audit log persistence |
+| --- | --- |
+| `src/tests/setup.ts` | Global test bootstrapping. |
+| `src/tests/test-server.ts` | Test app/server creation. |
+| `src/tests/supertest-client.ts` | Shared Supertest client helper. |
+| `src/tests/prisma-test-db.ts` | Test database helpers for Prisma integration tests. |
+| `src/tests/api/` | Shared API integration tests not owned by a single module. |
 
-### `prisma`
+### `src/workers/`
 
-The Prisma directory is split into multiple schema fragments, which is a good approach for a growing SaaS codebase.
+| File | Responsibility |
+| --- | --- |
+| `src/workers/index.ts` | Worker bootstrap entry. Imported by the app during startup. |
+| `src/workers/audit.worker.ts` | BullMQ consumer that persists audit log jobs into PostgreSQL. |
 
-| File or Folder | Responsibility |
-|---|---|
-| `prisma/schema.prisma` | Prisma root configuration such as generator and datasource |
-| `prisma/*.prisma` | Domain-specific model files split by concern such as hospital, user, file, billing, subscription, webhook, audit log |
-| `prisma/migrations` | Versioned SQL migrations |
-| `prisma/seed.ts` | Main seed runner |
-| `prisma/seeds/*.ts` | Seed units for roles, permissions, hospitals, users |
-| `prisma.config.ts` | Prisma CLI config, schema path, migration path, seed command, datasource env mapping |
+### `prisma/`
+
+Database schema ownership lives here.
+
+| Path | Responsibility |
+| --- | --- |
+| `prisma/schema.prisma` | Root Prisma configuration, generator, and datasource definition. |
+| `prisma/*.prisma` | Split Prisma model files grouped by business domain. |
+| `prisma/migrations/` | Generated SQL migrations applied to PostgreSQL. |
+| `prisma/seeds/` | Seed logic for roles, permissions, hospitals, and default users. |
+| `prisma/seed.ts` | Seed entry point used by Prisma config. |
+| `prisma.config.ts` | Prisma CLI configuration, migrations path, and seed command. |
+
+---
 
 ## 5. Technology Stack
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| Runtime | Node.js | JavaScript runtime for the backend |
-| Server | Express.js | HTTP server, middleware composition, routing |
-| Language | TypeScript | Static typing and better maintainability |
-| ORM | Prisma ORM | Database access, transactions, migrations, type-safe queries |
-| Database | PostgreSQL | Primary relational datastore |
-| Validation | Zod | Runtime validation for env config and request data |
-| Auth | JWT | Stateless access token strategy |
-| Cache / Queue Transport | Redis | Shared infrastructure for caching, workers, queue transport |
-| Background Jobs | BullMQ | Queue-based async job processing |
-| API Docs | Swagger UI + OpenAPI | Human-readable API documentation |
-| Testing | Vitest + Supertest | Unit, service, and API testing |
-| Linting | ESLint | Static analysis and consistency checks |
-| Formatting | Prettier | Code formatting |
+| Category | Technology | Why it is used |
+| --- | --- | --- |
+| Runtime | Node.js 20+ | Stable LTS runtime for the API server and worker processes. |
+| Web framework | Express 5 | Lightweight HTTP framework with predictable middleware composition. |
+| Language | TypeScript | Type safety, better refactoring support, and safer module boundaries. |
+| ORM | Prisma ORM | Type-safe database client, migrations, and transaction support. |
+| Database | PostgreSQL | Relational database suited for multi-tenant SaaS business data. |
+| Validation | Zod | Runtime validation plus static inference for request contracts and config parsing. |
+| Auth | JWT | Stateless access token mechanism for authenticated APIs. |
+| Cache / queue backend | Redis | Supports caching, queue infrastructure, and fast transient storage. |
+| Background jobs | BullMQ | Durable job processing for audit and async workflows. |
+| API docs | Swagger UI + OpenAPI | Human-readable interactive API documentation for backend and frontend teams. |
+| Logging | Pino / pino-http | Structured logs with low overhead and request correlation support. |
+| Security | Helmet, CORS, rate limiting, cookie parsing | Standard API hardening and browser/client interoperability. |
+| Testing | Vitest + Supertest | Fast unit/integration test execution for services and HTTP endpoints. |
+| Formatting | Prettier | Consistent formatting across the team. |
+| Linting | ESLint + TypeScript ESLint | Enforces code quality, async correctness, and import order. |
+| Containerization | Docker | Intended deployment/runtime packaging for consistent environments. No Dockerfile is currently committed in this repository. |
+| File storage | AWS S3 | Intended object storage for file uploads. The package and file schema exist, but S3 integration code is not yet wired into the current runtime. |
 
-### Planned or External Technologies
-
-| Technology | Status in Current Repository | Notes |
-|---|---|---|
-| AWS S3 | Not implemented yet | Suitable for document, image, or asset storage; add as an infrastructure service and storage adapter when file upload flows are introduced |
-| Docker | Not implemented yet | No `Dockerfile` or `docker-compose.yml` is currently present; deployment teams should add container definitions if containerized delivery is required |
+---
 
 ## 6. Important Packages and Why They Are Used
 
-This section is intentionally explicit, because package purpose is a major onboarding shortcut.
+### Runtime dependencies
 
-| Package | Why It Exists |
-|---|---|
-| `express` | Core HTTP framework for routing, middleware, and request/response handling |
-| `typescript` | Compile-time safety, editor support, better refactoring confidence |
-| `ts-node-dev` | Fast local development with automatic reload for TypeScript files |
-| `tsx` | Simple TypeScript execution for scripts and seeds |
-| `@prisma/client` | Generated Prisma client used by repositories and services |
-| `prisma` | Migration, introspection, formatting, and seed tooling |
-| `@prisma/adapter-pg` | PostgreSQL adapter for Prisma runtime |
-| `pg` | PostgreSQL driver used under Prisma’s adapter |
-| `zod` | Runtime validation for requests and environment variables |
-| `jsonwebtoken` | JWT issuing and verification for auth flows |
-| `bcrypt` | Password hashing for secure credential storage |
-| `redis` | Redis client for cache/session/infra connectivity |
-| `ioredis` | Often used for BullMQ-compatible Redis connections and advanced Redis flows |
-| `bullmq` | Reliable background jobs and async processing |
-| `swagger-ui-express` | Serves interactive API documentation |
-| `cors` | Browser cross-origin control |
-| `helmet` | Basic security headers for Express |
-| `compression` | Gzip compression for HTTP responses |
-| `cookie-parser` | Cookie parsing, useful for refresh-token strategies |
-| `express-rate-limit` | Request throttling to reduce abuse and protect APIs |
-| `pino` | Structured logging |
-| `pino-http` | HTTP request logging integration for Express |
-| `vitest` | Test runner for unit and integration tests |
-| `supertest` | HTTP assertions for Express endpoints |
-| `eslint` | Code quality and rule enforcement |
-| `@typescript-eslint/*` | TypeScript-aware linting rules |
-| `eslint-plugin-import` | Import order and import hygiene |
-| `prettier` | Consistent formatting across contributors |
-| `dotenv` | Loads environment variables in local execution |
-| `husky` | Git hook automation before commits or pushes |
-| `tsconfig-paths` | Makes TypeScript path aliases work during runtime in dev tools |
-| `tsc-alias` | Rewrites TypeScript path aliases after build output |
+| Package | Why it exists in this project |
+| --- | --- |
+| `express` | Core HTTP framework and middleware pipeline. |
+| `@prisma/client` | Generated database client used inside repositories and services. |
+| `@prisma/adapter-pg` | Connects Prisma to PostgreSQL using the driver adapter approach. |
+| `pg` | PostgreSQL driver required by Prisma's adapter. |
+| `zod` | Validates env vars and API requests. |
+| `jsonwebtoken` | Signs and verifies JWT access/refresh tokens. |
+| `bcrypt` | Password hashing for user credentials. |
+| `redis` | Main Redis client used during application startup. |
+| `ioredis` | Redis client used by BullMQ queue and worker connection handling. |
+| `bullmq` | Background jobs, retries, and worker execution. |
+| `@aws-sdk/client-s3` | Planned S3 file storage integration. Useful for uploads and signed URL workflows. |
+| `multer` | Multipart/form-data parsing for future file upload endpoints. |
+| `pino` | Structured application logging. |
+| `pino-http` | Express request logging middleware. |
+| `helmet` | Security headers for API hardening. |
+| `cors` | Browser cross-origin policy configuration. |
+| `cookie-parser` | Reads cookies for refresh token or session-oriented flows. |
+| `compression` | Compresses HTTP responses for bandwidth savings. |
+| `express-rate-limit` | Protects public endpoints from abuse. |
+| `swagger-ui-express` | Serves generated OpenAPI docs at `/docs`. |
+| `axios` | Outbound HTTP client for third-party APIs or internal service calls. |
+| `@opentelemetry/api` | Telemetry abstraction for tracing and metrics. |
+| `@opentelemetry/sdk-node` | Node SDK for telemetry pipeline setup. |
+| `@opentelemetry/auto-instrumentations-node` | Planned auto-instrumentation for observability. |
+
+### Development dependencies
+
+| Package | Why it exists in this project |
+| --- | --- |
+| `typescript` | TypeScript compiler. |
+| `ts-node-dev` | Fast TypeScript development server with respawn/reload support. |
+| `tsx` | Executes TypeScript scripts directly, used for internal tooling like module scaffolding. |
+| `tsconfig-paths` | Resolves `@/` path aliases in runtime tooling. |
+| `tsc-alias` | Rewrites TypeScript path aliases after build output generation. |
+| `prisma` | Prisma CLI for generate, migrate, format, validate, studio, and seed flows. |
+| `vitest` | Test runner. |
+| `supertest` | HTTP endpoint testing against the Express app. |
+| `eslint` | Static code analysis. |
+| `@typescript-eslint/*` | Type-aware TypeScript lint rules. |
+| `eslint-plugin-import` | Import ordering and import quality checks. |
+| `eslint-config-prettier` | Disables lint rules that conflict with Prettier. |
+| `prettier` | Code formatting. |
+| `husky` | Git hooks for enforcing checks before commits. |
+| `dotenv` | Loads environment variables for scripts and runtime entry points. |
+
+---
 
 ## 7. Environment Variables
 
-Environment variables are parsed and validated in `src/config/env.config.ts` with Zod. This is the single source of truth for config shape.
+The source of truth is `src/config/env.config.ts`. New developers should not rely only on `.env.example`, because the example file is currently missing some values required by the Zod schema.
 
-### Current Environment Variables
+### Required and supported variables
 
-| Variable | Required | Default | Purpose |
-|---|---|---|---|
-| `NODE_ENV` | No | `development` | Runtime environment |
-| `PORT` | No | `4000` | HTTP server port |
-| `HOST` | No | `0.0.0.0` | Bind host |
-| `DATABASE_URL` | Yes | none | PostgreSQL connection string |
-| `CORS_ENABLED` | Yes in current validation | none | Enables or disables CORS behavior |
-| `CORS_ORIGINS` | No | `*` | Allowed CORS origins |
-| `TRUST_PROXY` | No | `false` | Enables proxy awareness for load balancers / reverse proxies |
-| `RATE_LIMIT_WINDOW_MS` | No | `60000` | Rate limiter time window |
-| `RATE_LIMIT_MAX_REQUESTS` | No | `120` | Maximum requests allowed per window |
-| `JWT_ACCESS_SECRET` | No | `dev-access-secret-change-me` | Secret for access token signing |
-| `JWT_EXPIRES_IN` | No | `15m` | Access token TTL |
-| `REDIS_URL` | No | `redis://127.0.0.1:6379` | Full Redis URL |
-| `REDIS_HOST` | No | `127.0.0.1` | Redis host |
-| `REDIS_PORT` | No | `6379` | Redis port |
-| `REDIS_PASSWORD` | No | none | Redis password |
+| Variable | Required | Example | Purpose |
+| --- | --- | --- | --- |
+| `NODE_ENV` | Yes | `development` | Controls runtime mode and logging behavior. |
+| `PORT` | Yes | `4000` | HTTP port for the API server. |
+| `HOST` | Yes | `0.0.0.0` | Network host binding. |
+| `CORS_ENABLED` | Yes in current schema | `true` | Intended feature flag for CORS behavior. Note: current `cors.config.ts` does not branch on it yet. |
+| `DATABASE_URL` | Yes | `postgresql://postgres:postgres@localhost:5432/hospital_management?schema=public` | PostgreSQL connection string for Prisma. |
+| `CORS_ORIGINS` | Yes | `*` or `http://localhost:3000,http://localhost:5173` | Allowed client origins. |
+| `TRUST_PROXY` | Yes | `false` | Enables proxy-aware request handling in Express when behind a load balancer. |
+| `RATE_LIMIT_WINDOW_MS` | Yes | `60000` | Rate limit window size. |
+| `RATE_LIMIT_MAX_REQUESTS` | Yes | `120` | Max requests per rate limit window. |
+| `JWT_ACCESS_SECRET` | Yes | `dev-access-secret-change-me` | Secret used to sign access tokens. Must be strong in production. |
+| `JWT_EXPIRES_IN` | Yes | `15m` | Access token TTL. |
+| `REDIS_URL` | Yes | `redis://127.0.0.1:6379` | General Redis URL. |
+| `REDIS_HOST` | Yes | `127.0.0.1` | Redis host for queue/client configuration. |
+| `REDIS_PORT` | Yes | `6379` | Redis port. |
+| `REDIS_PASSWORD` | Optional | `` | Redis password if secured. |
 
-### Important Note
-
-The current `.env.example` does not include `CORS_ENABLED`, while `src/config/env.config.ts` expects it. A new developer should add this variable locally or the application will fail env validation.
-
-Recommended local addition:
+### Recommended local `.env`
 
 ```env
-CORS_ENABLED=true
-```
-
-### Suggested Future Variables
-
-If AWS S3 and Dockerized deployment are introduced, these are common additions:
-
-| Variable | Purpose |
-|---|---|
-| `AWS_ACCESS_KEY_ID` | AWS credentials |
-| `AWS_SECRET_ACCESS_KEY` | AWS credentials |
-| `AWS_REGION` | S3 bucket region |
-| `AWS_S3_BUCKET` | Upload bucket |
-| `JWT_REFRESH_SECRET` | Refresh token signing |
-| `APP_BASE_URL` | Absolute backend/public URL |
-
-## 8. Available Scripts
-
-Scripts are defined in `package.json`.
-
-| Script | What It Does |
-|---|---|
-| `npm run dev` | Starts the backend in development using `ts-node-dev` |
-| `npm run build` | Compiles TypeScript to `dist` and rewrites path aliases |
-| `npm start` | Runs the built app from `dist/server.js` |
-| `npm run typecheck` | Runs TypeScript type-checking without emitting files |
-| `npm run lint` | Runs ESLint with zero warnings allowed |
-| `npm run lint:fix` | Runs ESLint and applies safe fixes |
-| `npm run format` | Formats the project with Prettier |
-| `npm run format:check` | Checks formatting without writing changes |
-| `npm run create:module` | Runs the internal module scaffolding script |
-| `npm run prisma:generate` | Generates Prisma client |
-| `npm run prisma:reset` | Resets database and reruns migrations |
-| `npm run prisma:format` | Formats Prisma schema files |
-| `npm run prisma:validate` | Validates Prisma schema setup |
-| `npm run prisma:migrate:dev` | Creates and applies development migrations |
-| `npm run prisma:migrate:deploy` | Applies migrations in deployment environments |
-| `npm run prisma:studio` | Opens Prisma Studio |
-| `npm test` | Runs the full test suite once |
-| `npm run test:watch` | Runs tests in watch mode |
-| `npm run test:coverage` | Runs tests with coverage |
-| `npm run test:auth` | Runs only auth tests |
-
-## 9. Coding Conventions
-
-The codebase already communicates several conventions through ESLint, TypeScript config, and current structure.
-
-### General Conventions
-
-- Use strict TypeScript mode and avoid `any` unless there is a real integration constraint.
-- Use the `@/` alias for imports from `src`.
-- Keep controllers thin.
-- Put business logic in application services.
-- Put database logic in repositories.
-- Keep module boundaries clear.
-- Prefer explicit named exports unless a single use case file benefits from a default export.
-- Use shared response helpers instead of hand-building JSON in every controller.
-- Throw controlled `AppError` instances for business-rule failures.
-
-### Import Style
-
-ESLint enforces ordered imports with grouped sections:
-
-1. Built-in modules
-2. External packages
-3. Internal modules via `@/`
-4. Parent/sibling/index imports
-5. Type imports
-
-### Validation Convention
-
-- Validate environment variables in `src/config/env.config.ts`
-- Validate request payloads through middleware using Zod
-- Use `validateRequest(schema)` in routes before calling controllers
-
-### Error Handling Convention
-
-- Wrap async controllers with `catchAsync`
-- Let the global error handler translate thrown errors
-- Avoid repetitive `try/catch` blocks in controllers unless there is a real transformation need
-
-### Testing Convention
-
-- Place module-local tests under `src/modules/<module>/tests`
-- Place shared integration helpers under `src/tests`
-- Prefer API tests for request/response contracts
-- Prefer service tests for business logic
-
-## 10. API Architecture
-
-The API is versioned under `/api/v1`.
-
-### Route Composition
-
-- `src/bootstrap/createApp.ts` mounts `/api/v1` using `apiRouter`
-- `src/routes/index.ts` composes module routers:
-  - `/health`
-  - `/auth`
-  - `/hospitals`
-
-### Request Lifecycle
-
-1. Request enters Express app
-2. Global middleware runs: logging, security headers, CORS, rate limit, parsing
-3. Request reaches versioned router
-4. Module route applies validation and auth middleware as needed
-5. Controller receives validated input
-6. Controller calls an application service
-7. Service orchestrates business rules
-8. Repository persists or fetches data using Prisma
-9. Controller returns standardized response
-
-### API Documentation
-
-Swagger UI is served at:
-
-```text
-/docs
-```
-
-The OpenAPI source is maintained manually under `src/docs/openapi`.
-
-## 11. Module Architecture
-
-The backend follows a lightweight layered module pattern.
-
-### Recommended Layer Definitions
-
-| Layer | Responsibility |
-|---|---|
-| `interfaces` | HTTP layer: routes, controllers, presenters |
-| `application` | Use cases and business orchestration |
-| `domain` | Core business contracts, constants, schemas, and rules |
-| `infrastructure` | External system access such as Prisma, Redis, JWT, S3 |
-| `validation` | Request contracts for incoming HTTP data when kept separate from domain |
-
-### Practical Example
-
-For `hospital` creation:
-
-1. `hospital.routes.ts` defines the `POST /hospitals` endpoint
-2. `validateRequest(createHospitalSchema)` validates the request
-3. `hospital.controller.ts` calls `createHospitalService`
-4. `createHospital.service.ts` computes the slug and orchestrates the use case
-5. `hospital.repository.ts` performs transactional database writes through Prisma
-
-This is the model new modules should follow.
-
-## 12. How to Add a New Module
-
-Use the module structure consistently. The existing `src/shared/scripts/create-module.ts` can be used as a starting point if it matches the desired layout.
-
-### Recommended Steps
-
-1. Create a new folder under `src/modules/<module-name>`
-2. Add `interfaces`, `application`, `domain`, and `infrastructure`
-3. Add `validation` and `tests` if needed
-4. Define the route file in `interfaces`
-5. Add controller functions in `interfaces`
-6. Add use cases in `application/service`
-7. Add repositories or external adapters in `infrastructure`
-8. Add constants, types, and schemas in `domain`
-9. Register the module router in `src/routes/index.ts`
-10. Add OpenAPI docs in `src/docs/openapi/paths` and `src/docs/openapi/schemas`
-11. Add tests for both use cases and API behavior
-
-### Module Checklist
-
-- Route registered under `/api/v1`
-- Validation schema exists
-- Controller remains thin
-- Service contains business rules
-- Repository owns persistence
-- Errors use `AppError`
-- Response uses `sendResponse`
-- OpenAPI entry added
-- Tests added
-
-## 13. How to Add a New API
-
-### Standard Process
-
-1. Define the request schema with Zod
-2. Add the route in the module router
-3. Add a controller method
-4. Add or reuse an application service
-5. Add or reuse repository methods if persistence is needed
-6. Return a standardized response
-7. Document the endpoint in OpenAPI
-8. Add tests
-
-### Example Pattern
-
-```ts
-router.post(
-  '/',
-  validateRequest(createEntitySchema),
-  entityController.createEntity,
-);
-```
-
-### Controller Pattern
-
-```ts
-const createEntity = catchAsync(async (req, res) => {
-  const result = await createEntityService(req.body);
-
-  sendResponse(res, 201, {
-    success: true,
-    message: 'Entity created successfully',
-    data: result,
-  });
-});
-```
-
-## 14. Development Workflow
-
-### Local Setup
-
-1. Install dependencies
-2. Create `.env` from `.env.example`
-3. Add any missing required env values such as `CORS_ENABLED=true`
-4. Start PostgreSQL and Redis locally
-5. Run migrations
-6. Seed the database if required
-7. Start the development server
-
-### Typical Commands
-
-```bash
-npm install
-npm run prisma:generate
-npm run prisma:migrate:dev
-npm run dev
-```
-
-### Daily Workflow
-
-1. Pull latest code
-2. Run migrations if schema changed
-3. Implement module or API changes
-4. Update OpenAPI docs
-5. Run `npm run lint`
-6. Run `npm run typecheck`
-7. Run relevant tests
-8. Commit only when checks pass
-
-## 15. How to Run the Project Locally
-
-### Prerequisites
-
-- Node.js `>=20.11.0`
-- PostgreSQL
-- Redis
-- npm
-
-### Local Run Steps
-
-```bash
-npm install
-cp .env.example .env
-```
-
-Then update `.env` with at least:
-
-```env
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hospital_management?schema=public
+NODE_ENV=development
 PORT=4000
 HOST=0.0.0.0
 CORS_ENABLED=true
 CORS_ORIGINS=*
 TRUST_PROXY=false
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hospital_management?schema=public
 RATE_LIMIT_WINDOW_MS=60000
 RATE_LIMIT_MAX_REQUESTS=120
 JWT_ACCESS_SECRET=dev-access-secret-change-me
@@ -606,115 +455,483 @@ JWT_EXPIRES_IN=15m
 REDIS_URL=redis://127.0.0.1:6379
 REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
+REDIS_PASSWORD=
 ```
 
-Then run:
+---
+
+## 8. Available Scripts
+
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | Starts the API in development mode with `ts-node-dev`. |
+| `npm run build` | Compiles TypeScript and rewrites path aliases for `dist/`. |
+| `npm start` | Runs the compiled build from `dist/server.js`. |
+| `npm run typecheck` | Runs TypeScript type-checking without emitting build files. |
+| `npm run lint` | Runs ESLint and fails on warnings. |
+| `npm run lint:fix` | Runs ESLint with autofix. |
+| `npm run format` | Formats the repository with Prettier. |
+| `npm run format:check` | Checks formatting without modifying files. |
+| `npm run create:module -- <name>` | Generates a new module skeleton under `src/modules/<name>`. |
+| `npm run prisma:generate` | Generates the Prisma client. |
+| `npm run prisma:reset` | Drops and recreates the database using Prisma migrate reset. |
+| `npm run prisma:format` | Formats Prisma schema files. |
+| `npm run prisma:validate` | Validates Prisma schema configuration. |
+| `npm run prisma:migrate:dev` | Creates and applies development migrations. |
+| `npm run prisma:migrate:deploy` | Applies migrations in deployment environments. |
+| `npm run prisma:studio` | Opens Prisma Studio. |
+| `npm run test` | Runs the test suite once. |
+| `npm run test:watch` | Runs tests in watch mode. |
+| `npm run test:coverage` | Runs tests with coverage output. |
+| `npm run test:auth` | Runs auth-focused tests only. |
+| `npm run prepare` | Installs Husky hooks. |
+
+---
+
+## 9. Coding Conventions
+
+This project already enforces several conventions through TypeScript, ESLint, and Prettier. New code should follow the same rules.
+
+### TypeScript conventions
+
+- Use strict typing; `tsconfig.json` enables strict mode and additional safety flags.
+- Prefer explicit DTO/input types inferred from Zod schemas for request payloads.
+- Keep framework-specific types in `interfaces` and business logic in `application` or `domain`.
+- Use the `@/` path alias instead of deep relative imports where practical.
+
+### File naming conventions
+
+- Use feature-oriented folders under `src/modules`.
+- Use suffixes that describe responsibility:
+  - `*.route.ts`
+  - `*.controller.ts`
+  - `*.service.ts`
+  - `*.repository.ts`
+  - `*.validation.ts`
+  - `*.schema.ts`
+  - `*.constants.ts`
+- Keep related files together inside the owning module.
+
+### Linting conventions
+
+Based on `eslint.config.mjs`:
+
+- import order is enforced
+- floating promises are not allowed
+- unused vars fail the build unless prefixed with `_`
+- `require-await` is enforced
+- `any` is discouraged
+- console usage is allowed only as a warning and should be avoided in committed production code
+
+### Formatting conventions
+
+- Prettier is the formatting source of truth.
+- Keep imports grouped and alphabetized according to ESLint.
+- Prefer small controllers and thin route files.
+
+### Architectural conventions
+
+- Controllers should not contain database logic.
+- Repositories should not format HTTP responses.
+- Shared code should remain generic and not leak feature-specific rules.
+- Validation should happen before controller logic using middleware where possible.
+- Transactions should be orchestrated in the application service layer for multi-step business flows.
+
+---
+
+## 10. API Architecture
+
+The API is designed as a versioned REST service.
+
+### Versioning
+
+- Base prefix: `/api/v1`
+- Swagger docs: `/docs`
+
+### Current route composition
+
+`src/routes/index.ts` mounts:
+
+- `healthRouter` on `/health`
+- `authRoutes` on `/auth`
+- `hospitalRoutes` on `/hospitals`
+
+### API design pattern
+
+Each endpoint should follow this structure:
+
+1. Route file receives HTTP request and applies middleware.
+2. Validation middleware checks `body`, `query`, and `params`.
+3. Controller extracts typed input and delegates to a use case.
+4. Application service runs the business workflow.
+5. Repository handles Prisma and persistence details.
+6. Response helpers format the output consistently.
+
+### Response pattern
+
+The project uses shared response helpers, typically returning:
+
+```json
+{
+  "success": true,
+  "message": "Descriptive message",
+  "data": {}
+}
+```
+
+Errors are normalized through the global error handler into a consistent error shape.
+
+### Middleware stack
+
+The app currently installs:
+
+- request logging
+- security headers via Helmet
+- CORS
+- rate limiting
+- compression
+- cookie parsing
+- JSON and URL-encoded body parsing
+- not-found handling
+- global error handling
+
+---
+
+## 11. Module Architecture
+
+The module design follows a light clean-architecture style adapted for Express.
+
+### Recommended dependency direction
+
+```text
+interfaces -> application -> infrastructure
+           -> domain
+
+shared is reusable by all layers
+```
+
+### Responsibility by layer
+
+#### `interfaces`
+
+Owns transport concerns.
+
+- Express routes
+- controllers
+- presenters
+- request/response mapping
+- middleware composition
+
+#### `application`
+
+Owns use-case execution.
+
+- business workflow orchestration
+- transaction boundaries
+- coordination between repositories, queues, cache, and external systems
+
+#### `domain`
+
+Owns business meaning.
+
+- constants
+- domain types
+- domain schema support
+- business language
+
+#### `infrastructure`
+
+Owns implementation details.
+
+- Prisma queries
+- Redis interactions
+- token generation
+- third-party adapters
+- storage integrations
+
+#### `validation`
+
+Owns API contracts.
+
+- Zod schemas
+- request DTO validation
+- typed input inference
+
+### Why this architecture works well for SaaS backends
+
+- keeps feature code together
+- avoids a giant shared service layer
+- makes onboarding faster because each feature has a predictable shape
+- improves testability by separating orchestration from transport and persistence
+- supports future tenant-aware business rules without polluting global folders
+
+---
+
+## 12. File Responsibilities by Execution Path
+
+This section helps new developers trace a change from endpoint to database.
+
+### Example: create hospital flow
+
+| Step | File | Responsibility |
+| --- | --- | --- |
+| 1 | `src/routes/index.ts` | Mounts hospital routes under `/api/v1/hospitals`. |
+| 2 | `src/modules/hospital/interfaces/hospital.routes.ts` | Declares `POST /` and applies request validation. |
+| 3 | `src/middlewares/validateRequest.ts` | Validates incoming payload using Zod. |
+| 4 | `src/modules/hospital/interfaces/hospital.controller.ts` | Converts Express request into typed service call. |
+| 5 | `src/modules/hospital/application/service/createHospita.service.ts` | Runs transactional business logic for hospital setup. |
+| 6 | `src/modules/hospital/infrastructure/hospital.repository.ts` | Executes Prisma transaction operations. |
+| 7 | `src/bootstrap/prisma.ts` | Provides the shared Prisma client. |
+| 8 | `src/shared/utils/sendResponse.ts` | Formats the success response. |
+
+### Example: audit processing flow
+
+| Step | File | Responsibility |
+| --- | --- | --- |
+| 1 | `src/shared/queues/audit.queue.ts` | Creates the BullMQ queue used for audit events. |
+| 2 | `src/workers/index.ts` | Ensures workers are registered during app startup. |
+| 3 | `src/workers/audit.worker.ts` | Consumes jobs from Redis. |
+| 4 | `src/bootstrap/prisma.ts` | Persists audit data into PostgreSQL through Prisma. |
+
+---
+
+## 13. How to Add a New Module
+
+### Option 1: use the scaffold script
+
+```bash
+npm run create:module -- billing
+```
+
+This creates:
+
+```text
+src/modules/billing/
+  application/service/
+  domain/
+  infrastructure/
+  interfaces/
+  validation/
+```
+
+### Recommended steps after scaffolding
+
+1. Create or refine the Zod request schema in `validation/`.
+2. Add domain constants, types, and rules in `domain/`.
+3. Implement one or more use cases in `application/service/`.
+4. Implement repository or adapter code in `infrastructure/`.
+5. Add Express route/controller files in `interfaces/`.
+6. Mount the router from `src/routes/index.ts`.
+7. Add or update OpenAPI files in `src/docs/openapi/`.
+8. Add tests in `src/modules/<module>/tests/`.
+
+### Practical guidance
+
+- Keep the module self-contained.
+- Do not move feature-specific helpers into `src/shared/` too early.
+- If the module touches multiple tables, keep the transaction boundary in the application layer.
+
+---
+
+## 14. How to Add a New API
+
+Use this sequence for a new endpoint inside an existing module.
+
+1. Define the request schema in the module's `validation/` folder.
+2. Add or update any domain types/constants if needed.
+3. Implement the use case in `application/service/`.
+4. Add persistence logic in `infrastructure/`.
+5. Expose a controller in `interfaces/`.
+6. Register the route in the module's route file.
+7. Update OpenAPI docs under `src/docs/openapi/paths` and `src/docs/openapi/schemas`.
+8. Add API and service tests.
+
+### Example template
+
+```text
+validation/create-x.validation.ts
+application/service/createX.service.ts
+infrastructure/x.repository.ts
+interfaces/x.controller.ts
+interfaces/x.route.ts
+```
+
+### Controller rule of thumb
+
+Controllers should do only three things:
+
+- read validated input
+- call the application service
+- return a standardized response
+
+If a controller starts owning branching business rules or Prisma calls, move that logic down a layer.
+
+---
+
+## 15. How to Run the Project Locally
+
+### Prerequisites
+
+- Node.js `>= 20.11.0`
+- PostgreSQL running locally or remotely
+- Redis running locally or remotely
+- npm installed
+
+### Local setup
+
+1. Install dependencies.
+
+```bash
+npm install
+```
+
+2. Create a local `.env` file using the variables documented above.
+
+3. Generate Prisma client.
 
 ```bash
 npm run prisma:generate
+```
+
+4. Apply migrations.
+
+```bash
 npm run prisma:migrate:dev
+```
+
+5. Optionally seed the database.
+
+```bash
+npx prisma db seed
+```
+
+6. Make sure Redis is available.
+
+7. Start the development server.
+
+```bash
 npm run dev
 ```
 
-Useful URLs:
+8. Open:
 
 - API base: `http://localhost:4000/api/v1`
 - Swagger docs: `http://localhost:4000/docs`
 
-## 16. Best Practices
-
-### Architecture Best Practices
-
-- Keep feature logic inside its module
-- Do not let controllers talk directly to Prisma unless there is an exceptional reason
-- Avoid placing business rules in route files
-- Keep `shared` generic; move feature-specific code back into the module
-- Prefer transaction boundaries in repositories for multi-write operations
-
-### Reliability Best Practices
-
-- Validate all inbound data
-- Centralize error handling
-- Use structured logging
-- Protect sensitive endpoints with authentication and authorization middleware
-- Add rate limits for abuse-sensitive routes
-- Write API tests for all public endpoints
-
-### Maintainability Best Practices
-
-- Keep OpenAPI docs updated with every endpoint change
-- Favor descriptive file names such as `createHospital.service.ts`
-- Keep service functions focused on one use case
-- Use constants for messages and reusable domain labels
-- Avoid hidden side effects in utility functions
-
-### Security Best Practices
-
-- Never hardcode secrets outside local defaults
-- Hash passwords with `bcrypt`
-- Rotate JWT secrets in production
-- Restrict CORS to known origins outside development
-- Review logging to avoid leaking tokens or PII
-
-## 17. Deployment Notes
-
-### Current State
-
-The repository supports production builds through:
+### Production-style local run
 
 ```bash
 npm run build
 npm start
 ```
 
-Production deployment requires:
+---
 
-- Valid production `DATABASE_URL`
-- Valid production Redis instance
-- Strong JWT secrets
-- Correct CORS origin configuration
-- Reverse proxy or load balancer configuration if `TRUST_PROXY=true`
+## 16. Development Workflow
 
-### Database Deployment
+Recommended day-to-day workflow for backend developers:
 
-Use:
+1. Pull the latest changes.
+2. Install dependencies if `package-lock.json` changed.
+3. Sync `.env` values with `src/config/env.config.ts`.
+4. Run migrations if Prisma schema changed.
+5. Implement feature changes inside the owning module.
+6. Update OpenAPI docs when endpoint contracts change.
+7. Run `npm run typecheck`.
+8. Run `npm run lint`.
+9. Run targeted tests, then full tests when needed.
+10. Format before commit.
 
-```bash
-npm run prisma:migrate:deploy
-```
+### When changing database models
 
-Do not use `prisma:migrate:dev` in production.
+1. Update Prisma model files under `prisma/`.
+2. Run `npm run prisma:format`.
+3. Run `npm run prisma:generate`.
+4. Run `npm run prisma:migrate:dev`.
+5. Update repositories, services, seeds, and tests.
 
-### Redis and Workers
+### When changing API contracts
 
-If background jobs are needed in production, deploy worker processes alongside the API process. The current project auto-imports workers from the application bootstrap, but larger deployments usually separate API and worker runtimes into different services.
+1. Update Zod schema.
+2. Update controller/service types.
+3. Update OpenAPI schemas and path definitions.
+4. Update API tests.
 
-### Docker Notes
+---
 
-Docker is part of the intended platform but is not yet defined in this repo. When containerizing:
+## 17. Deployment Notes
 
-- Add a `Dockerfile` for the API service
-- Add a separate worker container if BullMQ processing is isolated
-- Inject env vars through secrets or container orchestration
-- Run Prisma migrations as part of deployment or release startup
+### Build and runtime expectations
 
-### AWS S3 Notes
+- The production process runs from `dist/`.
+- Environment variables must be provided externally.
+- PostgreSQL and Redis must be reachable at startup.
+- The server currently attempts Redis connection during boot, so Redis unavailability can block startup.
 
-When S3-backed file storage is introduced:
+### Database deployment
 
-- Put storage logic in an infrastructure adapter, not in controllers
-- Hide S3 SDK details behind a service interface
-- Store file metadata in PostgreSQL, not only in S3
-- Keep bucket names and credentials in env config
+- Use `npm run prisma:migrate:deploy` in deployed environments.
+- Avoid `prisma:migrate:dev` outside development.
+- Run `prisma generate` as part of the build pipeline if needed by the environment.
 
-## 18. Summary for New Developers
+### Logging
 
-If you are new to the project, understand these five points first:
+- Pino pretty logs are used in development.
+- File transport is used in production logger setup.
+- Sensitive fields such as passwords and tokens are redacted.
 
-1. All features should live inside `src/modules`
-2. Controllers should be thin and delegate to services
-3. Repositories own Prisma and database access
-4. Shared concerns belong in `src/shared`, but only if they are truly cross-module
-5. Every new API should include validation, documentation, and tests
+### Reverse proxy / load balancer
 
-This project is already structured in a way that can scale well for a SaaS backend if those boundaries remain disciplined.
+- Set `TRUST_PROXY=true` or `1` when running behind Nginx, a cloud load balancer, or a container ingress proxy.
+- Review rate limiting and IP handling when proxying traffic.
+
+### Docker
+
+- Docker is part of the intended deployment stack, but there is no committed `Dockerfile` or Compose file in the current repository.
+- If you containerize this service, include API, PostgreSQL, and Redis coordination and pass env vars through the container runtime.
+
+### File storage
+
+- S3 support is planned and the repository already includes `@aws-sdk/client-s3` plus a Prisma file model.
+- No active upload/storage service is mounted yet, so deployment should treat S3 as future infrastructure unless that integration is added.
+
+### Workers
+
+- Audit processing uses BullMQ and Redis.
+- In a larger deployment, run workers as a separate process instead of importing them into the web app process.
+
+---
+
+## 18. Best Practices
+
+- Keep each feature inside its module unless the code is truly shared.
+- Keep controllers thin and deterministic.
+- Validate requests with Zod before business logic executes.
+- Use transactions for multi-step business workflows that must succeed or fail together.
+- Keep Prisma queries inside repositories or infrastructure adapters.
+- Use `AppError` or typed error handlers instead of throwing raw strings.
+- Update Swagger docs whenever routes, payloads, or responses change.
+- Add tests next to the module being changed.
+- Prefer explicit naming over clever abstractions.
+- Avoid leaking infrastructure concerns into `domain` files.
+- Do not access `process.env` outside `src/config/env.config.ts`.
+- Redact secrets and tokens from logs.
+
+---
+
+## 19. Suggested Onboarding Path for New Developers
+
+Read these files in order:
+
+1. `README.md`
+2. `src/server.ts`
+3. `src/bootstrap/startServer.ts`
+4. `src/bootstrap/createApp.ts`
+5. `src/routes/index.ts`
+6. `src/modules/hospital/interfaces/hospital.routes.ts`
+7. `src/modules/hospital/interfaces/hospital.controller.ts`
+8. `src/modules/hospital/application/service/createHospita.service.ts`
+9. `src/modules/hospital/infrastructure/hospital.repository.ts`
+10. `src/config/env.config.ts`
+
+This sequence gives the fastest path to understanding how a request enters the system, moves through the module layers, and reaches the database.

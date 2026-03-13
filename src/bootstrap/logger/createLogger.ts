@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import pino from 'pino';
+import pino, { type Level, type LoggerOptions } from 'pino';
 
 import { envConfig } from '@/config/env.config';
 
@@ -8,31 +8,40 @@ import { getFileTransport, getPrettyTransport, logDir } from './transports';
 
 const isProduction = envConfig.nodeEnv === 'production';
 
-export const createLogger = (
-  fileName: string,
-  level: pino.Level = 'info'
-) => {
-  return pino(
-    {
-      level,
-      base: {
+const redactPaths = [
+  'req.headers.authorization',
+  'req.headers.cookie',
+  'req.body.password',
+  'req.body.token',
+  'req.body.refreshToken',
+  'password',
+  'token',
+  'refreshToken',
+  'accessToken',
+];
+
+export const createLogger = (fileName: string, level: Level = envConfig.logLevel) => {
+  const options: LoggerOptions = {
+    level,
+    messageKey: 'message',
+    timestamp: pino.stdTimeFunctions.isoTime,
+    formatters: {
+      level: (label) => ({ level: label }),
+      bindings: (bindings) => ({
+        pid: bindings['pid'],
+        host: bindings['hostname'],
         service: 'hosp-management-api',
         environment: envConfig.nodeEnv,
-      },
-      timestamp: pino.stdTimeFunctions.isoTime,
-      redact: {
-        paths: [
-          'req.headers.authorization',
-          'password',
-          'token',
-          'refreshToken',
-          'accessToken',
-        ],
-        remove: true,
-      },
+      }),
     },
-    isProduction
-      ? getFileTransport(path.join(logDir, fileName))
-      : getPrettyTransport()
+    redact: {
+      paths: redactPaths,
+      remove: true,
+    },
+  };
+
+  return pino(
+    options,
+    isProduction ? getFileTransport(path.join(logDir, fileName)) : getPrettyTransport(),
   );
 };

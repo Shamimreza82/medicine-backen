@@ -1,3 +1,4 @@
+import { logger } from '@/bootstrap/logger';
 import { redis } from '@/bootstrap/redis';
 
 export const RedisService = {
@@ -14,7 +15,7 @@ export const RedisService = {
         await redis.set(key, data);
       }
     } catch (error) {
-      console.error(`[RedisService] SET Error for key ${key}:`, error);
+      logger.error({ key, err: error }, 'Redis SET failed');
     }
   },
 
@@ -28,7 +29,7 @@ export const RedisService = {
 
       return JSON.parse(data) as T;
     } catch (error) {
-      console.error(`[RedisService] GET/PARSE Error for key ${key}:`, error);
+      logger.error({ key, err: error }, 'Redis GET/PARSE failed');
       return null; // Fail gracefully in production
     }
   },
@@ -37,7 +38,7 @@ export const RedisService = {
     try {
       await redis.del(key);
     } catch (error) {
-      console.error(`[RedisService] DEL Error for key ${key}:`, error);
+      logger.error({ key, err: error }, 'Redis DEL failed');
     }
   },
 

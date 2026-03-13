@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 
+import { logger } from '@/bootstrap/logger';
 import { prisma } from '@/bootstrap/prisma';
 
 interface TLogActivityInput {
@@ -27,7 +28,7 @@ export async function logActivity(data: TLogActivityInput) {
       },
     });
   } catch (error) {
-    console.error('Activity log failed:', error);
+    logger.error({err: error}, 'Activity log failed');
   }
 }
 

@@ -1,8 +1,8 @@
 model ActivityLog {
   id String @id @default(uuid()) @map("id")
 
-  hospitalId String?  @map("hospital_id")
-  hospital   Hospital? @relation(fields: [hospitalId], references: [id], onDelete: SetNull)
+     tenantId   String    @map("tenant_id")
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   userId String? @map("user_id")
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -22,9 +22,9 @@ model ActivityLog {
 
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@index([hospitalId], map: "idx_activity_hospital")
+  @@index([tenantId], map: "idx_activity_tenant")
   @@index([userId], map: "idx_activity_user")
-  @@index([hospitalId, createdAt], map: "idx_activity_tenant_time")
+  @@index([tenantId, createdAt], map: "idx_activity_tenant_time")
   @@index([createdAt], map: "idx_activity_time")
 
   @@map("activity_logs")

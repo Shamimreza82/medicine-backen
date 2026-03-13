@@ -1,8 +1,7 @@
 model WebhookEndpoint {
   id         String @id @default(uuid())
-  hospitalId String @map("hospital_id")
-
-  hospital Hospital @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  tenantId   String    @map("tenant_id")
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   name      String
   url       String
@@ -14,7 +13,7 @@ model WebhookEndpoint {
 
   deliveries WebhookDelivery[]
 
-  @@index([hospitalId])
+  @@index([tenantId])
   @@map("webhook_endpoints")
 }
 

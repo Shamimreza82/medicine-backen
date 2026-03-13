@@ -1,0 +1,18 @@
+model TenantUsage {
+  id          String    @id @default(uuid())
+  tenantId    String    @map("tenant_id")
+  metricCode  String    @map("metric_code")
+  period      String
+  usedValue   Int       @default(0) @map("used_value")
+  metadata    Json?
+
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@unique([tenantId, metricCode, period])
+  @@index([tenantId])
+  @@index([metricCode])
+  @@map("tenant_usages")
+}

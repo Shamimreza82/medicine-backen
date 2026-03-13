@@ -1,5 +1,4 @@
-import { envConfig } from "./env.config";
-
+import { envConfig } from './env.config';
 
 export const appConfig = {
   host: envConfig.host,
