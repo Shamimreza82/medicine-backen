@@ -10,6 +10,8 @@ import { TCreateTenantInput } from '../validation/tenant.validation';
 
 const createTenant = catchAsync(async (req, res) => {
   const body: TCreateTenantInput = req.body;
+
+  console.log(body)
   const result = await createTenantService(body);
 
   sendResponse(res, StatusCodes.CREATED, {

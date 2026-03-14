@@ -17,7 +17,7 @@ const createTenantService = async (payload: TCreateTenantInput) => {
 
   const existingTenantByEmail = await TenantRepository.getTenantByEmail(email)
   if (existingTenantByEmail) {
-    throw new AppError(StatusCodes.CONFLICT, TENANT_MESSAGES.EMAIL_ALREADY_EXISTS);
+    throw new AppError(StatusCodes.CONFLICT, `${TENANT_MESSAGES.EMAIL_ALREADY_EXISTS} try another email`);
   }
 
   const tenant = await TenantRepository.createTenant(payload);

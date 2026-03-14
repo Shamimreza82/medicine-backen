@@ -1,6 +1,6 @@
 
 export interface TJwtPayload {
-    id: string;
-    hospitalId: string;
+    userId: string;
+    tenantId: string;
     role: string;
 }

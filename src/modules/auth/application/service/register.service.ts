@@ -9,7 +9,7 @@ import { createAuthUser, findUserByEmail } from '../../infrastructure/auth.repos
 
  const registerService = async (payload: TRegisterInput) => {
 
-const {email , tenantId, password} = payload
+const {email, password} = payload
 
 
   const existingUser = await findUserByEmail(email);

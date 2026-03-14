@@ -9,6 +9,7 @@ import { catchAsync } from '@/shared/utils/catchAsync';
 
 import type { Logger } from 'pino';
 
+
 declare module 'express-serve-static-core' {
   interface Request {
     id?: string;
@@ -29,15 +30,14 @@ export const auth: RequestHandler = catchAsync(async (req, res, next) => {
   }
 
   const token = authHeader.split(" ")[1]
-  const decoded = verifyAccessToken(token!) as TJwtPayload
+  const decoded = verifyAccessToken(token!)
 
-  const user = await findUserById(decoded.id)
+  const user = await findUserById(decoded.userId)
 
   if (user && user?.status === "INACTIVE" || user?.status === "LOCKED" || user?.status === "SUSPENDED") {
     throw new AppError(StatusCodes.LOCKED, `Account temporarily ${user.status}, please contect admin`)
   }
-
-  req.user = decoded
+    req.user = decoded
   next()
 
-})
+})  

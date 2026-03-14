@@ -27,7 +27,7 @@ const loginService = async (payload: TLoginInput) => {
 
 
     const jwtPayload = {
-        id: isExistUser.id,
+        userId: isExistUser.id,
         tenantId: isExistUser.tenantId,
         role: isExistUser.role.slug
     }
@@ -38,7 +38,7 @@ const loginService = async (payload: TLoginInput) => {
         accessToken,
         refreshToken,
         user: {
-            id: isExistUser.id,
+            userId: isExistUser.id,
             tenantId: isExistUser.tenantId,
             name: isExistUser.name,
             email: isExistUser.email,

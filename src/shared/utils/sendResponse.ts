@@ -8,6 +8,7 @@ export interface TResponse<T> {
     page?: number;
     limit?: number;
     total?: number;
+    totalPages?: number;
   };
 }
 

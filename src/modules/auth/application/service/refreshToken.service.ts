@@ -1,25 +1,20 @@
 import { StatusCodes } from "http-status-codes";
-import { JwtPayload } from "jsonwebtoken";
+
 
 import { AppError } from "@/shared/errors/AppError";
 
 import { AUTH_MESSAGES } from "../../domain/auth.constants";
+import { TJwtPayload } from "../../domain/auth.types";
 import { findUserById } from "../../infrastructure/auth.repository";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../infrastructure/auth.token"
 
-
-interface TJwtPayload extends JwtPayload {
-  id: string
-  hospitalId: string
-  role: string
-}
 
 
 const refreshTokenService = async (token: string) => {
     const decoded = verifyRefreshToken(token) as TJwtPayload
  
 
-    const isExistUser = await findUserById(decoded.id)
+    const isExistUser = await findUserById(decoded.userId)
 
     if (!isExistUser) throw new AppError(StatusCodes.CONFLICT, AUTH_MESSAGES.USER_NOT_FOUND)
 
@@ -29,7 +24,7 @@ const refreshTokenService = async (token: string) => {
 
 
     const jwtPayload = {
-        id: isExistUser.id,
+        userId: isExistUser.id,
         tenantId: isExistUser.tenantId,
         role: isExistUser.role
     }
