@@ -282,10 +282,12 @@ CREATE TABLE "tenant_features" (
 CREATE TABLE "permissions" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "module" TEXT NOT NULL,
     "resource" TEXT NOT NULL,
     "action" TEXT NOT NULL,
     "description" TEXT,
     "is_system" BOOLEAN NOT NULL DEFAULT true,
+    "metadata" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -300,6 +302,9 @@ CREATE TABLE "roles" (
     "slug" TEXT NOT NULL,
     "description" TEXT,
     "is_system" BOOLEAN NOT NULL DEFAULT false,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "level" INTEGER NOT NULL DEFAULT 0,
+    "metadata" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -311,7 +316,9 @@ CREATE TABLE "role_permissions" (
     "id" TEXT NOT NULL,
     "role_id" TEXT NOT NULL,
     "permission_id" TEXT NOT NULL,
+    "metadata" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "role_permissions_pkey" PRIMARY KEY ("id")
 );
@@ -505,10 +512,25 @@ CREATE UNIQUE INDEX "tenant_features_tenant_id_feature_id_key" ON "tenant_featur
 CREATE UNIQUE INDEX "permissions_name_key" ON "permissions"("name");
 
 -- CreateIndex
+CREATE INDEX "permissions_module_idx" ON "permissions"("module");
+
+-- CreateIndex
 CREATE INDEX "permissions_resource_idx" ON "permissions"("resource");
 
 -- CreateIndex
+CREATE INDEX "permissions_action_idx" ON "permissions"("action");
+
+-- CreateIndex
+CREATE INDEX "roles_tenant_id_idx" ON "roles"("tenant_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "roles_tenant_id_slug_key" ON "roles"("tenant_id", "slug");
+
+-- CreateIndex
+CREATE INDEX "role_permissions_role_id_idx" ON "role_permissions"("role_id");
+
+-- CreateIndex
+CREATE INDEX "role_permissions_permission_id_idx" ON "role_permissions"("permission_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "role_permissions_role_id_permission_id_key" ON "role_permissions"("role_id", "permission_id");

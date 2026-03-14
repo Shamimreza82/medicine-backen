@@ -1,36 +1,36 @@
-import { Prisma } from '@prisma/client';
+// import { Prisma } from '@prisma/client';
 
-import { logger } from '@/bootstrap/logger';
-import { prisma } from '@/bootstrap/prisma';
+// import { logger } from '@/bootstrap/logger';
+// import { prisma } from '@/bootstrap/prisma';
 
-interface TLogActivityInput {
-  hospitalId?: string;
-  userId?: string;
-  action: string;
-  resource: string;
-  description?: string;
-  method?: string;
-  endpoint?: string;
-  ipAddress?: string;
-  userAgent?: string;
-  metadata?: Prisma.InputJsonValue;
-}
+// interface TLogActivityInput {
+//   hospitalId?: string;
+//   userId?: string;
+//   action: string;
+//   resource: string;
+//   description?: string;
+//   method?: string;
+//   endpoint?: string;
+//   ipAddress?: string;
+//   userAgent?: string;
+//   metadata?: Prisma.InputJsonValue;
+// }
 
-export async function logActivity(data: TLogActivityInput) {
-  try {
-    const { hospitalId, userId, ...rest } = data;
+// export async function logActivity(data: TLogActivityInput) {
+//   try {
+//     const { hospitalId, userId, ...rest } = data;
 
-    await prisma.activityLog.create({
-      data: {
-        ...rest,
-        hospital: hospitalId ? { connect: { id: hospitalId } } : undefined,
-        user: userId ? { connect: { id: userId } } : undefined,
-      },
-    });
-  } catch (error) {
-    logger.error({err: error}, 'Activity log failed');
-  }
-}
+//     await prisma.activityLog.create({
+//       data: {
+//         ...rest,
+//         hospital: hospitalId ? { connect: { id: hospitalId } } : undefined,
+//         user: userId ? { connect: { id: userId } } : undefined,
+//       },
+//     });
+//   } catch (error) {
+//     logger.error({err: error}, 'Activity log failed');
+//   }
+// }
 
 // Example usage:
 // await logActivity({

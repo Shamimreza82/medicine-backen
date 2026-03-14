@@ -30,7 +30,7 @@ const refreshTokenService = async (token: string) => {
 
     const jwtPayload = {
         id: isExistUser.id,
-        hospitalId: isExistUser.hospitalId,
+        tenantId: isExistUser.tenantId,
         role: isExistUser.role
     }
 

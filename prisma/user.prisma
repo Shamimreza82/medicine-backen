@@ -1,31 +1,40 @@
 model Permission {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  resource    String
-  action      String
+  id       String @id @default(uuid())
+  name     String @unique
+  module   String
+  resource String
+  action   String
+
   description String?
+  isSystem    Boolean @default(true) @map("is_system")
 
-  isSystem    Boolean  @default(true)  @map("is_system") // system permission
+  // optional metadata for future extensibility
+  metadata Json?
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   rolePermissions RolePermission[]
 
+  @@index([module])
   @@index([resource])
+  @@index([action])
   @@map("permissions")
 }
 
 model Role {
   id String @id @default(uuid())
 
-    tenantId   String    @map("tenant_id")
-  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenantId String @map("tenant_id")
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   name        String
   slug        String
   description String?
   isSystem    Boolean @default(false) @map("is_system")
+  isActive    Boolean @default(true) @map("is_active")
+  level       Int     @default(0)
+  metadata    Json?
 
   users           User[]
   rolePermissions RolePermission[]
@@ -34,21 +43,23 @@ model Role {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([tenantId, slug])
+  @@index([tenantId])
   @@map("roles")
 }
 
 model RolePermission {
-  id String @id @default(uuid())
-
-  roleId       String @map("role_id")
-  permissionId String @map("permission_id")
-
-  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now()) @map("created_at")
+  id           String     @id @default(uuid())
+  roleId       String     @map("role_id")
+  permissionId String     @map("permission_id")
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  metadata     Json?
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
 
   @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
   @@map("role_permissions")
 }
 
@@ -63,15 +74,15 @@ model User {
   id String @id @default(uuid())
 
   // Multi Tenant
-    tenantId   String    @map("tenant_id")
-  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenantId String? @map("tenant_id")
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   roleId String @map("role_id")
   role   Role   @relation(fields: [roleId], references: [id])
 
   // Identity
   name     String
-  email    String  
+  email    String
   phone    String?
   password String
 
@@ -94,12 +105,12 @@ model User {
   mfaSecret  String? @map("mfa_secret")
 
   // Login tracking
-  lastLoginAt         DateTime?     @map("last_login_at")
-  lastLoginIp         String?       @map("last_login_ip")
-  lastUserAgent       String?       @map("last_user_agent")
+  lastLoginAt   DateTime? @map("last_login_at")
+  lastLoginIp   String?   @map("last_login_ip")
+  lastUserAgent String?   @map("last_user_agent")
 
   // Session control
-  refreshTokenVersion Int           @default(0) @map("refresh_token_version")
+  refreshTokenVersion Int @default(0) @map("refresh_token_version")
 
   // Audit
   createdAt DateTime @default(now()) @map("created_at")
@@ -111,10 +122,10 @@ model User {
   deletedAt DateTime? @map("deleted_at")
 
   // Relations
-  sessions UserSession[]
-  activityLogs   ActivityLog[]
-  auditLogs AuditLog[]
-  uploadedFiles File[] 
+  sessions      UserSession[]
+  activityLogs  ActivityLog[]
+  auditLogs     AuditLog[]
+  uploadedFiles File[]
 
   @@unique([tenantId, email])
   @@index([tenantId])

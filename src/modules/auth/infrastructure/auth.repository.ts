@@ -1,8 +1,10 @@
 import { prisma } from '@/bootstrap/prisma';
 
-export const findUserByEmail = async (email: string) => {
+
+
+export const findUserByEmail = async (email: string, tenantId?: string) => {
   return prisma.user.findFirst({
-    where: { email },
+    where: { email, tenantId },
     include: {
       role: {
         select: {
@@ -13,9 +15,9 @@ export const findUserByEmail = async (email: string) => {
   });
 };
 
-export const findUserById = async (id: string) => {
+export const findUserById = async (id: string, tenantId?: string) => {
   return prisma.user.findUnique({
-    where: { id },
+    where: { id, tenantId },
     include: {
       role: {
         select: {
@@ -25,5 +27,24 @@ export const findUserById = async (id: string) => {
     }
   });
 };
+
+
+export const createAuthUser = async (data: any) => {
+  return await prisma.user.create({
+    data: {
+      ...data
+    },
+    include: {
+      role: {
+        select: {
+          slug: true
+        }
+      }
+    }
+  });
+};
+
+
+
 
 

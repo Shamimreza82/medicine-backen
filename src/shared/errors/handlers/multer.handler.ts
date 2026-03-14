@@ -1,7 +1,8 @@
-import type { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { sendError } from '@/shared/utils/sendError';
+
+import type { Response } from 'express';
 
 export const multerErrorHandler = (err: unknown, res: Response) => {
   const stack = err instanceof Error ? err.stack : undefined;

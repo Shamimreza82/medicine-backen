@@ -16,7 +16,7 @@ model Tenant {
   slug            String        @unique
   code            String?       @unique
 
-  email           String?
+  email           String        @unique
   phone           String?
   website         String?
   logoUrl         String?       @map("logo_url")

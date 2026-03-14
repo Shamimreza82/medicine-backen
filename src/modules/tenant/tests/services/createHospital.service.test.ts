@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { generateSlug } from '@/shared/utils/generateSlug';
 
-import createHospitalService from '../../application/service/createHospita.service';
+import createHospitalService from '../../application/service/createTenant.service';
 import { createHospitalRepository } from '../../infrastructure/hospital.repository';
 
 vi.mock('../../infrastructure/hospital.repository', () => ({

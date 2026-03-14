@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import globalErrorHandler from '@/middlewares/globalErrorHandler';
 import { AppError } from '@/shared/errors/AppError';
 
-import createHospitalService from '../../application/service/createHospita.service';
+import createHospitalService from '../../application/service/createTenant.service';
 import { hospitalRoutes } from '../../interfaces/hospital.routes';
 
 import type { NextFunction, Request, Response } from 'express';

@@ -19,6 +19,7 @@ import { rateLimiter } from '../middlewares/rateLimiter';
 import { apiRouter } from '../routes';
 
 import type { RequestHandler } from 'express';
+
 import '@/workers';
 
 export const createApp = () => {

@@ -28,7 +28,7 @@ const loginService = async (payload: TLoginInput) => {
 
     const jwtPayload = {
         id: isExistUser.id,
-        hospitalId: isExistUser.hospitalId,
+        tenantId: isExistUser.tenantId,
         role: isExistUser.role.slug
     }
     const accessToken = generateAccessToken(jwtPayload)
@@ -39,7 +39,7 @@ const loginService = async (payload: TLoginInput) => {
         refreshToken,
         user: {
             id: isExistUser.id,
-            hospitalId: isExistUser.hospitalId,
+            tenantId: isExistUser.tenantId,
             name: isExistUser.name,
             email: isExistUser.email,
             role: isExistUser.role.slug

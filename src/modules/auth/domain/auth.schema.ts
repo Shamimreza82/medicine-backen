@@ -10,6 +10,8 @@ const registerSchema = z.object({
     email: z.string().email('Invalid email address'),
     phone: phoneValidation,
     password: z.string().min(6, 'Password must be at least 6 characters'),
+    roleId: z.string().uuid({error: "Invalid role ID"}).optional(),
+    tenantId: z.string().uuid({error: "Invalid tenant ID"}).optional(),
   }),
 });
 

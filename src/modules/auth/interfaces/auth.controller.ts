@@ -6,12 +6,15 @@ import { sendResponse } from '@/shared/utils/sendResponse';
 
 import loginService from '../application/service/login.service';
 import refreshTokenService from '../application/service/refreshToken.service';
-import { register as registerService } from '../application/service/register.service';
+import registerService from '../application/service/register.service';
 import { AUTH_MESSAGES } from '../domain/auth.constants';
-import { TLoginInput } from '../domain/auth.schema';
+import { TLoginInput, TRegisterInput } from '../domain/auth.schema';
 
 const register = catchAsync(async (req, res) => {
-  const result = await registerService(req.body);
+
+  const data = req.body as TRegisterInput
+
+const result = await registerService(data)
 
   sendResponse(res, StatusCodes.CREATED, {
     success: true,

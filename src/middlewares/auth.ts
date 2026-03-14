@@ -1,7 +1,12 @@
-import { verifyAccessToken } from '../modules/auth/infrastructure/auth.token';
-import { AppError } from '../shared/errors/AppError';
+import { RequestHandler } from 'express';
+import { StatusCodes } from 'http-status-codes';
 
-import type { RequestHandler } from 'express';
+import { TJwtPayload } from '@/modules/auth/domain/auth.types';
+import { findUserById } from '@/modules/auth/infrastructure/auth.repository';
+import { verifyAccessToken } from '@/modules/auth/infrastructure/auth.token';
+import { AppError } from '@/shared/errors/AppError';
+import { catchAsync } from '@/shared/utils/catchAsync';
+
 import type { Logger } from 'pino';
 
 declare module 'express-serve-static-core' {
@@ -15,26 +20,24 @@ declare module 'express-serve-static-core' {
   }
 }
 
-export const auth: RequestHandler = (req, _res, next) => {
-  const authHeader = req.header('authorization');
 
-  if (!authHeader) {
-    throw new AppError(401, 'Unauthorized');
+export const auth: RequestHandler = catchAsync(async (req, res, next) => {
+  const authHeader = req.headers.authorization
+
+  if (!authHeader?.startsWith("Bearer ")) {
+    throw new AppError(401, "Unauthorized: Token missing");
   }
 
-  const token = authHeader.replace(/^Bearer\s+/iu, '').trim();
-  if (!token) {
-    throw new AppError(401, 'Unauthorized');
+  const token = authHeader.split(" ")[1]
+  const decoded = verifyAccessToken(token!) as TJwtPayload
+
+  const user = await findUserById(decoded.id)
+
+  if (user && user?.status === "INACTIVE" || user?.status === "LOCKED" || user?.status === "SUSPENDED") {
+    throw new AppError(StatusCodes.LOCKED, `Account temporarily ${user.status}, please contect admin`)
   }
 
-  try {
-    const payload = verifyAccessToken(token);
-    req.user = { id: payload.sub, role: payload.role };
-    if (req.log) {
-      req.log = req.log.child({ userId: payload.sub, role: payload.role });
-    }
-    next();
-  } catch {
-    throw new AppError(401, 'Unauthorized');
-  }
-};
+  req.user = decoded
+  next()
+
+})

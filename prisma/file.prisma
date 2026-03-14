@@ -1,8 +1,8 @@
 model File {
     id String @id @default(uuid())
 
-     tenantId   String    @map("tenant_id")
-  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+    tenantId   String    @map("tenant_id")
+    tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
     uploadedById String? @map("uploaded_by_id")
     uploadedBy   User?   @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
