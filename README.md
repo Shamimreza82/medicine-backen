@@ -1,24 +1,40 @@
-# Hospital Management Backend
+# Multi-Tenant SaaS Backend
 
-TypeScript/Express backend for a hospital management platform. The codebase uses feature modules, Prisma for PostgreSQL access, Redis for cache/queue connectivity, BullMQ workers, Zod validation, and Swagger UI for API docs.
+TypeScript/Express backend for a multi-tenant SaaS platform. The codebase uses feature modules, Prisma for PostgreSQL access, Redis for cache and queue connectivity, BullMQ workers, Zod validation, and Swagger UI for API docs.
+
+## Documentation
+
+Primary project documentation is now under `/docs`:
+
+- `docs/README.md` (index)
+- `docs/setup.md`
+- `docs/api.md`
+- `docs/architecture.md`
 
 ## Current Scope
 
 Implemented modules in this repository:
 
-- `health`
 - `auth`
-- `hospital`
+- `role`
+- `tenant`
 
 Currently exposed API routes:
 
 - `GET /` - basic root status response
-- `GET /api/v1/health`
 - `POST /api/v1/auth/register`
-- `POST /api/v1/hospitals`
+- `POST /api/v1/auth/login`
+- `POST /api/v1/auth/refresh-token`
+- `GET /api/v1/roles`
+- `POST /api/v1/roles`
+- `POST /api/v1/roles/:roleId/permissions`
+- `POST /api/v1/tenants`
 - `GET /docs` - Swagger UI
 
-Some auth service files for login, logout, and refresh-token already exist, but those routes are not mounted yet in the current router.
+`/api/v1/roles` and `/api/v1/tenants` are mounted after the global `auth` middleware, so they require a bearer access token. Some route-level permission checks are also enforced:
+
+- `POST /api/v1/roles` requires `ROLE:CREATE`
+- `POST /api/v1/tenants` requires `TENANT:CREATE`
 
 ## Stack
 
@@ -57,7 +73,9 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hospital_management?s
 RATE_LIMIT_WINDOW_MS=60000
 RATE_LIMIT_MAX_REQUESTS=120
 JWT_ACCESS_SECRET=dev-access-secret-change-me
+JWT_REFRESH_SECRET=dev-refresh-secret-change-me
 JWT_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
 REDIS_URL=redis://127.0.0.1:6379
 REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
@@ -130,4 +148,4 @@ prisma/
   *.prisma
 ```
 
-See `PROJECT_DOCUMENTATION.md` for the detailed architecture and folder breakdown, and `DOCS.md` for OpenAPI maintenance notes.
+Legacy references are still available in `PROJECT_DOCUMENTATION.md` and `DOCS.md`.

@@ -1,10 +1,10 @@
-import { TJwtPayload } from "@/modules/auth/domain/auth.types"
+import { TJwtPayload } from '@/modules/auth/domain/auth.types';
 
 declare global {
   namespace Express {
     interface Request {
-      user: TJwtPayload
-      tenantId?: string
+      user: TJwtPayload;
+      tenantId?: string;
     }
   }
 }

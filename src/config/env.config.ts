@@ -25,8 +25,6 @@ const envSchema = z.object({
   JWT_ACCESS_EXPIRES_IN: z.string().min(1).default('15m'),
   JWT_REFRESH_EXPIRES_IN: z.string().min(1).default('365d'),
 
-
-
   REDIS_URL: z.string().url().default('redis://127.0.0.1:6379'),
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
   HTTP_LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
@@ -61,7 +59,7 @@ export const envConfig = {
   jwtExpiresIn: parsed.data.JWT_ACCESS_EXPIRES_IN,
   jwtRefreshSecret: parsed.data.JWT_REFRESH_SECRET,
   jwtRefreshExpiresIn: parsed.data.JWT_REFRESH_EXPIRES_IN,
-  
+
   redisUrl: parsed.data.REDIS_URL,
   logLevel: parsed.data.LOG_LEVEL as LogLevel,
   httpLogLevel: parsed.data.HTTP_LOG_LEVEL as LogLevel,

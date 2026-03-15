@@ -1,5 +1,5 @@
-import { prisma } from "@/bootstrap/prisma";
-import { tenantTypes } from "@/shared/lib/data/tenantTypes";
+import { prisma } from '@/bootstrap/prisma';
+import { tenantTypes } from '@/shared/lib/data/tenantTypes';
 
 export async function seedTenantTypes() {
   for (const type of tenantTypes) {
@@ -10,5 +10,5 @@ export async function seedTenantTypes() {
     });
   }
 
-  console.log("✅ Tenant Types seeded");
+  console.log('✅ Tenant Types seeded');
 }

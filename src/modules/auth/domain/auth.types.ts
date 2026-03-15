@@ -1,6 +1,5 @@
-
 export interface TJwtPayload {
-    userId: string;
-    tenantId: string;
-    role: string;
+  userId: string;
+  tenantId: string;
+  role: string;
 }

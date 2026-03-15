@@ -1,29 +1,29 @@
 export class QueryBuilder {
-  private query: any
-  private prismaQuery: any = {}
+  private query: any;
+  private prismaQuery: any = {};
 
   constructor(query: any) {
-    this.query = query
+    this.query = query;
   }
 
   paginate() {
-    const page = Number(this.query.page) || 1
-    const limit = Number(this.query.limit) || 10
+    const page = Number(this.query.page) || 1;
+    const limit = Number(this.query.limit) || 10;
 
-    this.prismaQuery.skip = (page - 1) * limit
-    this.prismaQuery.take = limit
+    this.prismaQuery.skip = (page - 1) * limit;
+    this.prismaQuery.take = limit;
 
-    return this
+    return this;
   }
 
   sort() {
     if (this.query.sortBy) {
       this.prismaQuery.orderBy = {
-        [this.query.sortBy]: this.query.sortOrder || "desc"
-      }
+        [this.query.sortBy]: this.query.sortOrder || 'desc',
+      };
     }
 
-    return this
+    return this;
   }
 
   search(fields: string[]) {
@@ -32,16 +32,16 @@ export class QueryBuilder {
         OR: fields.map((field) => ({
           [field]: {
             contains: this.query.search,
-            mode: "insensitive"
-          }
-        }))
-      }
+            mode: 'insensitive',
+          },
+        })),
+      };
     }
 
-    return this
+    return this;
   }
 
   build() {
-    return this.prismaQuery
+    return this.prismaQuery;
   }
 }

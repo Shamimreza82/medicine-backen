@@ -1,12 +1,12 @@
-import { prisma } from '@/bootstrap/prisma'
-import type { Tenant } from '@prisma/client'
+import { prisma } from '@/bootstrap/prisma';
+import type { Tenant } from '@prisma/client';
 
 export async function seedTenant(): Promise<Tenant> {
-  const features = await prisma.feature.findMany()
+  const features = await prisma.feature.findMany();
 
   const tenantType = await prisma.tenantType.findFirst({
     where: { code: 'HOSPITAL' },
-  })
+  });
 
   const tenant = await prisma.tenant.upsert({
     where: { slug: 'demo-hospital' },
@@ -47,7 +47,7 @@ export async function seedTenant(): Promise<Tenant> {
         })),
       },
     },
-  })
+  });
 
-  return tenant
+  return tenant;
 }

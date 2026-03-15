@@ -1,24 +1,21 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from '@prisma/client';
 
-import { prisma } from "@/bootstrap/prisma";
+import { prisma } from '@/bootstrap/prisma';
 import { generateSlug } from '@/shared/utils/generateSlug';
-import { paginateResponse } from "@/shared/utils/paginateResponse";
-import { TBaseQueryInput } from "@/shared/utils/validation/baseQuery.validation";
+import { paginateResponse } from '@/shared/utils/paginateResponse';
+import { TBaseQueryInput } from '@/shared/utils/validation/baseQuery.validation';
 
-import { TCreateRoleInput } from "../validation/role.validation";
-
-
+import { TCreateRoleInput } from '../validation/role.validation';
 
 const getRoles = async (tenantId: string, query: TBaseQueryInput) => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
 
-  const page = Number(query.page) || 1
-  const limit = Number(query.limit) || 10
-
-  const skip = (page - 1) * limit
+  const skip = (page - 1) * limit;
 
   const where: any = {
-    tenantId
-  }
+    tenantId,
+  };
 
   // search
   if (query.search) {
@@ -26,26 +23,26 @@ const getRoles = async (tenantId: string, query: TBaseQueryInput) => {
       {
         name: {
           contains: query.search,
-          mode: "insensitive"
-        }
+          mode: 'insensitive',
+        },
       },
       {
         slug: {
           contains: query.search,
-          mode: "insensitive"
-        }
-      }
-    ]
+          mode: 'insensitive',
+        },
+      },
+    ];
   }
 
   // active filter
   if (query.isActive !== undefined) {
-    where.isActive = query.isActive
+    where.isActive = query.isActive;
   }
 
   const orderBy: any = {
-    [query.sortBy ?? "createdAt"]: query.sortOrder ?? "desc"
-  }
+    [query.sortBy ?? 'createdAt']: query.sortOrder ?? 'desc',
+  };
 
   const [roles, total] = await Promise.all([
     prisma.role.findMany({
@@ -54,49 +51,39 @@ const getRoles = async (tenantId: string, query: TBaseQueryInput) => {
       take: limit,
       orderBy,
       include: {
-        rolePermissions: true
-      }
+        rolePermissions: true,
+      },
     }),
 
-    prisma.role.count({ where })
-  ])
+    prisma.role.count({ where }),
+  ]);
 
-  return paginateResponse(roles, total, page, limit)
-}
-
-
-
-
-
-
+  return paginateResponse(roles, total, page, limit);
+};
 
 const createRole = async (tenantId: string, payload: TCreateRoleInput) => {
   return prisma.role.create({
     data: {
       tenantId,
       ...payload,
-      metadata: payload.metadata as Prisma.InputJsonValue
-    }
-  })
-}
-
+      metadata: payload.metadata as Prisma.InputJsonValue,
+    },
+  });
+};
 
 const getTenantByTenantIdWithSlug = async (tenantId: string, slug: string) => {
   return await prisma.role.findUnique({
     where: {
       tenantId_slug: {
         tenantId,
-        slug
-      }
-    }
-  })
-}
-
-
-
+        slug,
+      },
+    },
+  });
+};
 
 export const RoleRepository = {
   getRoles,
-  createRole, 
-  getTenantByTenantIdWithSlug
+  createRole,
+  getTenantByTenantIdWithSlug,
 };

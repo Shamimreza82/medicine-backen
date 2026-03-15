@@ -1,9 +1,11 @@
 # Pino Logger Guide for `hosp-management-backend`
 
 ## 1. Overview
+
 Logging is a core reliability layer in backend systems. In production, logs are the fastest source of truth for incident response, debugging, security investigations, and performance analysis.
 
 For your Node.js + Express + TypeScript backend, good logging should provide:
+
 - Fast root-cause analysis during failures
 - Full request lifecycle visibility
 - Security/audit traceability for sensitive actions
@@ -14,20 +16,25 @@ For your Node.js + Express + TypeScript backend, good logging should provide:
 ## 2. Logging Philosophy
 
 ### Structured Logging
+
 Use JSON logs (key-value fields) instead of plain text. This enables searching, filtering, aggregations, and alerts in ELK/Loki/Grafana.
 
 Bad:
+
 ```ts
-console.log('User login failed')
+console.log('User login failed');
 ```
 
 Good:
+
 ```ts
-logger.warn({ userId, ip, reason: 'invalid_password' }, 'Login failed')
+logger.warn({ userId, ip, reason: 'invalid_password' }, 'Login failed');
 ```
 
 ### Log Levels
+
 Use level semantics consistently:
+
 - `trace`: very detailed execution flow
 - `debug`: developer diagnostics
 - `info`: business/system milestones
@@ -36,13 +43,17 @@ Use level semantics consistently:
 - `fatal`: process-level unrecoverable crash
 
 ### Observability
+
 Logs are one pillar of observability (logs + metrics + traces). Logs should include context that links to metrics/traces, especially `requestId`, `userId`, `entityId`, `durationMs`.
 
 ### Correlation IDs
+
 Every request should have a `requestId` (or trace ID). All logs generated during that request must carry this ID.
 
 ### Request Tracing
+
 For each request, log:
+
 - inbound request metadata
 - completion status + latency
 - errors (with stack and context)
@@ -52,7 +63,9 @@ For each request, log:
 ## 3. Current Logger Setup
 
 ### What is good
+
 Your current setup in `src/bootstrap/logger` has strong fundamentals:
+
 - Central logger factory: `createLogger.ts`
 - Environment-aware transport strategy (`pino-pretty` in dev, file in prod)
 - Separate logical loggers exported (`logger`, `errorLogger`, `auditLogger`)
@@ -60,30 +73,39 @@ Your current setup in `src/bootstrap/logger` has strong fundamentals:
 - `pino-http` middleware is wired early in `createApp.ts`
 
 ### What should be improved
+
 Based on the current files, these are the key gaps:
 
 1. Missing request correlation strategy
+
 - `pino-http` is used, but there is no explicit `genReqId` strategy and no `x-request-id` response header contract.
 
 2. Error logging loses stack-rich structure
+
 - In `globalErrorHandler.ts`, logger uses `err.message` string, not `{ err }` object serializer. This weakens debugging.
 
 3. `errorLogger`/`auditLogger` are exported but mostly unused
+
 - Most modules still log with `logger`, so streams are not functionally separated.
 
 4. Production file strategy has no rotation lifecycle
+
 - Writing to `logs/*.log` is fine, but there is no retention/rotation policy (required in production).
 
 5. Request serializer may leak too much query/params detail
+
 - Logging full query/params can leak PII depending on endpoint usage.
 
 6. No environment-driven log level control
+
 - Levels are mostly hardcoded; production should use env-driven levels (e.g., `LOG_LEVEL`, `HTTP_LOG_LEVEL`).
 
 7. No reusable context helper for app/service/repository layers
+
 - Missing child logger/request context utility results in inconsistent fields across modules.
 
 8. Duplicate logger location risk
+
 - Both `src/bootstrap/logger/httpLogger.ts` and `src/middlewares/httpLogger.ts` exist. Keep only one canonical source.
 
 ---
@@ -113,6 +135,7 @@ src/
 ```
 
 Why this scales:
+
 - `bootstrap/logger/*`: infrastructure-level logger creation only
 - `middlewares/*`: request-scoped lifecycle handling
 - `shared/logging/*`: reusable helpers for domain layers
@@ -125,10 +148,12 @@ This separation prevents logger config drift and keeps domain services independe
 ## 5. Logger Configuration
 
 ### Dev vs Production
+
 - Development: pretty logs for readability
 - Production: JSON logs only, one-line structured output, shipped to central platform
 
 ### Improved `createLogger.ts` example
+
 ```ts
 // src/bootstrap/logger/createLogger.ts
 import path from 'node:path';
@@ -170,20 +195,20 @@ export const createLogger = (
     redact: { paths: defaultRedactions, remove: true },
   };
 
-  const stream = isProd
-    ? getFileTransport(path.join(logDir, fileName))
-    : getPrettyTransport();
+  const stream = isProd ? getFileTransport(path.join(logDir, fileName)) : getPrettyTransport();
 
   return pino(options, stream);
 };
 ```
 
 Explanation:
+
 - Standardizes log schema (`message`, `level`, `service`, `environment`)
 - Makes log level configurable via environment
 - Keeps redaction centralized and explicit
 
 ### Improved `transports.ts` example
+
 ```ts
 // src/bootstrap/logger/transports.ts
 import path from 'node:path';
@@ -216,39 +241,51 @@ export const getPrettyTransport = () =>
 Use levels with discipline:
 
 ### `trace`
+
 ```ts
-logger.trace({ payloadSize, parserStep: 'normalize' }, 'Parsing inbound payload')
+logger.trace({ payloadSize, parserStep: 'normalize' }, 'Parsing inbound payload');
 ```
+
 Use only in deep debugging, usually disabled in production.
 
 ### `debug`
+
 ```ts
-logger.debug({ userId, cacheKey }, 'Cache miss, querying database')
+logger.debug({ userId, cacheKey }, 'Cache miss, querying database');
 ```
+
 For developer diagnostics.
 
 ### `info`
+
 ```ts
-logger.info({ userId }, 'User created')
+logger.info({ userId }, 'User created');
 ```
+
 For successful business milestones.
 
 ### `warn`
+
 ```ts
-logger.warn({ ip, email }, 'Login attempt failed')
+logger.warn({ ip, email }, 'Login attempt failed');
 ```
+
 For suspicious/recoverable issues.
 
 ### `error`
+
 ```ts
-logger.error({ err, userId }, 'Database query failed')
+logger.error({ err, userId }, 'Database query failed');
 ```
+
 For failed operations where request/job can continue to global handling.
 
 ### `fatal`
+
 ```ts
-logger.fatal({ err }, 'Uncaught exception; shutting down process')
+logger.fatal({ err }, 'Uncaught exception; shutting down process');
 ```
+
 For unrecoverable process-level failures before exit.
 
 ---
@@ -269,9 +306,7 @@ export const httpLogger = pinoHttp({
   genReqId: (req, res) => {
     const incoming = req.headers['x-request-id'];
     const requestId =
-      typeof incoming === 'string' && incoming.length > 0
-        ? incoming
-        : crypto.randomUUID();
+      typeof incoming === 'string' && incoming.length > 0 ? incoming : crypto.randomUUID();
 
     res.setHeader('x-request-id', requestId);
     return requestId;
@@ -323,6 +358,7 @@ logger.error(
 ```
 
 Why:
+
 - preserves stack trace and error metadata
 - links failure to request/user context
 - enables alert grouping by error type/path
@@ -334,12 +370,14 @@ Why:
 Audit logs are security/compliance records, not debug logs.
 
 Log these events at minimum:
+
 - user login/logout
 - role or permission changes
 - create/update/delete on sensitive entities
 - security setting changes
 
 Recommended helper:
+
 ```ts
 // src/shared/logging/audit.ts
 import { auditLogger } from '@/bootstrap/logger';
@@ -377,6 +415,7 @@ logs/
 ```
 
 Strategy:
+
 - Keep file separation by responsibility
 - Rotate daily or by size (e.g., 100MB)
 - Retention example:
@@ -386,6 +425,7 @@ Strategy:
   - `audit.log`: 90+ days (policy/compliance dependent)
 
 Rotation can be done by:
+
 - container platform log drivers
 - Linux `logrotate`
 - centralized logging pipeline (preferred)
@@ -409,18 +449,22 @@ Rotation can be done by:
 For super admin visibility:
 
 1. Internal Log Dashboard
+
 - Query by `requestId`, `userId`, `action`, `statusCode`, time range
 - Add role-based access and immutable audit views
 
 2. ELK Stack
+
 - Ship logs with Filebeat/Vector/Fluent Bit
 - Use Kibana saved searches and alerts
 
 3. Grafana + Loki
+
 - Lower operational complexity than ELK for many teams
 - Good for label-based search and alerting
 
 Minimum alert set:
+
 - spike in `error` logs
 - repeated auth failures from same IP
 - frequent `fatal`/process restart events
@@ -430,6 +474,7 @@ Minimum alert set:
 ## 13. Example Logging in Each Layer
 
 ### Controller
+
 ```ts
 export const createHospital = catchAsync(async (req, res) => {
   req.log.info({ route: 'POST /hospitals', userId: req.user?.id }, 'Request received');
@@ -440,9 +485,11 @@ export const createHospital = catchAsync(async (req, res) => {
   sendResponse(res, 201, { success: true, data: result, message: 'Created' });
 });
 ```
+
 Explanation: controller logs request boundary and output identifiers.
 
 ### Service
+
 ```ts
 export const createHospitalService = async (payload: TCreateHospitalInput, log: pino.Logger) => {
   log.debug({ email: payload.email }, 'Validating hospital create payload');
@@ -451,9 +498,11 @@ export const createHospitalService = async (payload: TCreateHospitalInput, log: 
   log.info({ slug: payload.slug }, 'Hospital creation business flow completed');
 };
 ```
+
 Explanation: service logs business decisions and milestones.
 
 ### Repository
+
 ```ts
 export const getHospitalBySlug = async (slug: string, log: pino.Logger) => {
   const start = Date.now();
@@ -463,9 +512,11 @@ export const getHospitalBySlug = async (slug: string, log: pino.Logger) => {
   return result;
 };
 ```
+
 Explanation: repository logs DB interaction latency and result shape.
 
 ### Middleware
+
 ```ts
 export const requestContext = (req: Request, _res: Response, next: NextFunction) => {
   req.log = req.log.child({
@@ -475,6 +526,7 @@ export const requestContext = (req: Request, _res: Response, next: NextFunction)
   next();
 };
 ```
+
 Explanation: middleware enriches logger once so downstream layers inherit context.
 
 ---
@@ -482,6 +534,7 @@ Explanation: middleware enriches logger once so downstream layers inherit contex
 ## 14. Logging Anti-Patterns
 
 Avoid these mistakes:
+
 - Using `console.log` in application code
 - Logging secrets (`password`, token, cookie, authorization header)
 - Logging full request/response bodies everywhere
@@ -524,26 +577,32 @@ Avoid these mistakes:
 Your logging flow now works like this:
 
 1. `src/bootstrap/logger/createLogger.ts`
+
 - Creates base Pino loggers with:
   - standard fields (`service`, `environment`, `pid`, `host`)
   - redaction rules
   - env-based level (`LOG_LEVEL`)
 
 2. `src/bootstrap/logger/requestLogger.ts`
+
 - Creates request logger with `HTTP_LOG_LEVEL`.
 
 3. `src/bootstrap/logger/httpLogger.ts`
+
 - Uses `pino-http` middleware.
 - Generates/propagates `x-request-id`.
 - Adds request fields (`method`, `url`, `statusCode`, `ip`, `userAgent`).
 
 4. `src/middlewares/requestContext.ts`
+
 - Enriches `req.log` for per-request context.
 
 5. `src/middlewares/auth.ts`
+
 - After auth success, adds `userId` and `role` to request logger context.
 
 6. `src/middlewares/globalErrorHandler.ts`
+
 - Logs structured errors with:
   - `err`
   - `requestId`
@@ -551,11 +610,13 @@ Your logging flow now works like this:
   - `method`, `url`, `ip`
 
 7. Dedicated streams
+
 - `logger` -> general app events
 - `errorLogger` -> system/process/runtime errors
 - `auditLogger` -> compliance/security actions
 
 8. Audit pipeline
+
 - `src/shared/services/audit.service.ts` enqueues audit job and logs audit event metadata.
 - `src/workers/audit.worker.ts` persists audit data and logs worker outcomes.
 
@@ -567,27 +628,33 @@ Use these rules consistently:
 
 1. Never use `console.log` in runtime code.
 2. Always use structured logs with object fields:
+
 ```ts
-logger.info({ userId, requestId, action: 'USER_CREATE' }, 'User created')
+logger.info({ userId, requestId, action: 'USER_CREATE' }, 'User created');
 ```
+
 3. Always include contextual IDs when available:
+
 - `requestId`
 - `userId`
 - `hospitalId`
 - `entityId`
 
 4. Log errors with `{ err }`, not only message text:
+
 ```ts
-logger.error({ err, requestId, userId }, 'Database write failed')
+logger.error({ err, requestId, userId }, 'Database write failed');
 ```
 
 5. Use correct level:
+
 - success milestones -> `info`
 - expected anomalies -> `warn`
 - failed operation -> `error`
 - crash path -> `fatal`
 
 6. Never log sensitive data:
+
 - passwords
 - tokens
 - cookies
@@ -595,21 +662,25 @@ logger.error({ err, requestId, userId }, 'Database write failed')
 - full PII payloads
 
 7. Keep log messages stable and searchable:
+
 - prefer short constant-style messages
 - put details in fields, not long text
 
 8. In controllers/services/repositories:
+
 - controller: request boundary logs
 - service: business decision logs
 - repository: DB query + latency logs
 
 9. For audit actions, use audit path only:
+
 - login
 - role/permission changes
 - delete operations
 - sensitive record updates
 
 10. Before merge, validate:
+
 - No secret fields logged
 - Every error path logs structured `err`
 - Request ID present in HTTP/error logs

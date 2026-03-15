@@ -1,3 +1,1 @@
-export const roleSchema = {
-
-};
+export const roleSchema = {};

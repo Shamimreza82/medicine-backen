@@ -1,4 +1,3 @@
-
 import { logger } from '@/bootstrap/logger';
 
 import type { Request } from 'express';

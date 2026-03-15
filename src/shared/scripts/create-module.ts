@@ -82,5 +82,5 @@ export const ${moduleName}Routes = router;
 
   logger.info(`✅ Module '${moduleName}' created successfully`);
 } catch (error) {
-  logger.error({err: error},'❌ Error creating module:',);
+  logger.error({ err: error }, '❌ Error creating module:');
 }

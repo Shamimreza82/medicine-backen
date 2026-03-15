@@ -1,6 +1,5 @@
-import { prisma } from "@/bootstrap/prisma";
-import { features } from "@/shared/lib/data/features";
-
+import { prisma } from '@/bootstrap/prisma';
+import { features } from '@/shared/lib/data/features';
 
 export async function seedFeatures() {
   for (const feature of features) {

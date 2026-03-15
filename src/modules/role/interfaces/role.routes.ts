@@ -1,27 +1,28 @@
-import { Router } from "express";
+import { Router } from 'express';
 
-import { validateRequest } from "@/middlewares/validateRequest";
-import { baseQuerySchema } from "@/shared/utils/validation/baseQuery.validation";
+import { authPermission } from '@/middlewares/authPermission';
+import { validateRequest } from '@/middlewares/validateRequest';
+import { baseQuerySchema } from '@/shared/utils/validation/baseQuery.validation';
 
-import { RoleController } from "./role.controller";
-import { PermissionValidationSchema } from "../validation/permission.validation";
-import { RoleValidationSchemas } from "../validation/role.validation";
-
+import { RoleController } from './role.controller';
+import { PermissionValidationSchema } from '../validation/permission.validation';
+import { RoleValidationSchemas } from '../validation/role.validation';
 
 const router = Router();
 
-router.get("/", validateRequest(baseQuerySchema), RoleController.getRoles)
+router.get('/', validateRequest(baseQuerySchema), RoleController.getRoles);
 
 router.post(
-  "/",
+  '/',
+  authPermission('ROLE:CREATE'),
   validateRequest(RoleValidationSchemas.createRoleSchema),
-  RoleController.createRole
+  RoleController.createRole,
 );
 
 router.post(
-  "/:roleId/permissions",
+  '/:roleId/permissions',
   validateRequest(PermissionValidationSchema.assignPermissionsSchema),
-  RoleController.createPermission
+  RoleController.createPermission,
 );
 
 // router.patch(
@@ -43,3 +44,13 @@ router.post(
 // );
 
 export const roleRoutes = router;
+
+
+// GET    /api/v1/roles
+// POST   /api/v1/roles
+// GET    /api/v1/roles/:id
+// PATCH  /api/v1/roles/:id
+// DELETE /api/v1/roles/:id
+
+// GET    /api/v1/roles/:id/permissions
+// PATCH  /api/v1/roles/:id/permissions

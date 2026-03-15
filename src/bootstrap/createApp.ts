@@ -5,7 +5,6 @@ import express from 'express';
 import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
 
-
 import { corsConfig } from '@/config/cors.config';
 import globalErrorHandler from '@/middlewares/globalErrorHandler';
 import { requestContext } from '@/middlewares/requestContext';

@@ -10,7 +10,7 @@ export interface TErrorResponse {
 }
 
 export const sendError = (res: Response, statusCode: number, payload: TErrorResponse): void => {
-  const isDev = envConfig.nodeEnv === "development";
+  const isDev = envConfig.nodeEnv === 'development';
 
   res.status(statusCode).json({
     success: false,

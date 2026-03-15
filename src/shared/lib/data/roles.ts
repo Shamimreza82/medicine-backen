@@ -25,6 +25,6 @@ export const roles = [
 
   { name: 'Patient', slug: 'PATIENT', level: 10, isSystem: true },
   { name: 'Patient Guardian', slug: 'PATIENT_GUARDIAN', level: 5, isSystem: true },
-] as const
+] as const;
 
 export type TRoles = (typeof roles)[number]['slug'];

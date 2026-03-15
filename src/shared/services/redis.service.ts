@@ -1,7 +1,7 @@
 import { logger } from '@/bootstrap/logger';
 import { redis } from '@/bootstrap/redis';
 
-export const RedisService = {
+export const redisService = {
   /**
    * Set a value with optional TTL (Time To Live)
    */
