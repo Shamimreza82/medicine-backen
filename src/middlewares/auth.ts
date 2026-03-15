@@ -1,25 +1,13 @@
 import { RequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
+
 import { TJwtPayload } from '@/modules/auth/domain/auth.types';
 import { findUserById } from '@/modules/auth/infrastructure/auth.repository';
 import { verifyAccessToken } from '@/modules/auth/infrastructure/auth.token';
 import { AppError } from '@/shared/errors/AppError';
 import { catchAsync } from '@/shared/utils/catchAsync';
 
-import type { Logger } from 'pino';
-
-
-declare module 'express-serve-static-core' {
-  interface Request {
-    id?: string;
-    log?: Logger;
-    user?: {
-      id: string;
-      role: string;
-    };
-  }
-}
 
 
 export const auth: RequestHandler = catchAsync(async (req, res, next) => {
@@ -30,7 +18,7 @@ export const auth: RequestHandler = catchAsync(async (req, res, next) => {
   }
 
   const token = authHeader.split(" ")[1]
-  const decoded = verifyAccessToken(token!)
+  const decoded = verifyAccessToken(token!) as TJwtPayload
 
   const user = await findUserById(decoded.userId)
 

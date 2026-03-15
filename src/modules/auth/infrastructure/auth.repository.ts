@@ -15,18 +15,21 @@ export const findUserByEmail = async (email: string, tenantId?: string) => {
   });
 };
 
-export const findUserById = async (id: string, tenantId?: string) => {
-  return prisma.user.findUnique({
-    where: { id, tenantId },
+export const findUserById = async (userId: string, tenantId?: string) => {
+  return prisma.user.findFirst({
+    where: {
+      id: userId,
+      tenantId
+    },
     include: {
       role: {
-        select: {
-          slug: true
+        include: {
+          rolePermissions: true
         }
       }
     }
-  });
-};
+  })
+}
 
 
 export const createAuthUser = async (data: any) => {

@@ -22,7 +22,7 @@ const globalErrorHandler = (err: unknown, req: Request, res: Response, _next: Ne
     {
       err,
       requestId: getRequestId(req),
-      userId: req.user?.id,
+      userId: req.user?.userId,
       method: req.method,
       url: req.originalUrl,
       ip: req.ip,

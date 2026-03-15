@@ -1,15 +1,20 @@
+import { Prisma } from "@prisma/client";
+
 import { prisma } from "@/bootstrap/prisma";
+import { generateSlug } from '@/shared/utils/generateSlug';
 import { paginateResponse } from "@/shared/utils/paginateResponse";
 import { TBaseQueryInput } from "@/shared/utils/validation/baseQuery.validation";
+
+import { TCreateRoleInput } from "../validation/role.validation";
 
 
 
 const getRoles = async (tenantId: string, query: TBaseQueryInput) => {
 
-const page = Number(query.page) || 1
-const limit = Number(query.limit) || 10
+  const page = Number(query.page) || 1
+  const limit = Number(query.limit) || 10
 
-const skip = (page - 1) * limit
+  const skip = (page - 1) * limit
 
   const where: any = {
     tenantId
@@ -62,6 +67,36 @@ const skip = (page - 1) * limit
 
 
 
-export const roleRepository = {
-    getRoles
+
+
+
+const createRole = async (tenantId: string, payload: TCreateRoleInput) => {
+  return prisma.role.create({
+    data: {
+      tenantId,
+      ...payload,
+      metadata: payload.metadata as Prisma.InputJsonValue
+    }
+  })
+}
+
+
+const getTenantByTenantIdWithSlug = async (tenantId: string, slug: string) => {
+  return await prisma.role.findUnique({
+    where: {
+      tenantId_slug: {
+        tenantId,
+        slug
+      }
+    }
+  })
+}
+
+
+
+
+export const RoleRepository = {
+  getRoles,
+  createRole, 
+  getTenantByTenantIdWithSlug
 };
