@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 
 import { AppError } from '@/shared/errors/AppError';
+import { generateId } from '@/shared/utils/generateId';
 import { hashPassword } from '@/shared/utils/passwordHased';
 
 import { AUTH_MESSAGES } from '../../domain/auth.constants';
@@ -17,6 +18,7 @@ const registerService = async (payload: TRegisterInput) => {
   }
 
   const data: TRegisterInput = {
+    publicId: generateId("usr"),
     ...payload,
     password: await hashPassword(password),
   };

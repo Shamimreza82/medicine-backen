@@ -6,6 +6,7 @@ export const ROLE_MESSAGES = {
   UPDATED: 'Role updated successfully',
   DELETED: 'Role deleted successfully',
 
+
   // Error
   NOT_FOUND: 'Role not found',
   ALREADY_EXISTS: 'Role already exists',
@@ -16,4 +17,10 @@ export const ROLE_MESSAGES = {
   // Validation
   INVALID_ROLE_ID: 'Invalid role id',
   TENANT_REQUIRED: 'Tenant id is required',
+};
+
+
+export const PERMISSION_MESSAGES = {
+  // Success
+  PERMISSION_ASSIGN: "Assign permission successfully",
 };

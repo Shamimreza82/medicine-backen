@@ -7,7 +7,7 @@ import { TQueryOptions } from '@/types/pagination.types';
 import createPermissionsToRole from '../application/service/createPermission.service';
 import createRoleService from '../application/service/createRole.service';
 import getAllRoleService from '../application/service/getAllRoles.service';
-import { ROLE_MESSAGES } from '../domain/role.constants';
+import { PERMISSION_MESSAGES, ROLE_MESSAGES } from '../domain/role.constants';
 import { TAssignPermissionsInput } from '../validation/permission.validation';
 import { TCreateRoleInput } from '../validation/role.validation';
 
@@ -39,12 +39,11 @@ const createPermission = catchAsync(async (req, res) => {
   const payload = req.body as TAssignPermissionsInput;
   const { roleId } = req.params;
 
-  const result = await createPermissionsToRole(payload.permissions, roleId as string);
+   await createPermissionsToRole(payload.permissions, roleId as string);
 
   sendResponse(res, StatusCodes.CREATED, {
     success: true,
-    message: ROLE_MESSAGES.CREATED,
-    data: result,
+    message: PERMISSION_MESSAGES.PERMISSION_ASSIGN,
   });
 });
 

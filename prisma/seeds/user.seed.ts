@@ -2,6 +2,7 @@ import { prisma } from '@/bootstrap/prisma';
 import bcrypt from 'bcrypt';
 import { AppError } from '@/shared/errors/AppError';
 import { StatusCodes } from 'http-status-codes';
+import { generateId } from '@/shared/utils/generateId';
 
 export async function seedSuperAdmin(tenantId: string) {
   const role = await prisma.role.findFirst({
@@ -31,6 +32,7 @@ export async function seedSuperAdmin(tenantId: string) {
       phoneVerified: true,
     },
     create: {
+      publicId: generateId("usr"),
       name: 'System Admin',
       email: 'admin@system.com',
       password,

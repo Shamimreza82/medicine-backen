@@ -2,16 +2,18 @@ import { Router } from 'express';
 
 import { auth } from '@/middlewares/auth';
 import { authRoutes } from '@/modules/auth/interfaces/auth.route';
+import { permissionRoutes } from '@/modules/permission/interfaces/permission.routes';
 import { roleRoutes } from '@/modules/role/interfaces/role.routes';
 import { tenantRoutes } from '@/modules/tenant/interfaces/tenant.routes';
 
 export const apiRouter = Router();
 
 apiRouter.use('/auth', authRoutes);
+
 apiRouter.use(auth);
 apiRouter.use('/roles', roleRoutes);
 apiRouter.use('/tenants', tenantRoutes);
-
+apiRouter.use('/permissions', permissionRoutes);
 
 
 

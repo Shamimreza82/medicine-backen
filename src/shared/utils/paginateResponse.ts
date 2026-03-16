@@ -14,7 +14,7 @@ export const paginateResponse = <T>(
   };
 
   return {
-    meta,
     data,
+    meta,
   };
 };

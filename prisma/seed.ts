@@ -5,8 +5,8 @@ import { seedFeatures } from './seeds/feature.seed';
 import { seedPermissions } from './seeds/permission.seed';
 import { seedRoles } from './seeds/role.seed';
 import { seedTenantTypes } from './seeds/seedTenantTypes';
-import { seedSuperAdmin } from './seeds/user.seed';
 import { seedTenant } from './seeds/tenant.seed';
+import { seedSuperAdmin } from './seeds/user.seed';
 
 async function main() {
   logger.info('🌱 Seeding started...');

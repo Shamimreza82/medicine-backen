@@ -10,7 +10,10 @@ import { RoleValidationSchemas } from '../validation/role.validation';
 
 const router = Router();
 
-router.get('/', validateRequest(baseQuerySchema), RoleController.getRoles);
+router.get('/',
+  
+  validateRequest(baseQuerySchema), 
+  RoleController.getRoles);
 
 router.post(
   '/',
@@ -21,6 +24,7 @@ router.post(
 
 router.post(
   '/:roleId/permissions',
+  authPermission('PERMISSION:ASSIGN'),
   validateRequest(PermissionValidationSchema.assignPermissionsSchema),
   RoleController.createPermission,
 );
