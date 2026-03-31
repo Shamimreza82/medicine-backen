@@ -1,23 +1,20 @@
 import { Router } from 'express';
 
 import { authRoutes } from '@/modules/auth/auth.route';
-import { doctorRoutes } from '@/modules/doctor/doctor.route';
+import { onboardingRouter } from '@/modules/onboarding/onboarding.router';
 
 export const apiRouter = Router();
 
 apiRouter.use('/auth', authRoutes);
-apiRouter.use('/doctors', doctorRoutes);
+// apiRouter.use('/doctors', doctorRoutes);
+apiRouter.use('/onboarding', onboardingRouter);
 
 
-
-// POST   /api/v1/auth/register
-// POST   /api/v1/auth/login
-// POST   /api/v1/auth/logout
-// POST   /api/v1/auth/refresh-token
-// POST   /api/v1/auth/forgot-password
-// POST   /api/v1/auth/reset-password
-// POST   /api/v1/auth/change-password
-// POST   /api/v1/auth/verify-email
-// POST   /api/v1/auth/resend-verification
-// GET    /api/v1/auth/me
-// POST   /api/v1/auth/switch-hospital
+// apiRouter.use('/auth', authRoutes);
+// apiRouter.use('/doctors', doctorRoutes);
+// apiRouter.use('/patients', patientRoutes);
+// apiRouter.use('/prescriptions', prescriptionRoutes);
+// apiRouter.use('/plans', planRoutes);
+// apiRouter.use('/subscriptions', subscriptionRoutes);
+// apiRouter.use('/settings', settingRoutes);
+// apiRouter.use('/dashboard', dashboardRoutes);
