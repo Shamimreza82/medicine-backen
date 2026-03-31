@@ -1,5 +1,4 @@
-# Multi-Tenant SaaS Backend
-
+# doctor-prescriptio-backend
 TypeScript/Express backend for a multi-tenant SaaS platform. The codebase uses feature modules, Prisma for PostgreSQL access, Redis for cache and queue connectivity, BullMQ workers, Zod validation, and Swagger UI for API docs.
 
 ## Documentation
