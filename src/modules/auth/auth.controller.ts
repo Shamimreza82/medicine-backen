@@ -5,7 +5,10 @@ import { sendResponse } from '@/shared/utils/sendResponse';
 
 import { AUTH_MESSAGES } from './auth.consted';
 import { AuthServices } from './auth.service';
+import { refreshTokenCookieOptions } from './auth.utils';
 import { TLoginInput, TRegisterInput } from './auth.validation';
+
+
 
 const register = catchAsync(async (req, res) => {
   const data = req.body as TRegisterInput;
@@ -17,6 +20,9 @@ const register = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
+
+
 
 const login = catchAsync(async (req, res) => {
   const data = req.body as TLoginInput;

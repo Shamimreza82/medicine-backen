@@ -439,8 +439,9 @@ CREATE TABLE "plans" (
     "description" TEXT,
     "billing_cycle" "BillingCycle" NOT NULL,
     "price" DECIMAL(12,2) NOT NULL,
-    "currency" TEXT NOT NULL DEFAULT 'USD',
+    "currency" TEXT NOT NULL DEFAULT 'BDT',
     "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "max_patients" INTEGER NOT NULL,
     "metadata" JSONB,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -693,10 +694,10 @@ CREATE UNIQUE INDEX "tenant_settings_tenant_id_key" ON "tenant_settings"("tenant
 CREATE UNIQUE INDEX "users_publicId_key" ON "users"("publicId");
 
 -- CreateIndex
-CREATE INDEX "users_tenant_id_idx" ON "users"("tenant_id");
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "users_tenant_id_email_key" ON "users"("tenant_id", "email");
+CREATE INDEX "users_tenant_id_idx" ON "users"("tenant_id");
 
 -- AddForeignKey
 ALTER TABLE "activity_logs" ADD CONSTRAINT "activity_logs_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "tenants"("id") ON DELETE CASCADE ON UPDATE CASCADE;

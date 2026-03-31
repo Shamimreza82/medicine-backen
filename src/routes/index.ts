@@ -1,11 +1,12 @@
 import { Router } from 'express';
 
 import { authRoutes } from '@/modules/auth/auth.route';
+import { doctorRoutes } from '@/modules/doctor/doctor.route';
 
 export const apiRouter = Router();
 
 apiRouter.use('/auth', authRoutes);
-
+apiRouter.use('/doctors', doctorRoutes);
 
 
 

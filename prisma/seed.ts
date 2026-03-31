@@ -1,10 +1,12 @@
 import { logger } from "@/bootstrap/logger";
 import { prisma } from "@/bootstrap/prisma";
 
-import { seedSuperAdmin } from './seed/superAdmin';
+import { seedPlans } from './seed/plan.seed';
+import { seedSuperAdmin } from './seed/superAdmin.seed';
 
 async function main() {
   await seedSuperAdmin();
+  await seedPlans()
 }
 
 main()

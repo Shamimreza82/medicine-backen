@@ -23,7 +23,7 @@ model User {
 
   // Identity
   name     String
-  email    String
+  email    String @unique
   phone    String?
   password String
 
@@ -69,7 +69,6 @@ model User {
   patientProfile Patient?
   visits         Visit[]
 
-  @@unique([tenantId, email])
   @@index([tenantId])
   @@map("users")
 }

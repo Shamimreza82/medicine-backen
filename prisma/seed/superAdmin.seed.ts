@@ -2,6 +2,7 @@
 import {Role, UserStatus } from "@prisma/client";
 import bcrypt from "bcrypt";
 
+import { logger } from "@/bootstrap/logger";
 import { prisma } from "@/bootstrap/prisma";
 
 
@@ -11,16 +12,11 @@ export const seedSuperAdmin = async () => {
 
     // 1. Check যদি already থাকে
     const existing = await prisma.user.findUnique({
-        where: {
-            tenantId_email: {
-                tenantId: "",
-                email,
-            },
-        },
+        where: {email}
     });
 
     if (existing) {
-        console.log("✅ Super Admin already exists");
+        logger.info("✅ Super Admin already exists");
         return;
     }
 
@@ -33,17 +29,13 @@ export const seedSuperAdmin = async () => {
             name: "Super Admin",
             email,
             password: hashedPassword,
-
             role: Role.SUPER_ADMIN,
             status: UserStatus.ACTIVE,
-
             tenantId: null, // 🔥 important
-
             emailVerified: true,
-
             createdBy: "system",
         },
     });
 
-    console.log("🚀 Super Admin created:", superAdmin.email);
+    logger.info("Super Admin created");
 };
