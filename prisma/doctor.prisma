@@ -1,0 +1,269 @@
+model Doctor {
+  id       String @id @default(uuid())
+  tenantId String @map("tenant_id")
+  userId   String @unique @map("user_id")
+
+  employeeId         String? @map("employee_id")
+  registrationNumber String? @map("registration_number")
+  licenseNumber      String? @map("license_number")
+
+  experienceYears Int? @map("experience_years")
+
+  gender      Gender?
+  dateOfBirth DateTime? @map("date_of_birth")
+  bloodGroup  String?   @map("blood_group")
+
+  bio                   String?
+  address               String?
+  emergencyContactName  String? @map("emergency_contact_name")
+  emergencyContactPhone String? @map("emergency_contact_phone")
+
+  joiningDate          DateTime?    @map("joining_date")
+  isAvailable          Boolean      @default(true) @map("is_available")
+  consultationDuration Int?         @default(15) @map("consultation_duration")
+  status               DoctorStatus @default(ACTIVE)
+
+  metadata Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  specializations DoctorSpecialization[]
+  qualifications  DoctorQualification[]
+  departments     DoctorDepartment[]
+  chambers        DoctorChamber[]
+  schedules       DoctorSchedule[]
+  leaves          DoctorLeave[]
+  feeConfigs      DoctorFeeConfig[]
+
+  @@unique([employeeId])
+  @@unique([registrationNumber])
+  @@index([tenantId])
+  @@index([status])
+  @@index([isAvailable])
+  @@map("doctor_profiles")
+}
+
+model Department {
+  id String @id @default(uuid())
+
+  name        String
+  description String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  doctors DoctorDepartment[]
+
+  @@unique([name])
+  @@map("departments")
+}
+
+model DoctorDepartment {
+  id String @id @default(uuid())
+
+  doctorId     String  @map("doctor_id")
+  departmentId String  @map("department_id")
+  isPrimary    Boolean @default(false) @map("is_primary")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  doctor     Doctor     @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, departmentId])
+  @@index([doctorId])
+  @@index([departmentId])
+  @@map("doctor_departments")
+}
+
+model Specialization {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  doctors DoctorSpecialization[]
+
+  @@unique([name])
+  @@map("specializations")
+}
+
+model DoctorSpecialization {
+  id               String  @id @default(uuid())
+  doctorId         String  @map("doctor_id")
+  specializationId String  @map("specialization_id")
+  isPrimary        Boolean @default(false) @map("is_primary")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  doctor         Doctor         @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  specialization Specialization @relation(fields: [specializationId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, specializationId])
+  @@index([doctorId])
+  @@index([specializationId])
+  @@map("doctor_specializations")
+}
+
+model Qualification {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  doctors DoctorQualification[]
+
+  @@map("qualifications")
+}
+
+model DoctorQualification {
+  id              String  @id @default(uuid())
+  doctorId        String  @map("doctor_id")
+  qualificationId String  @map("qualification_id")
+  institute       String?
+  year            Int?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  doctor        Doctor        @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  qualification Qualification @relation(fields: [qualificationId], references: [id], onDelete: Cascade)
+
+  @@unique([doctorId, qualificationId, institute])
+  @@index([doctorId])
+  @@map("doctor_qualifications")
+}
+
+model DoctorChamber {
+  id       String @id @default(uuid())
+  doctorId String @map("doctor_id")
+
+  name       String
+  roomNumber String? @map("room_number")
+  floor      String?
+  branchName String? @map("branch_name")
+  address    String?
+  isPrimary  Boolean @default(false) @map("is_primary")
+  isActive   Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  doctor           Doctor            @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  doctorSchedules  DoctorSchedule[]
+  doctorFeeConfigs DoctorFeeConfig[]
+
+  @@index([doctorId])
+  @@map("doctor_chambers")
+}
+
+model DoctorSchedule {
+  id        String  @id @default(uuid())
+  doctorId  String  @map("doctor_id")
+  chamberId String? @map("chamber_id")
+
+  dayOfWeek DayOfWeek @map("day_of_week")
+  startTime String    @map("start_time")
+  endTime   String    @map("end_time")
+
+  maxPatients     Int?            @map("max_patients")
+  slotDuration    Int?            @map("slot_duration")
+  appointmentMode AppointmentMode @default(IN_PERSON) @map("appointment_mode")
+
+  effectiveFrom DateTime? @map("effective_from")
+  effectiveTo   DateTime? @map("effective_to")
+
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  doctor  Doctor         @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  chamber DoctorChamber? @relation(fields: [chamberId], references: [id], onDelete: SetNull)
+
+  @@index([doctorId])
+  @@index([chamberId])
+  @@map("doctor_schedules")
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model DoctorLeave {
+  id       String @id @default(uuid())
+  doctorId String @map("doctor_id")
+
+  startDate DateTime @map("start_date")
+  endDate   DateTime @map("end_date")
+  reason    String?
+  isFullDay Boolean  @default(true) @map("is_full_day")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  doctor Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  @@index([doctorId])
+  @@index([startDate, endDate])
+  @@map("doctor_leaves")
+}
+
+model DoctorFeeConfig {
+  id        String  @id @default(uuid())
+  doctorId  String  @map("doctor_id")
+  chamberId String? @map("chamber_id")
+
+  appointmentMode  AppointmentMode  @default(IN_PERSON) @map("appointment_mode")
+  consultationType ConsultationType @map("consultation_type")
+
+  amount   Decimal @db.Decimal(10, 2)
+  currency String  @default("BDT")
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  doctor  Doctor         @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  chamber DoctorChamber? @relation(fields: [chamberId], references: [id], onDelete: SetNull)
+
+  @@index([doctorId])
+  @@map("doctor_fee_configs")
+}
+
+enum AppointmentMode {
+  IN_PERSON
+  ONLINE
+  VIDEO
+  PHONE
+}
+
+enum ConsultationType {
+  NEW
+  FOLLOW_UP
+  EMERGENCY
+}
+
+enum DoctorStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+  SUSPENDED
+  RETIRED
+}

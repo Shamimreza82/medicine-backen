@@ -1,8 +1,6 @@
 import { RequestHandler } from 'express';
-import { StatusCodes } from 'http-status-codes';
 
-import { findUserById } from '@/modules/auth/infrastructure/auth.repository';
-import { verifyAccessToken } from '@/modules/auth/infrastructure/auth.token';
+import { assertActiveUser, findUserById, verifyAccessToken } from '@/modules/auth/auth.utils';
 import { AppError } from '@/shared/errors/AppError';
 import { catchAsync } from '@/shared/utils/catchAsync';
 
@@ -18,16 +16,8 @@ export const auth: RequestHandler = catchAsync(async (req, res, next) => {
 
   const user = await findUserById(decoded.userId);
 
-  if (
-    (user && user?.status === 'INACTIVE') ||
-    user?.status === 'LOCKED' ||
-    user?.status === 'SUSPENDED'
-  ) {
-    throw new AppError(
-      StatusCodes.LOCKED,
-      `Account temporarily ${user.status}, please contect admin`,
-    );
-  }
+  assertActiveUser(user?.status);
+  
   req.user = decoded;
   next();
 });

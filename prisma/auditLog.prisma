@@ -1,11 +1,10 @@
 model AuditLog {
   id String @id @default(uuid())
 
-
-  userId     String? @map("user_id")
-     tenantId   String    @map("tenant_id")
-  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId   String? @map("user_id")
+  tenantId String  @map("tenant_id")
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   module   String
   entity   String
@@ -36,6 +35,5 @@ model AuditLog {
   @@index([userId])
   @@index([entity, entityId])
   @@index([tenantId, createdAt])
-
   @@map("audit_logs")
 }
