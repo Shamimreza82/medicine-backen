@@ -22,3 +22,6 @@ prisma/generated/
 Thumbs.db
 
 .vscode/
+
+meilisearch
+meilisearch-linux-amd64
