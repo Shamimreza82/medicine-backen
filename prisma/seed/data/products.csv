@@ -1,3 +1,21 @@
 brand_slug,sku,strength,dosage_form,route,pack_size,unit_per_pack,price,status,registration_number,barcode,is_prescription_required,is_active
-napa,NAPA-500-TAB,500 mg,Tablet,Oral,10x10,100,1.20,ACTIVE,DGDA-001,1234567890123,false,true
-seclo,SECLO-20-CAP,20 mg,Capsule,Oral,3x10,30,6.50,ACTIVE,DGDA-002,1234567890456,false,true
+ace,ACE-500-TAB,500 mg,Tablet,Oral,10x10,100,1.00,ACTIVE,DGDA-003,1234567890789,false,true
+fast,FAST-500-TAB,500 mg,Tablet,Oral,10x10,100,0.95,ACTIVE,DGDA-004,1234567891123,false,true
+pyrol,PYROL-500-TAB,500 mg,Tablet,Oral,10x10,100,1.10,ACTIVE,DGDA-005,1234567891456,false,true
+reset,RESET-500-TAB,500 mg,Tablet,Oral,10x10,100,1.05,ACTIVE,DGDA-006,1234567891789,false,true
+parapyrol,PARAPYROL-500-TAB,500 mg,Tablet,Oral,10x10,100,1.15,ACTIVE,DGDA-007,1234567892123,false,true
+maxpro,MAXPRO-20-CAP,20 mg,Capsule,Oral,3x10,30,7.00,ACTIVE,DGDA-008,1234567892456,false,true
+pantonix,PANTONIX-40-TAB,40 mg,Tablet,Oral,3x10,30,6.80,ACTIVE,DGDA-009,1234567892789,false,true
+losectil,LOSECTIL-20-CAP,20 mg,Capsule,Oral,3x10,30,6.20,ACTIVE,DGDA-010,1234567893123,false,true
+anclog,ANCLOG-75-TAB,75 mg,Tablet,Oral,3x10,30,12.50,ACTIVE,DGDA-011,1234567893456,true,true
+clopid,CLOPID-75-TAB,75 mg,Tablet,Oral,3x10,30,11.80,ACTIVE,DGDA-012,1234567893789,true,true
+amdocal,AMDOCAL-5-TAB,5 mg,Tablet,Oral,3x10,30,5.50,ACTIVE,DGDA-013,1234567894123,true,true
+amlopin,AMLOPIN-5-TAB,5 mg,Tablet,Oral,3x10,30,5.20,ACTIVE,DGDA-014,1234567894456,true,true
+metform,METFORM-500-TAB,500 mg,Tablet,Oral,10x10,100,2.00,ACTIVE,DGDA-015,1234567894789,true,true
+glucolet,GLUCOLET-500-TAB,500 mg,Tablet,Oral,10x10,100,2.10,ACTIVE,DGDA-016,1234567895123,true,true
+neotack,NEOTACK-250-TAB,250 mg,Tablet,Oral,2x10,20,15.00,ACTIVE,DGDA-017,1234567895456,true,true
+cefotil,CEFOTIL-250-TAB,250 mg,Tablet,Oral,2x10,20,14.50,ACTIVE,DGDA-018,1234567895789,true,true
+zimax,ZIMAX-500-TAB,500 mg,Tablet,Oral,1x3,3,35.00,ACTIVE,DGDA-019,1234567896123,true,true
+azithro,AZITHRO-500-TAB,500 mg,Tablet,Oral,1x3,3,33.00,ACTIVE,DGDA-020,1234567896456,true,true
+fexo,FEXO-120-TAB,120 mg,Tablet,Oral,3x10,30,8.50,ACTIVE,DGDA-021,1234567896789,false,true
+alatrol,ALATROL-120-TAB,120 mg,Tablet,Oral,3x10,30,8.20,ACTIVE,DGDA-022,1234567897123,false,true

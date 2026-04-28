@@ -21,6 +21,7 @@ Implemented modules in this repository:
 Currently exposed API routes:
 
 - `GET /` - basic root status response
+- `POST /api/v1/medicine-ai/ask`
 - `POST /api/v1/auth/register`
 - `POST /api/v1/auth/login`
 - `POST /api/v1/auth/refresh-token`
@@ -80,6 +81,12 @@ REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
 REDIS_PASSWORD=
 REDIS_MAXMEMORY_POLICY=noeviction
+MEILISEARCH_URL=http://localhost:7700
+MEILISEARCH_API_KEY=aSampleMasterKey
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+OLLAMA_CHAT_MODEL=gemma3:4b
+OLLAMA_EMBEDDING_MODEL=nomic-embed-text
+MEDICINE_RAG_MATCH_COUNT=5
 ```
 
 ### 3. Prepare the database
@@ -93,6 +100,12 @@ Optional seed flow:
 
 ```bash
 npx prisma db seed
+```
+
+To build vector search context for medicine Q&A after seeding:
+
+```bash
+npm run medicine:embeddings:sync
 ```
 
 ### 4. Start Redis

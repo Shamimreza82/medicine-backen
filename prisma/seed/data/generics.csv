@@ -1,3 +1,21 @@
 name,slug,scientific_name,drug_class,therapeutic_class,description,mechanism_of_action,pharmacokinetics,dosage_guideline,is_active
-Paracetamol,paracetamol,Acetaminophen,Analgesic,Antipyretic,Pain reliever and fever reducer,Acts centrally to reduce pain and fever,Hepatic metabolism,Use as directed,true
-Omeprazole,omeprazole,Omeprazole,Proton Pump Inhibitor,Antiulcerant,Reduces stomach acid secretion,Inhibits gastric proton pump,Hepatic metabolism,Take before meal,true
+Ibuprofen,ibuprofen,Ibuprofen,NSAID,Analgesic,Relieves pain and inflammation,Inhibits COX enzymes reducing prostaglandins,Hepatic metabolism,Take after food,true
+Amoxicillin,amoxicillin,Amoxicillin,Antibiotic,Penicillin,Used to treat bacterial infections,Inhibits bacterial cell wall synthesis,Renal excretion,Complete full course,true
+Azithromycin,azithromycin,Azithromycin,Antibiotic,Macrolide,Treats respiratory infections,Inhibits bacterial protein synthesis,Hepatic metabolism,Once daily dosing,true
+Ciprofloxacin,ciprofloxacin,Ciprofloxacin,Antibiotic,Fluoroquinolone,Broad spectrum antibiotic,Inhibits DNA gyrase,Renal excretion,Take with water,true
+Metformin,metformin,Metformin,Antidiabetic,Biguanide,Controls blood sugar levels,Decreases hepatic glucose production,Renal excretion,Take with meals,true
+Amlodipine,amlodipine,Amlodipine,Calcium Channel Blocker,Antihypertensive,Lowers blood pressure,Relaxes blood vessels,Hepatic metabolism,Once daily,true
+Losartan,losartan,Losartan,ARB,Antihypertensive,Used for hypertension,Blocks angiotensin II receptors,Hepatic metabolism,Once daily,true
+Salbutamol,salbutamol,Albuterol,Bronchodilator,Antiasthmatic,Relieves bronchospasm,Stimulates beta-2 receptors,Inhalation route,Use inhaler as directed,true
+Montelukast,montelukast,Montelukast,Leukotriene Antagonist,Antiasthmatic,Prevents asthma symptoms,Blocks leukotriene receptors,Hepatic metabolism,Take at night,true
+Cetirizine,cetirizine,Cetirizine,Antihistamine,Antiallergic,Relieves allergy symptoms,Blocks H1 receptors,Renal excretion,Once daily,true
+Fexofenadine,fexofenadine,Fexofenadine,Antihistamine,Antiallergic,Non-sedating antihistamine,Blocks H1 receptors,Minimal metabolism,Take before meals,true
+Ranitidine,ranitidine,Ranitidine,H2 Blocker,Antiulcerant,Reduces stomach acid,Blocks H2 receptors,Renal excretion,Take before meals,true
+Pantoprazole,pantoprazole,Pantoprazole,Proton Pump Inhibitor,Antiulcerant,Treats GERD and ulcers,Inhibits proton pump,Hepatic metabolism,Take before meals,true
+Esomeprazole,esomeprazole,Esomeprazole,Proton Pump Inhibitor,Antiulcerant,Reduces acid secretion,Inhibits gastric proton pump,Hepatic metabolism,Take before meals,true
+Clopidogrel,clopidogrel,Clopidogrel,Antiplatelet,Cardiovascular,Prevents blood clots,Inhibits platelet aggregation,Hepatic metabolism,Once daily,true
+Aspirin,aspirin,Acetylsalicylic Acid,NSAID,Antiplatelet,Reduces pain and clotting,Inhibits COX enzyme,Hepatic metabolism,After meals,true
+Atorvastatin,atorvastatin,Atorvastatin,Statin,Lipid Lowering,Reduces cholesterol levels,Inhibits HMG-CoA reductase,Hepatic metabolism,Once daily,true
+Rosuvastatin,rosuvastatin,Rosuvastatin,Statin,Lipid Lowering,Lowers LDL cholesterol,Inhibits HMG-CoA reductase,Hepatic metabolism,Once daily,true
+Doxycycline,doxycycline,Doxycycline,Antibiotic,Tetracycline,Treats infections,Inhibits protein synthesis,Hepatic metabolism,Take with water,true
+Cefuroxime,cefuroxime,Cefuroxime,Antibiotic,Cephalosporin,Broad spectrum antibiotic,Inhibits cell wall synthesis,Renal excretion,Complete full course,true

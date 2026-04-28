@@ -1,3 +1,21 @@
 generic_slug,category,warning,recommendation
-paracetamol,B,Generally considered safe when used properly,Use lowest effective dose
-omeprazole,C,Use only if clearly needed,Consult physician before use
+ibuprofen,D,Avoid especially in third trimester due to fetal risk,Use alternative like paracetamol
+amoxicillin,B,Generally safe in pregnancy,Use as prescribed
+azithromycin,B,Considered relatively safe,Use if clearly needed
+ciprofloxacin,C,Potential risk to fetal cartilage,Avoid if safer alternative available
+metformin,B,Generally safe in gestational diabetes,Monitor blood glucose
+amlodipine,C,Limited data in pregnancy,Use if benefit outweighs risk
+losartan,D,Can cause fetal toxicity,Avoid during pregnancy
+salbutamol,C,Use with caution,Use inhalation route if needed
+montelukast,B,No strong evidence of harm,Use if necessary
+cetirizine,B,Generally safe antihistamine,Preferred option in allergy
+fexofenadine,C,Limited human data,Use only if needed
+pantoprazole,B,Considered low risk,Use if required
+esomeprazole,C,Limited data available,Use with caution
+clopidogrel,B,Use only if clearly indicated,Consult specialist
+aspirin,D,Risk in high doses,Low dose only if prescribed
+atorvastatin,X,Contraindicated in pregnancy,Discontinue before conception
+rosuvastatin,X,Contraindicated in pregnancy,Avoid use
+doxycycline,D,May affect fetal teeth and bone,Avoid use
+cefuroxime,B,Generally safe antibiotic,Use as prescribed
+ranitidine,B,Considered safe option,Use if needed

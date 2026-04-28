@@ -3,4 +3,24 @@ paracetamol,Nausea,LOW,Rare,Usually mild
 paracetamol,Skin rash,MODERATE,Rare,Stop if allergic reaction occurs
 omeprazole,Headache,LOW,Common,Usually temporary
 omeprazole,Abdominal pain,MODERATE,Less common,Observe patient response
-
+ibuprofen,Stomach pain,MODERATE,Common,Take with food to reduce irritation
+ibuprofen,Nausea,LOW,Common,Usually mild
+ibuprofen,Gastrointestinal bleeding,HIGH,Rare,Avoid long term use
+amoxicillin,Diarrhea,LOW,Common,Usually self limiting
+amoxicillin,Allergic reaction,HIGH,Rare,Stop immediately if occurs
+azithromycin,Nausea,LOW,Common,Usually mild
+azithromycin,QT prolongation,HIGH,Rare,Monitor in high risk patients
+ciprofloxacin,Tendon rupture,HIGH,Rare,Avoid excessive physical activity
+ciprofloxacin,Dizziness,MODERATE,Common,Use caution when driving
+metformin,Diarrhea,LOW,Common,Improves over time
+metformin,Lactic acidosis,HIGH,Rare,Medical emergency
+amlodipine,Ankle edema,MODERATE,Common,Dose dependent effect
+amlodipine,Flushing,LOW,Common,Usually temporary
+losartan,Dizziness,LOW,Common,Monitor blood pressure
+losartan,Hyperkalemia,HIGH,Less common,Monitor potassium levels
+salbutamol,Tremor,LOW,Common,Dose related
+salbutamol,Palpitations,MODERATE,Common,Monitor heart rate
+montelukast,Headache,LOW,Common,Usually mild
+montelukast,Neuropsychiatric effects,HIGH,Rare,Monitor behavior changes
+cetirizine,Drowsiness,LOW,Common,Avoid driving if affected
+fexofenadine,Headache,LOW,Common,Usually mild

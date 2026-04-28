@@ -1,3 +1,21 @@
 generic_slug,risk_level,warning,recommendation
-paracetamol,SAFE,Usually compatible with breastfeeding,Use normal recommended dose
-omeprazole,CAUTION,Limited data in lactation,Use if benefit outweighs risk
+ibuprofen,SAFE,Compatible with breastfeeding,Preferred analgesic in lactation
+amoxicillin,SAFE,Minimal transfer into breast milk,Generally safe to use
+azithromycin,SAFE,Low levels in breast milk,Use if needed
+ciprofloxacin,CAUTION,May affect infant joints,Use alternative if possible
+metformin,SAFE,Low levels in breast milk,Safe in most cases
+amlodipine,CAUTION,Limited data available,Monitor infant for effects
+losartan,CAUTION,Insufficient safety data,Avoid if possible
+salbutamol,SAFE,Minimal systemic absorption,Safe inhalation use
+montelukast,SAFE,Very low breast milk transfer,Safe for use
+cetirizine,SAFE,Low milk levels,Non sedating preferred
+fexofenadine,SAFE,Minimal sedation risk,Preferred antihistamine
+pantoprazole,SAFE,Low secretion in breast milk,Safe if needed
+esomeprazole,CAUTION,Limited lactation data,Use with caution
+clopidogrel,CAUTION,Limited safety data,Avoid unless necessary
+aspirin,UNSAFE,Risk of Reye syndrome and bleeding,Avoid during breastfeeding
+atorvastatin,UNSAFE,May affect infant lipid metabolism,Avoid use
+rosuvastatin,UNSAFE,Excreted in milk,Avoid breastfeeding
+doxycycline,CAUTION,May affect bone and teeth development,Short term use only
+cefuroxime,SAFE,Minimal risk to infant,Safe to use
+ranitidine,SAFE,Low levels in milk,Generally safe

@@ -1,4 +1,21 @@
 name,slug,code,description,category,is_active
-Fever,fever,R50,Increase in body temperature,General Medicine,true
-Headache,headache,R51,Pain in the head,Neurology,true
-GERD,gerd,K21,Gastroesophageal reflux disease,Gastroenterology,true
+Hypertension,hypertension,I10,High blood pressure,Cardiology,true
+Diabetes Mellitus Type 2,diabetes-type-2,E11,Chronic high blood sugar,Endocrinology,true
+Asthma,asthma,J45,Chronic airway inflammation,Respiratory,true
+Common Cold,common-cold,J00,Viral upper respiratory infection,General Medicine,true
+Migraine,migraine,G43,Severe recurrent headache,Neurology,true
+Peptic Ulcer Disease,peptic-ulcer,K27,Ulcers in stomach or duodenum,Gastroenterology,true
+Pneumonia,pneumonia,J18,Lung infection,Respiratory,true
+Bronchitis,bronchitis,J20,Inflammation of bronchial tubes,Respiratory,true
+Anemia,anemia,D64,Low hemoglobin levels,Hematology,true
+Hyperlipidemia,hyperlipidemia,E78,High cholesterol levels,Cardiology,true
+Chronic Kidney Disease,ckd,N18,Progressive kidney dysfunction,Nephrology,true
+Urinary Tract Infection,uti,N39,Infection in urinary system,Urology,true
+Allergic Rhinitis,allergic-rhinitis,J30,Nasal allergy,Allergy,true
+Sinusitis,sinusitis,J01,Inflammation of sinuses,ENT,true
+Osteoarthritis,osteoarthritis,M19,Joint degeneration,Rheumatology,true
+Rheumatoid Arthritis,rheumatoid-arthritis,M06,Autoimmune joint disease,Rheumatology,true
+Depression,depression,F32,Mood disorder,Psychiatry,true
+Anxiety Disorder,anxiety-disorder,F41,Excessive worry,Psychiatry,true
+Hypothyroidism,hypothyroidism,E03,Underactive thyroid,Endocrinology,true
+Hyperthyroidism,hyperthyroidism,E05,Overactive thyroid,Endocrinology,true

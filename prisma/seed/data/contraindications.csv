@@ -1,3 +1,21 @@
 generic_slug,condition,note
-paracetamol,Severe hepatic impairment,Avoid excessive dose
-omeprazole,Hypersensitivity to omeprazole,Avoid use
+paracetamol,Chronic alcohol use,Use with caution due to liver risk
+paracetamol,Severe renal impairment,Dose adjustment may be needed
+ibuprofen,Active peptic ulcer disease,Avoid use due to bleeding risk
+ibuprofen,Severe heart failure,May worsen condition
+ibuprofen,Third trimester pregnancy,Contraindicated due to fetal risk
+amoxicillin,Penicillin allergy,Avoid due to hypersensitivity
+azithromycin,Severe liver disease,Use with caution
+ciprofloxacin,Tendon disorders,May increase tendon rupture risk
+metformin,Severe renal impairment,Risk of lactic acidosis
+metformin,Metabolic acidosis,Contraindicated
+amlodipine,Severe hypotension,May worsen condition
+losartan,Bilateral renal artery stenosis,Use with caution
+salbutamol,Severe cardiac arrhythmia,May exacerbate symptoms
+montelukast,Hypersensitivity to montelukast,Avoid use
+cetirizine,Severe renal impairment,Dose adjustment required
+fexofenadine,Hypersensitivity to fexofenadine,Avoid use
+ranitidine,Acute porphyria,Contraindicated
+pantoprazole,Hypersensitivity to PPIs,Avoid use
+clopidogrel,Active bleeding,Avoid use
+atorvastatin,Active liver disease,Contraindicated

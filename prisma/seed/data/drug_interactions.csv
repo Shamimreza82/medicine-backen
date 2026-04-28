@@ -1,3 +1,21 @@
 source_generic_slug,target_generic_slug,severity,effect,management,note
-omeprazole,clopidogrel,HIGH,May reduce effectiveness of clopidogrel,Use alternative if needed,Monitor therapy closely
-paracetamol,warfarin,MODERATE,Long term use may increase INR,Monitor INR during prolonged use,Short term use generally safer
+ibuprofen,warfarin,HIGH,Increased risk of bleeding,Avoid combination if possible,Use alternative analgesic
+aspirin,warfarin,HIGH,Increased bleeding risk,Avoid or monitor closely,Check INR regularly
+metformin,contrast-media,HIGH,Risk of lactic acidosis,Discontinue before imaging,Restart after renal check
+amlodipine,simvastatin,MODERATE,Increases statin levels,Limit simvastatin dose,Monitor muscle symptoms
+losartan,potassium-supplement,HIGH,Hyperkalemia risk,Avoid or monitor potassium levels,Check serum potassium
+salbutamol,beta-blocker,MODERATE,Reduced bronchodilator effect,Use selective beta-blocker if needed,Monitor breathing
+azithromycin,qt-prolonging-drugs,HIGH,Risk of QT prolongation,Avoid combination if possible,Monitor ECG
+ciprofloxacin,antacids,MODERATE,Reduced antibiotic absorption,Separate dosing by 2 hours,Take antibiotic first
+doxycycline,antacids,MODERATE,Decreased absorption,Separate dosing,Take on empty stomach
+clopidogrel,omeprazole,HIGH,Reduced antiplatelet effect,Use pantoprazole instead,Monitor therapy
+atorvastatin,clarithromycin,HIGH,Increased statin toxicity,Avoid combination,Monitor for myopathy
+rosuvastatin,cyclosporine,HIGH,Increased statin levels,Avoid or reduce dose,Monitor CK levels
+montelukast,phenobarbital,MODERATE,Reduced effectiveness of montelukast,Monitor symptoms,Dose adjustment may be needed
+cetirizine,alcohol,MODERATE,Increased sedation,Avoid alcohol,Use caution in activities
+fexofenadine,fruit-juice,MODERATE,Reduced drug absorption,Avoid fruit juice with dose,Take with water
+ranitidine,ketoconazole,MODERATE,Reduced antifungal absorption,Separate dosing,Monitor effectiveness
+pantoprazole,methotrexate,HIGH,Increased methotrexate toxicity,Avoid high dose combination,Monitor toxicity
+esomeprazole,clopidogrel,HIGH,Reduced clopidogrel activation,Avoid combination,Use alternative PPI
+warfarin,antibiotics,HIGH,Increased INR,Avoid or monitor INR closely,Adjust dose as needed
+metformin,alcohol,HIGH,Increased risk of lactic acidosis,Avoid alcohol,Educate patient

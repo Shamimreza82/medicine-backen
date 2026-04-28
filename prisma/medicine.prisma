@@ -132,8 +132,9 @@ model Brand {
   @@index([name])
   @@index([slug])
   @@index([manufacturerId])
-  @@index([genericId])
-  @@index([isActive])
+  @@index([genericId, isActive])
+  @@index([manufacturerId, isActive])
+  @@index([isActive, name])
   @@map("brands")
 }
 
@@ -305,4 +306,22 @@ model LactationWarning {
 
   @@index([riskLevel])
   @@map("lactation_warnings")
+}
+
+model MedicineEmbedding {
+  id         String   @id @default(uuid())
+  sourceType String   @map("source_type")
+  sourceId   String   @map("source_id")
+  title      String
+  content    String
+  checksum   String
+  metadata   Json?
+  embedding  Unsupported("vector")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@unique([sourceType, sourceId])
+  @@index([sourceType])
+  @@index([sourceId])
+  @@map("medicine_embeddings")
 }

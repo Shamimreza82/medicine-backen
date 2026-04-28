@@ -38,6 +38,10 @@ const envSchema = z.object({
   REDIS_MAXMEMORY_POLICY: z.string().min(1).default('noeviction'),
   MEILISEARCH_URL: z.string().url().default('http://localhost:7700'),
   MEILISEARCH_API_KEY: z.string().min(1).default('aSampleMasterKey'),
+  OLLAMA_BASE_URL: z.string().url().default('http://127.0.0.1:11434'),
+  OLLAMA_CHAT_MODEL: z.string().min(1).default('gemma3:4b'),
+  OLLAMA_EMBEDDING_MODEL: z.string().min(1).default('nomic-embed-text'),
+  MEDICINE_RAG_MATCH_COUNT: z.coerce.number().int().min(1).max(20).default(5),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -76,4 +80,8 @@ export const envConfig = {
   redisMaxmemoryPolicy: parsed.data.REDIS_MAXMEMORY_POLICY,
   meilisearchUrl: parsed.data.MEILISEARCH_URL,
   meilisearchApiKey: parsed.data.MEILISEARCH_API_KEY,
+  ollamaBaseUrl: parsed.data.OLLAMA_BASE_URL,
+  ollamaChatModel: parsed.data.OLLAMA_CHAT_MODEL,
+  ollamaEmbeddingModel: parsed.data.OLLAMA_EMBEDDING_MODEL,
+  medicineRagMatchCount: parsed.data.MEDICINE_RAG_MATCH_COUNT,
 } as const;

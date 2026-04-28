@@ -1,5 +1,21 @@
 generic_slug,disease_slug,note,is_primary
-paracetamol,fever,Reduces fever,true
-paracetamol,headache,Useful in mild to moderate headache,true
-omeprazole,gerd,Controls gastric acid secretion,true
-
+ibuprofen,fever,Reduces fever,false
+ibuprofen,headache,Effective for headache relief,true
+ibuprofen,osteoarthritis,Relieves joint pain and inflammation,true
+amoxicillin,pneumonia,Used in bacterial pneumonia,true
+amoxicillin,bronchitis,Treats bacterial bronchitis,false
+azithromycin,pneumonia,Alternative antibiotic for respiratory infection,true
+azithromycin,bronchitis,Used in respiratory infections,false
+ciprofloxacin,uti,Treats urinary tract infections,true
+ciprofloxacin,diarrhea,Used in bacterial diarrhea,false
+metformin,diabetes-type-2,Controls blood glucose levels,true
+amlodipine,hypertension,Lowers blood pressure,true
+losartan,hypertension,Used for BP control,true
+losartan,ckd,Protects kidney in diabetic patients,false
+salbutamol,asthma,Relieves bronchospasm,true
+montelukast,asthma,Prevents asthma symptoms,false
+montelukast,allergic-rhinitis,Reduces allergy symptoms,true
+cetirizine,allergic-rhinitis,Relieves allergy symptoms,true
+fexofenadine,allergic-rhinitis,Non sedating allergy relief,true
+pantoprazole,peptic-ulcer,Promotes ulcer healing,true
+esomeprazole,gerd,Reduces acid reflux symptoms,true
