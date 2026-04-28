@@ -1,0 +1,3 @@
+source_generic_slug,target_generic_slug,severity,effect,management,note
+omeprazole,clopidogrel,HIGH,May reduce effectiveness of clopidogrel,Use alternative if needed,Monitor therapy closely
+paracetamol,warfarin,MODERATE,Long term use may increase INR,Monitor INR during prolonged use,Short term use generally safer

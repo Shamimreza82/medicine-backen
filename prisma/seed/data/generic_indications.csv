@@ -1,0 +1,5 @@
+generic_slug,disease_slug,note,is_primary
+paracetamol,fever,Reduces fever,true
+paracetamol,headache,Useful in mild to moderate headache,true
+omeprazole,gerd,Controls gastric acid secretion,true
+

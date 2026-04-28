@@ -1,0 +1,6 @@
+generic_slug,effect,severity,frequency,note
+paracetamol,Nausea,LOW,Rare,Usually mild
+paracetamol,Skin rash,MODERATE,Rare,Stop if allergic reaction occurs
+omeprazole,Headache,LOW,Common,Usually temporary
+omeprazole,Abdominal pain,MODERATE,Less common,Observe patient response
+

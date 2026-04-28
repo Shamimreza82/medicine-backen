@@ -1,0 +1,3 @@
+name,slug,scientific_name,drug_class,therapeutic_class,description,mechanism_of_action,pharmacokinetics,dosage_guideline,is_active
+Paracetamol,paracetamol,Acetaminophen,Analgesic,Antipyretic,Pain reliever and fever reducer,Acts centrally to reduce pain and fever,Hepatic metabolism,Use as directed,true
+Omeprazole,omeprazole,Omeprazole,Proton Pump Inhibitor,Antiulcerant,Reduces stomach acid secretion,Inhibits gastric proton pump,Hepatic metabolism,Take before meal,true

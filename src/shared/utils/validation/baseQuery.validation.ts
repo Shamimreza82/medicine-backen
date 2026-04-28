@@ -38,6 +38,9 @@ export const baseQuerySchema = z.object({
 
           val.split(',').forEach((item) => {
             const [key, value] = item.split(':');
+            if (!key) {
+              return;
+            }
             obj[key] = value;
           });
 

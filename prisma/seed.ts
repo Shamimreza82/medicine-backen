@@ -1,20 +1,48 @@
-import { logger } from "@/bootstrap/logger";
-import { prisma } from "@/bootstrap/prisma";
+import { prisma } from '@/bootstrap/prisma';
 
-import { seedPlans } from './seed/plan.seed';
-import { seedSuperAdmin } from './seed/superAdmin.seed';
+import { importBrands } from './seed/importers/brands.importer';
+import { importContraindications } from './seed/importers/contraindications.importer';
+import { importDiseases } from './seed/importers/diseases.importer';
+import { importDrugInteractions } from './seed/importers/drug-interactions.importer';
+import { importGenericDetails } from './seed/importers/generic-details.importer';
+import { importGenericIndications } from './seed/importers/generic-indications.importer';
+import { importGenerics } from './seed/importers/generics.importer';
+import { importLactationWarnings } from './seed/importers/lactation-warnings.importer';
+import { importManufacturers } from './seed/importers/manufacturers.importer';
+import { importPregnancyCategories } from './seed/importers/pregnancy-categories.importer';
+import { importProducts } from './seed/importers/products.importer';
+import { importSideEffects } from './seed/importers/side-effects.importer';
+import { importLabTests } from './seed-lab-tests';
 
-async function main() {
-  await seedSuperAdmin();
-  await seedPlans()
-}
 
-main()
-  .then(() => {
-   logger.info("🌱 Seeding completed");
-  })
-  .catch((e) => {
-    console.error(e);
+
+const run = async () => {
+  console.log('Starting medicine seed...');
+
+  await importManufacturers(prisma);
+  await importGenerics(prisma);
+  await importDiseases(prisma);
+
+  await importGenericDetails(prisma);
+  await importPregnancyCategories(prisma);
+  await importLactationWarnings(prisma);
+
+  await importGenericIndications(prisma);
+  await importSideEffects(prisma);
+  await importContraindications(prisma);
+  await importDrugInteractions(prisma);
+
+  await importBrands(prisma);
+  await importProducts(prisma);
+  await importLabTests(prisma);
+
+  console.log('Medicine seed completed successfully.');
+};
+
+run()
+  .catch((error) => {
+    console.error('Seed failed:', error);
+    process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();

@@ -1,8 +1,11 @@
+
+import { AppError } from '@/shared/errors/AppError';
+
 import 'dotenv/config';
 import { StatusCodes } from 'http-status-codes';
 import { z } from 'zod';
 
-import { AppError } from '@/shared/errors/AppError';
+
 
 export type NodeEnvironment = 'development' | 'test' | 'production';
 export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
@@ -32,6 +35,9 @@ const envSchema = z.object({
   REDIS_HOST: z.string().default('127.0.0.1'),
   REDIS_PORT: z.coerce.number().int().positive().default(6379),
   REDIS_PASSWORD: z.string().optional(),
+  REDIS_MAXMEMORY_POLICY: z.string().min(1).default('noeviction'),
+  MEILISEARCH_URL: z.string().url().default('http://localhost:7700'),
+  MEILISEARCH_API_KEY: z.string().min(1).default('aSampleMasterKey'),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -67,4 +73,7 @@ export const envConfig = {
   redisHost: parsed.data.REDIS_HOST,
   redisPort: parsed.data.REDIS_PORT,
   redisPassword: parsed.data.REDIS_PASSWORD,
+  redisMaxmemoryPolicy: parsed.data.REDIS_MAXMEMORY_POLICY,
+  meilisearchUrl: parsed.data.MEILISEARCH_URL,
+  meilisearchApiKey: parsed.data.MEILISEARCH_API_KEY,
 } as const;

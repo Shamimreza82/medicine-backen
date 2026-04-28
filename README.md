@@ -79,6 +79,7 @@ REDIS_URL=redis://127.0.0.1:6379
 REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
 REDIS_PASSWORD=
+REDIS_MAXMEMORY_POLICY=noeviction
 ```
 
 ### 3. Prepare the database
@@ -97,6 +98,7 @@ npx prisma db seed
 ### 4. Start Redis
 
 The server currently calls `connectRedis()` during startup, so Redis must be reachable before the app can boot successfully.
+This app also expects Redis `maxmemory-policy` to be `noeviction` and will attempt to enforce that at startup.
 
 ### 5. Run the app
 

@@ -1,0 +1,78 @@
+CSV DATA RULES
+
+Location
+- All CSV files are stored in prisma/seed/data
+- Seed runner: prisma/seed.ts
+- CSV reader: prisma/seed/helpers/csv.ts
+- Column definitions: prisma/seed/helpers/parsers.ts
+
+How data is collected and fed into the project
+1. Raw medicine master data is prepared as CSV files.
+2. The app reads each CSV file from prisma/seed/data.
+3. Each row is parsed with header-based column mapping.
+4. Values are normalized:
+   - trim spaces
+   - lowercase slugs
+   - empty optional values become null
+   - booleans map from true/1/yes/y
+   - numbers are parsed to int or float
+   - enums are uppercased and validated
+5. Importers write rows into PostgreSQL through Prisma.
+6. Child rows are skipped if parent rows do not already exist.
+
+Seed order
+1. manufacturers.csv
+2. generics.csv
+3. diseases.csv
+4. generic_details.csv
+5. pregnancy_categories.csv
+6. lactation_warnings.csv
+7. generic_indications.csv
+8. side_effects.csv
+9. contraindications.csv
+10. drug_interactions.csv
+11. brands.csv
+12. products.csv
+
+CSV dependency rules
+- manufacturers.csv has no parent dependency
+- generics.csv has no parent dependency
+- diseases.csv has no parent dependency
+- generic_details.csv depends on generics.csv by generic_slug
+- pregnancy_categories.csv depends on generics.csv by generic_slug
+- lactation_warnings.csv depends on generics.csv by generic_slug
+- generic_indications.csv depends on generics.csv and diseases.csv
+- side_effects.csv depends on generics.csv
+- contraindications.csv depends on generics.csv
+- drug_interactions.csv depends on generics.csv for source and target slugs
+- brands.csv depends on manufacturers.csv and generics.csv
+- products.csv depends on brands.csv
+
+Minimum required columns
+- manufacturers.csv: name, slug
+- generics.csv: name, slug
+- diseases.csv: name, slug
+- generic_details.csv: generic_slug
+- pregnancy_categories.csv: generic_slug
+- lactation_warnings.csv: generic_slug
+- generic_indications.csv: generic_slug, disease_slug
+- side_effects.csv: generic_slug, effect
+- contraindications.csv: generic_slug, condition
+- drug_interactions.csv: source_generic_slug, target_generic_slug
+- brands.csv: name, slug, manufacturer_slug, generic_slug
+- products.csv: brand_slug, strength, dosage_form
+
+Allowed enum values
+- Product status: ACTIVE, INACTIVE, DISCONTINUED
+- Severity: LOW, MODERATE, HIGH, SEVERE
+- Pregnancy category: A, B, C, D, X, UNKNOWN
+- Lactation risk: SAFE, CAUTION, UNSAFE, UNKNOWN
+
+Important behavior
+- Upsert is used for most master tables, so reruns update existing records.
+- Side effects and contraindications use create, so reruns can duplicate those rows.
+- Missing parent references cause row skips with console warnings.
+- Product lookup uses brand slug, so keep brand slugs unique across the dataset.
+
+Run the pipeline
+- npx tsx prisma/seed.ts

@@ -18,32 +18,3 @@ if (envConfig.nodeEnv !== 'production') {
   globalForPrisma.prisma = prisma;
 }
 
-
-///// in future use case
-
-// import { PrismaClient } from "@prisma/client";
-
-// import { generateId } from "@/shared/utils/generateId";
-
-
-
-// const prisma = new PrismaClient().$extends({
-//     query: {
-//         user: {
-//             async create({ args, query }) {
-
-//                 args.data.publicId = generateId("usr");
-
-//                 return query(args);
-//             },
-//         },
-//         tenant: {
-//             async create({ args, query }) {
-//                 args.data.publicId = generateId("ten");
-//                 return query(args);
-//             }
-//         }
-//     },
-// });
-
-// export { prisma };

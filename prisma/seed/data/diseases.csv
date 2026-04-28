@@ -1,0 +1,4 @@
+name,slug,code,description,category,is_active
+Fever,fever,R50,Increase in body temperature,General Medicine,true
+Headache,headache,R51,Pain in the head,Neurology,true
+GERD,gerd,K21,Gastroesophageal reflux disease,Gastroenterology,true

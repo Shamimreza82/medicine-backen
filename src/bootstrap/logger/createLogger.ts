@@ -30,7 +30,7 @@ export const createLogger = (fileName: string, level: Level = envConfig.logLevel
       bindings: (bindings) => ({
         pid: bindings['pid'],
         host: bindings['hostname'],
-        service: 'hosp-management-api',
+        service: 'medicine-backend',
         environment: envConfig.nodeEnv,
       }),
     },

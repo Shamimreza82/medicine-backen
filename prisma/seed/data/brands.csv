@@ -1,0 +1,4 @@
+name,slug,manufacturer_slug,generic_slug,description,is_active
+Napa,napa,square-pharmaceuticals,paracetamol,Popular paracetamol brand,true
+Seclo,seclo,square-pharmaceuticals,omeprazole,Popular omeprazole brand,true
+

@@ -1,0 +1,308 @@
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  DISCONTINUED
+}
+
+enum SeverityLevel {
+  LOW
+  MODERATE
+  HIGH
+  SEVERE
+}
+
+enum PregnancyRiskLevel {
+  A
+  B
+  C
+  D
+  X
+  UNKNOWN
+}
+
+enum LactationRiskLevel {
+  SAFE
+  CAUTION
+  UNSAFE
+  UNKNOWN
+}
+
+model Manufacturer {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  country     String?
+  website     String?
+  email       String?
+  phone       String?
+  address     String?
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  metadata    Json?
+
+  brands      Brand[]
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([name])
+  @@index([slug])
+  @@index([isActive])
+  @@map("manufacturers")
+}
+
+model Generic {
+  id                String   @id @default(uuid())
+  name              String   @unique
+  slug              String   @unique
+  scientificName    String?  @map("scientific_name")
+  drugClass         String?  @map("drug_class")
+  therapeuticClass  String?  @map("therapeutic_class")
+  description       String?
+  mechanismOfAction String?  @map("mechanism_of_action")
+  pharmacokinetics  String?
+  dosageGuideline   String?  @map("dosage_guideline")
+  isActive          Boolean  @default(true) @map("is_active")
+  metadata          Json?
+
+  detail            GenericDetail?
+  brands            Brand[]
+  indications       GenericIndication[]
+  sideEffects       SideEffect[]
+  contraindications Contraindication[]
+  interactionsAsSource DrugInteraction[] @relation("InteractionSource")
+  interactionsAsTarget DrugInteraction[] @relation("InteractionTarget")
+  pregnancyCategory PregnancyCategory?
+  lactationWarning  LactationWarning?
+
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@index([name])
+  @@index([slug])
+  @@index([drugClass])
+  @@index([therapeuticClass])
+  @@index([isActive])
+  @@map("generics")
+}
+
+model GenericDetail {
+  id                    String   @id @default(uuid())
+  genericId             String   @unique @map("generic_id")
+  overview              String?
+  indicationSummary     String?  @map("indication_summary")
+  adultDose             String?  @map("adult_dose")
+  childDose             String?  @map("child_dose")
+  renalDoseAdjustment   String?  @map("renal_dose_adjustment")
+  hepaticDoseAdjustment String?  @map("hepatic_dose_adjustment")
+  administration        String?
+  monitoring            String?
+  precaution            String?
+  storageCondition      String?  @map("storage_condition")
+  notes                 String?
+  metadata              Json?
+
+  generic               Generic  @relation(fields: [genericId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("generic_details")
+}
+
+model Brand {
+  id              String   @id @default(uuid())
+  name            String
+  slug            String
+  manufacturerId  String   @map("manufacturer_id")
+  genericId       String   @map("generic_id")
+  description     String?
+  isActive        Boolean  @default(true) @map("is_active")
+  metadata        Json?
+
+  manufacturer    Manufacturer @relation(fields: [manufacturerId], references: [id], onDelete: Restrict)
+  generic         Generic      @relation(fields: [genericId], references: [id], onDelete: Restrict)
+  products        Product[]
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@unique([manufacturerId, name])
+  @@unique([manufacturerId, slug])
+  @@index([name])
+  @@index([slug])
+  @@index([manufacturerId])
+  @@index([genericId])
+  @@index([isActive])
+  @@map("brands")
+}
+
+model Product {
+  id                    String        @id @default(uuid())
+  brandId               String        @map("brand_id")
+  sku                   String?       @unique
+  strength              String
+  dosageForm            String        @map("dosage_form")
+  route                 String?
+  packSize              String?       @map("pack_size")
+  unitPerPack           Int?          @map("unit_per_pack")
+  price                 Decimal?      @db.Decimal(10, 2)
+  status                ProductStatus @default(ACTIVE)
+  registrationNumber    String?       @map("registration_number")
+  barcode               String?       @unique
+  isPrescriptionRequired Boolean      @default(false) @map("is_prescription_required")
+  isActive              Boolean       @default(true) @map("is_active")
+  metadata              Json?
+
+  brand                 Brand         @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+
+  @@unique([brandId, strength, dosageForm])
+  @@index([brandId])
+  @@index([strength])
+  @@index([dosageForm])
+  @@index([route])
+  @@index([status])
+  @@index([isActive])
+  @@map("products")
+}
+
+model Disease {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  code        String?  @unique
+  description String?
+  category    String?
+  isActive    Boolean  @default(true) @map("is_active")
+  metadata    Json?
+
+  genericLinks GenericIndication[]
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([name])
+  @@index([slug])
+  @@index([code])
+  @@index([category])
+  @@index([isActive])
+  @@map("diseases")
+}
+
+model GenericIndication {
+  id          String   @id @default(uuid())
+  genericId   String   @map("generic_id")
+  diseaseId   String   @map("disease_id")
+  note        String?
+  isPrimary   Boolean  @default(false) @map("is_primary")
+  metadata    Json?
+
+  generic     Generic  @relation(fields: [genericId], references: [id], onDelete: Cascade)
+  disease     Disease  @relation(fields: [diseaseId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([genericId, diseaseId])
+  @@index([genericId])
+  @@index([diseaseId])
+  @@index([isPrimary])
+  @@map("generic_indications")
+}
+
+model SideEffect {
+  id          String        @id @default(uuid())
+  genericId   String        @map("generic_id")
+  effect      String
+  severity    SeverityLevel @default(LOW)
+  frequency   String?
+  note        String?
+  metadata    Json?
+
+  generic     Generic       @relation(fields: [genericId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  @@index([genericId])
+  @@index([effect])
+  @@index([severity])
+  @@map("side_effects")
+}
+
+model Contraindication {
+  id          String   @id @default(uuid())
+  genericId   String   @map("generic_id")
+  condition   String
+  note        String?
+  metadata    Json?
+
+  generic     Generic  @relation(fields: [genericId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([genericId])
+  @@index([condition])
+  @@map("contraindications")
+}
+
+model DrugInteraction {
+  id               String        @id @default(uuid())
+  sourceGenericId  String        @map("source_generic_id")
+  targetGenericId  String        @map("target_generic_id")
+  severity         SeverityLevel @default(MODERATE)
+  effect           String?
+  management       String?
+  note             String?
+  metadata         Json?
+
+  sourceGeneric    Generic       @relation("InteractionSource", fields: [sourceGenericId], references: [id], onDelete: Cascade)
+  targetGeneric    Generic       @relation("InteractionTarget", fields: [targetGenericId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  @@unique([sourceGenericId, targetGenericId])
+  @@index([sourceGenericId])
+  @@index([targetGenericId])
+  @@index([severity])
+  @@map("drug_interactions")
+}
+
+model PregnancyCategory {
+  id            String             @id @default(uuid())
+  genericId     String             @unique @map("generic_id")
+  category      PregnancyRiskLevel @default(UNKNOWN)
+  warning       String?
+  recommendation String?
+  metadata      Json?
+
+  generic       Generic            @relation(fields: [genericId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@map("pregnancy_categories")
+}
+
+model LactationWarning {
+  id             String             @id @default(uuid())
+  genericId      String             @unique @map("generic_id")
+  riskLevel      LactationRiskLevel @default(UNKNOWN) @map("risk_level")
+  warning        String?
+  recommendation String?
+  metadata       Json?
+
+  generic        Generic            @relation(fields: [genericId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
+
+  @@index([riskLevel])
+  @@map("lactation_warnings")
+}
