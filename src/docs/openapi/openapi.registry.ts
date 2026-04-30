@@ -1,12 +1,10 @@
 import { schemas } from './openapi.register';
-import { authPaths } from './paths/auth.paths';
-import { rolePaths } from './paths/role.paths';
-import { tenantPaths } from './paths/tenant.paths';
+import { labTestPaths } from './paths/labTest.paths';
+import { medicinePaths } from './paths/medicine.paths';
 
 export { schemas };
 
 export const paths = {
-  ...authPaths,
-  ...rolePaths,
-  ...tenantPaths,
+  ...medicinePaths,
+  ...labTestPaths,
 };

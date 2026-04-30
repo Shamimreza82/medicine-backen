@@ -6,7 +6,7 @@ export const openApiDocument = {
   info: {
     title: 'Multi-Tenant SaaS Backend API',
     version: '1.0.0',
-    description: 'API documentation for the currently mounted auth, role, and tenant endpoints.',
+    description: 'API documentation for the medicine-backend project, including authentication, roles, tenants, medicine management, and lab test functionalities.',
   },
   servers: [
     {
@@ -14,7 +14,15 @@ export const openApiDocument = {
       description: 'Version 1 API',
     },
   ],
-  tags: [{ name: 'Auth' }, { name: 'Roles' }, { name: 'Tenants' }],
+  tags: [
+    {name: 'Health'},
+    { name: 'Medicine' },
+    { name: 'Medicine Brands' },
+    { name: 'Medicine Generics' },
+    { name: 'Medicine Diseases' },
+    { name: 'Medicine Warnings' },
+    { name: 'Lab Tests' },
+  ],
   paths,
   components: {
     securitySchemes: {

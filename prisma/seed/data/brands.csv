@@ -1,21 +1,21 @@
 name,slug,manufacturer_slug,generic_slug,description,is_active
 Napa,napa,square-pharmaceuticals,paracetamol,Popular paracetamol brand,true
-Ace,ace,aci-limited,paracetamol,Common paracetamol brand,true
-Fast,fast,drug-international,paracetamol,Fast acting paracetamol,true
-Pyrol,pyrol,eskayef-pharma,paracetamol,Widely used pain reliever,true
-Reset,reset,incepta-pharma,paracetamol,General pain relief medicine,true
-Parapyrol,parapyrol,beximco-pharma,paracetamol,Effective for fever,true
-Pyralgin,pyralgin,renata-limited,paracetamol,Standard analgesic,true
-Tamen,tamen,aristopharma,paracetamol,Used for mild to moderate pain,true
-Febrinil,febrinil,acme-laboratories,paracetamol,Fever reducing medicine,true
-Calpol,calpol,gsk-bd,paracetamol,Popular pediatric paracetamol,true
+Ace,ace,skf-pharmaceuticals,paracetamol,Common pain relief brand,true
+Parapyrol,parapyrol,incepta-pharmaceuticals,paracetamol,Used for fever and pain relief,true
+Reset,reset,aci-limited,paracetamol,Effective for mild to moderate pain,true
+Fast,fast,beximco-pharmaceuticals,paracetamol,Fast acting paracetamol brand,true
 Seclo,seclo,square-pharmaceuticals,omeprazole,Popular omeprazole brand,true
-Losectil,losectil,beximco-pharma,omeprazole,Acid reducing medicine,true
-Maxpro,maxpro,renata-limited,esomeprazole,Proton pump inhibitor,true
-Pantonix,pantonix,incepta-pharma,pantoprazole,Used for acidity and GERD,true
-Zimax,zimax,incepta-pharma,azithromycin,Antibiotic for infections,true
-Azithro,azithro,drug-international,azithromycin,Macrolide antibiotic,true
-Fexo,fexo,square-pharmaceuticals,fexofenadine,Anti-allergic medicine,true
-Alatrol,alatrol,eskayef-pharma,fexofenadine,Allergy relief,true
-Montair,montair,incepta-pharma,montelukast,Asthma and allergy medicine,true
-Monas,monas,aristopharma,montelukast,Leukotriene receptor blocker,true
+Losectil,losectil,incepta-pharmaceuticals,omeprazole,Used for gastric acidity,true
+Pantonix,pantonix,acme-laboratories,pantoprazole,Proton pump inhibitor,true
+Maxpro,maxpro,renata-limited,esomeprazole,Used for GERD and acid reflux,true
+Esoral,esoral,skf-pharmaceuticals,esomeprazole,Acid suppression medicine,true
+Napa Extra,napa-extra,square-pharmaceuticals,paracetamol-caffeine,Combination pain relief,true
+Napadol,napadol,drug-international,paracetamol,General analgesic brand,true
+Xpa,xpa,beximco-pharmaceuticals,paracetamol,Used for fever and pain,true
+Alatrol,alatrol,skf-pharmaceuticals,cetirizine,Anti-allergy medicine,true
+Fenadin,fenadin,acme-laboratories,fexofenadine,Non-drowsy antihistamine,true
+Deslor,deslor,incepta-pharmaceuticals,desloratadine,Allergy relief medicine,true
+Montair,montair,drug-international,montelukast,Used for asthma and allergy,true
+Monas,monas,renata-limited,montelukast,Leukotriene receptor antagonist,true
+Zimax,zimax,square-pharmaceuticals,azithromycin,Antibiotic for infections,true
+Azithro,azithro,incepta-pharmaceuticals,azithromycin,Broad spectrum antibiotic,true

@@ -1,27 +1,26 @@
-import { catchAsync } from '@/shared/utils/catchAsync';
+import { sendResponse } from '@/shared/utils/sendResponse';
 
 import { LabTestService } from './labTest.service';
 import { searchLabTestSchema } from './labTest.validation';
 
+import type { RequestHandler } from 'express';
 
+const searchLabTests: RequestHandler = async (req, res, next) => {
+  try {
+    const validated = searchLabTestSchema.parse({ query: req.query });
+    const result = await LabTestService.searchLabTests(validated.query);
 
-
-const serchTest = catchAsync(async (req, res) => {
-
-      const validatedQuery = searchLabTestSchema.parse(req.query)
-
-      const result = await LabTestService.searchLabTests(validatedQuery)
-
-      res.status(200).json({    
-        success: true,
-        message: 'Lab tests retrieved successfully',
-        meta: result.meta,
-        data: result.data,
-      })
-
-})
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Lab tests retrieved successfully',
+      meta: result.meta,
+      data: result.data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const LabTestController = {
-serchTest
-}
-
+  searchLabTests,
+};
