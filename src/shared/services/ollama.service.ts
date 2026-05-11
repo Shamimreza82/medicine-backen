@@ -1,23 +1,23 @@
 import axios from 'axios';
 
+import { envConfig } from '@/config/env.config';
 import { AppError } from '@/shared/errors/AppError';
 
-import { envConfig } from '@/config/env.config';
 
-type OllamaChatMessage = {
+interface OllamaChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
-};
+}
 
-type OllamaChatResponse = {
+interface OllamaChatResponse {
   message?: {
     content?: string;
   };
-};
+}
 
-type OllamaEmbeddingResponse = {
+interface OllamaEmbeddingResponse {
   embedding?: number[];
-};
+}
 
 const ollamaClient = axios.create({
   baseURL: envConfig.ollamaBaseUrl,

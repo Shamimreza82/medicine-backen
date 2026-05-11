@@ -1,3 +1,4 @@
+
 # doctor-prescriptio-backend
 TypeScript/Express backend for a multi-tenant SaaS platform. The codebase uses feature modules, Prisma for PostgreSQL access, Zod validation, and Swagger UI for API docs.
 

@@ -1,0 +1,41 @@
+import { z } from 'zod';
+
+import { searchMedicineQuerySchema } from './medicine.validation';
+
+export type MedicineSearchQuery = z.infer<typeof searchMedicineQuerySchema>;
+
+export interface BrandResponse {
+  id: number;
+  name: string;
+  form: string | null;
+  strength: string | null;
+  price: string | null;
+  packSize: string | null;
+  isSponsored: boolean;
+  company: {
+    id: number;
+    name: string;
+  };
+  generic: {
+    id: number;
+    name: string;
+  };
+}
+
+export interface GenericResponse {
+  id: number;
+  name: string;
+  indication: string | null;
+  therapeuticClass?: string | null;
+}
+
+export interface IndicationResponse {
+  id: number;
+  name: string;
+}
+
+export interface CombinedSearchResponse {
+  brands: BrandResponse[];
+  generics: GenericResponse[];
+  indications: IndicationResponse[];
+}

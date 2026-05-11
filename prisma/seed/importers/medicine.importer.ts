@@ -1,6 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
+
 import { PrismaClient } from '@prisma/client';
+
 import { batchInsert } from '../helpers/batch';
 
 const DATA_ROOT = path.join(process.cwd(), 'data/medicine_data');

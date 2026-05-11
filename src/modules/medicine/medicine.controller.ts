@@ -1,0 +1,54 @@
+import { Request, Response } from 'express';
+
+import { catchAsync } from '@/shared/utils/catchAsync';
+import { sendResponse } from '@/shared/utils/sendResponse';
+
+import { medicineService } from './medicine.service';
+import { MedicineSearchQuery } from './medicine.types';
+
+export class MedicineController {
+  searchBrands = catchAsync(async (req: Request, res: Response) => {
+    const query = req.query as unknown as MedicineSearchQuery;
+    const result = await medicineService.searchBrands(query);
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Brands retrieved successfully',
+      data: result.data,
+      meta: result.meta,
+    });
+  });
+
+  searchGenerics = catchAsync(async (req: Request, res: Response) => {
+    const query = req.query as unknown as MedicineSearchQuery;
+    const result = await medicineService.searchGenerics(query);
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Generics retrieved successfully',
+      data: result.data,
+      meta: result.meta,
+    });
+  });
+
+  searchIndications = catchAsync(async (req: Request, res: Response) => {
+    const query = req.query as unknown as MedicineSearchQuery;
+    const result = await medicineService.searchIndications(query);
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Indications retrieved successfully',
+      data: result.data,
+      meta: result.meta,
+    });
+  });
+
+  combinedSearch = catchAsync(async (req: Request, res: Response) => {
+    const query = req.query as unknown as MedicineSearchQuery;
+    const result = await medicineService.combinedSearch(query);
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Search results retrieved successfully',
+      data: result,
+    });
+  });
+}
+
+export const medicineController = new MedicineController();

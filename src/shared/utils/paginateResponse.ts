@@ -6,11 +6,12 @@ export const paginateResponse = <T>(
   page: number,
   limit: number,
 ): TPaginatedResponse<T> => {
+  const safeLimit = Math.max(1, limit);
   const meta: TPaginationMeta = {
     page,
-    limit,
+    limit: safeLimit,
     total,
-    totalPages: Math.ceil(total / limit),
+    totalPages: Math.ceil(total / safeLimit),
   };
 
   return {

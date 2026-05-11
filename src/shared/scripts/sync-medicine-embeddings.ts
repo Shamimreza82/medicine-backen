@@ -7,19 +7,19 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/bootstrap/prisma';
 import { OllamaService } from '@/shared/services/ollama.service';
 
-type GenericDocument = {
+interface GenericDocument {
   sourceType: 'GENERIC';
   sourceId: string;
   title: string;
   content: string;
   checksum: string;
   metadata: Record<string, unknown>;
-};
+}
 
-type ExistingEmbeddingRow = {
+interface ExistingEmbeddingRow {
   sourceId: string;
   checksum: string;
-};
+}
 
 const medicineSourceInclude = Prisma.validator<Prisma.DrugGenericInclude>()({
   brands: {
@@ -44,7 +44,7 @@ type GenericSource = Prisma.DrugGenericGetPayload<{
   include: typeof medicineSourceInclude;
 }>;
 
-const joinNonEmpty = (items: Array<string | null | undefined>) =>
+const joinNonEmpty = (items: (string | null | undefined)[]) =>
   items
     .map((item) => item?.trim())
     .filter((item): item is string => Boolean(item))
@@ -125,7 +125,7 @@ const upsertEmbedding = async (document: GenericDocument, embedding: number[]) =
 };
 
 const deleteStaleEmbeddings = async (activeSourceIds: string[]) => {
-  const existingRows = await prisma.$queryRawUnsafe<Array<{ sourceId: string }>>(
+  const existingRows = await prisma.$queryRawUnsafe<{ sourceId: string }[]>(
     `
       SELECT source_id AS "sourceId"
       FROM medicine_embeddings
