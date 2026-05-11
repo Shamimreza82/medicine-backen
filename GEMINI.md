@@ -14,14 +14,11 @@ The project leverages a modern and efficient tech stack:
 *   **Language:** TypeScript
 *   **ORM:** Prisma (with PostgreSQL adapter)
 *   **Database:** PostgreSQL
-*   **Search Engine:** Meilisearch
-*   **Caching & Job Queue:** Redis, BullMQ
 *   **API Documentation:** OpenAPI/Swagger UI (`swagger-ui-express`)
 *   **Logging:** Pino Logger
 *   **Environment Management:** `dotenv`
 *   **Linting:** ESLint
 *   **Code Formatting:** Prettier
-*   **Testing Framework:** Vitest
 *   **Cloud Services:** AWS S3 (for storage, indicated by `@aws-sdk/client-s3`)
 
 ## 3. Key Modules and Features
@@ -34,7 +31,6 @@ The application is structured into modular components:
 *   **API Endpoints:** Defined and documented using OpenAPI, with routes organized under `src/modules/*/route.ts` and aggregated in `src/routes/index.ts`.
 *   **Middleware:** Includes authentication (`auth.ts`), authorization (`authorize.ts`), request validation (`validateRequest.ts`), rate limiting (`rateLimiter.ts`), and global error handling (`globalErrorHandler.ts`).
 *   **Data Seeding:** Custom scripts for seeding initial data (`prisma/seed.ts`, `prisma/seed-lab-tests.ts`).
-*   **Background Jobs/Workers:** Utilizes BullMQ with Redis for handling background processes (`src/workers`).
 *   **Logging:** Centralized logging with Pino.
 
 ## 4. Development Setup and Common Commands
@@ -43,7 +39,7 @@ The application is structured into modular components:
 
 *   Node.js (>=20.11.0)
 *   npm (or yarn)
-*   Docker (recommended for PostgreSQL and Redis setup)
+*   Docker (recommended for PostgreSQL setup)
 
 ### 4.2. Local Setup
 
@@ -57,13 +53,13 @@ The application is structured into modular components:
     npm install
     ```
 3.  **Environment Configuration:**
-    Create a `.env` file in the project root by copying `.env.example` and filling in the necessary values (especially database connection strings, Redis, and Meilisearch configurations).
+    Create a `.env` file in the project root by copying `.env.example` and filling in the necessary values (especially database connection strings).
     ```bash
     cp .env.example .env
     ```
 4.  **Database Setup (using Docker Compose for example):**
-    Ensure PostgreSQL, Redis, and Meilisearch are running. You might use a `docker-compose.yml` file if one exists in the project or set them up individually.
-    
+    Ensure PostgreSQL is running. You might use a `docker-compose.yml` file if one exists in the project or set it up individually.
+
     *   **Run Prisma Migrations:** This will create the database schema based on `prisma/schema.prisma`.
         ```bash
         npm run prisma:migrate:dev
@@ -89,7 +85,7 @@ The application is structured into modular components:
     npm start
     ```
 
-### 4.4. Code Quality and Testing
+### 4.4. Code Quality
 
 *   **Run Linter:**
     ```bash
@@ -99,12 +95,6 @@ The application is structured into modular components:
 *   **Format Code:**
     ```bash
     npm run format
-    ```
-*   **Run Tests:**
-    ```bash
-    npm test
-    npm run test:watch # Run tests in watch mode
-    npm run test:coverage # Run tests and generate coverage report
     ```
 *   **Type Checking:**
     ```bash
@@ -135,6 +125,5 @@ The API documentation is available via Swagger UI. Once the server is running, y
 *   **Convention Adherence:** Please adhere strictly to the existing coding style, architectural patterns, and file naming conventions.
 *   **Tooling:** Prefer using `npm` scripts for common operations as defined in `package.json`.
 *   **Database:** Any database changes should be handled through Prisma migrations.
-*   **Testing:** Always ensure new features or bug fixes are accompanied by appropriate tests using Vitest.
 
 This guide should provide a solid foundation for the Gemini CLI to interact with and manage the `medicine-backen` project.

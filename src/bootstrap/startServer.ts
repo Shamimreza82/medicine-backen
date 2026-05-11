@@ -3,7 +3,6 @@ import { envConfig } from '@/config/env.config';
 
 import { createApp } from './createApp';
 import { errorLogger, logger } from './logger';
-import { connectRedis } from './redis';
 
 import type { Server } from 'node:http';
 
@@ -21,16 +20,11 @@ const shutdown = async (server: Server, signal: string): Promise<void> => {
     });
   });
 
-  // await disconnectRedis();
   logger.info('Shutdown completed');
 };
 
 export const startServer = async (): Promise<Server> => {
   const app = createApp();
-
-  // startTelemetry();
-  // await getPrisma().$connect();
-  await connectRedis();
 
   const server = app.listen(appConfig.port, appConfig.host, () => {
     logger.info(

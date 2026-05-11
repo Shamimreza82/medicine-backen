@@ -19,8 +19,6 @@ import { apiRouter } from '../routes';
 
 import type { RequestHandler } from 'express';
 
-import '@/workers';
-
 export const createApp = () => {
   const app = express();
 

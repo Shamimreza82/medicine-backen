@@ -405,7 +405,6 @@ Example response shape:
 - Current mounted API prefix is `/api/v1`.
 - Swagger UI is available at `/docs`.
 - There is no auth middleware on the currently mounted `lab-tests` and `medicines` routes.
-- The lab test module is database-backed and does not require Meilisearch.
 - Medicine search endpoints return only active records.
 - Medicine brand product lists are limited in some search endpoints. If the UI needs full product detail for a brand, call `GET /medicines/brands/:brandId/products`.
 - `price` is returned as a string, not a number.

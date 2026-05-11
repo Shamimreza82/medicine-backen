@@ -4,7 +4,6 @@ import path from 'path';
 import { Prisma, type PrismaClient } from '@prisma/client';
 import { parse } from 'csv-parse/sync';
 
-import { getLabTestIndex } from '@/bootstrap/meilisearch';
 import { prisma } from '@/bootstrap/prisma';
 
 interface LabTestRow {
@@ -19,29 +18,6 @@ interface LabTestRow {
   unit?: string;
   isActive?: string;
   metadata?: string;
-}
-
-interface LabTestSearchDocument {
-  id: string;
-  name: string;
-  slug: string;
-  shortName: string | null;
-  category: string | null;
-  description: string | null;
-  specimen: string | null;
-  preparation: string | null;
-  normalRange: string | null;
-  unit: string | null;
-  isActive: boolean;
-  metadata: unknown;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface MeiliTaskResult {
-  uid: number;
-  status: string;
-  error: unknown;
 }
 
 const csvFilePath = path.join(process.cwd(), 'data', 'lab_tests.csv');
@@ -84,38 +60,8 @@ const readLabTestsCsv = (): LabTestRow[] => {
   });
 };
 
-const assertMeiliTaskSucceeded = (task: MeiliTaskResult) => {
-  if (task.status === 'failed' || task.status === 'canceled') {
-    throw new Error(`Meilisearch task ${task.uid} ${task.status}: ${JSON.stringify(task.error)}`);
-  }
-};
-
-const indexLabTests = async (documents: LabTestSearchDocument[]) => {
-  if (documents.length === 0) return;
-
-  try {
-    const index = await getLabTestIndex();
-
-    const documentsTask = index.addDocuments(documents, { primaryKey: 'slug' });
-    assertMeiliTaskSucceeded(await documentsTask.waitTask({ timeout: 30_000 }));
-
-    const settingsTask = index.updateSettings({
-      searchableAttributes: ['name', 'shortName', 'slug', 'category', 'description', 'specimen'],
-      filterableAttributes: ['category', 'specimen', 'isActive'],
-      displayedAttributes: ['*'],
-    });
-    assertMeiliTaskSucceeded(await settingsTask.waitTask({ timeout: 30_000 }));
-
-    console.log(`Indexed ${documents.length} lab tests in Meilisearch`);
-  } catch (error) {
-    console.warn('Failed to index lab tests in Meilisearch. Is it running?');
-    console.warn(error instanceof Error ? error.message : String(error));
-  }
-};
-
 export const importLabTests = async (client: PrismaClient) => {
   const rows = readLabTestsCsv();
-  const searchDocuments: LabTestSearchDocument[] = [];
 
   console.log(`Found ${rows.length} lab tests in CSV`);
 
@@ -140,7 +86,7 @@ export const importLabTests = async (client: PrismaClient) => {
       metadata: parseMetadata(row.metadata),
     };
 
-    const labTest = await client.labTest.upsert({
+    await client.labTest.upsert({
       where: { slug },
       update: data,
       create: {
@@ -148,28 +94,9 @@ export const importLabTests = async (client: PrismaClient) => {
         slug,
       },
     });
-
-    searchDocuments.push({
-      id: labTest.id,
-      name: labTest.name,
-      slug: labTest.slug,
-      shortName: labTest.shortName,
-      category: labTest.category,
-      description: labTest.description,
-      specimen: labTest.specimen,
-      preparation: labTest.preparation,
-      normalRange: labTest.normalRange,
-      unit: labTest.unit,
-      isActive: labTest.isActive,
-      metadata: labTest.metadata,
-      createdAt: labTest.createdAt.toISOString(),
-      updatedAt: labTest.updatedAt.toISOString(),
-    });
   }
 
   console.log('Lab tests import completed');
-
-  await indexLabTests(searchDocuments);
 };
 
 if (require.main === module) {

@@ -1,5 +1,5 @@
 # doctor-prescriptio-backend
-TypeScript/Express backend for a multi-tenant SaaS platform. The codebase uses feature modules, Prisma for PostgreSQL access, Redis for cache and queue connectivity, BullMQ workers, Zod validation, and Swagger UI for API docs.
+TypeScript/Express backend for a multi-tenant SaaS platform. The codebase uses feature modules, Prisma for PostgreSQL access, Zod validation, and Swagger UI for API docs.
 
 ## Documentation
 
@@ -42,11 +42,8 @@ Currently exposed API routes:
 - TypeScript
 - Express 5
 - Prisma with PostgreSQL
-- Redis
-- BullMQ
 - Zod
 - Pino
-- Vitest
 
 ## Getting Started
 
@@ -76,13 +73,8 @@ JWT_ACCESS_SECRET=dev-access-secret-change-me
 JWT_REFRESH_SECRET=dev-refresh-secret-change-me
 JWT_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
-REDIS_URL=redis://127.0.0.1:6379
-REDIS_HOST=127.0.0.1
-REDIS_PORT=6379
-REDIS_PASSWORD=
-REDIS_MAXMEMORY_POLICY=noeviction
-MEILISEARCH_URL=http://localhost:7700
-MEILISEARCH_API_KEY=aSampleMasterKey
+LOG_LEVEL=info
+HTTP_LOG_LEVEL=info
 OLLAMA_BASE_URL=http://127.0.0.1:11434
 OLLAMA_CHAT_MODEL=gemma3:4b
 OLLAMA_EMBEDDING_MODEL=nomic-embed-text
@@ -108,12 +100,7 @@ To build vector search context for medicine Q&A after seeding:
 npm run medicine:embeddings:sync
 ```
 
-### 4. Start Redis
-
-The server currently calls `connectRedis()` during startup, so Redis must be reachable before the app can boot successfully.
-This app also expects Redis `maxmemory-policy` to be `noeviction` and will attempt to enforce that at startup.
-
-### 5. Run the app
+### 4. Run the app
 
 ```bash
 npm run dev
@@ -134,9 +121,6 @@ npm run build
 npm run typecheck
 npm run lint
 npm run format
-npm run test
-npm run test:coverage
-npm run test:auth
 npm run prisma:migrate:dev
 npm run prisma:migrate:deploy
 npm run prisma:studio
@@ -153,7 +137,6 @@ src/
   modules/
   routes/
   shared/
-  tests/
   workers/
 prisma/
   migrations/

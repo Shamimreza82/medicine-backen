@@ -28,12 +28,10 @@
   },
   "include": [
     "src",
-    "tests",
      "prisma/**/*.ts",
     "prisma.config.ts",
     "prisma/seeds/**/*.ts",
-    "prisma/seed.ts",
-    "vitest.config.mts"
+    "prisma/seed.ts"
   ],
   "exclude": [
     "node_modules",
