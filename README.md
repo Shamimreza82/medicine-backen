@@ -1,64 +1,45 @@
+# Medicine Backend
 
-# doctor-prescriptio-backend
-TypeScript/Express backend for a multi-tenant SaaS platform. The codebase uses feature modules, Prisma for PostgreSQL access, Zod validation, and Swagger UI for API docs.
+A robust Node.js backend built with TypeScript and Express 5, designed for managing and searching medical data, including medicines and lab tests. This project features AI-powered semantic search capabilities using Ollama and pgvector.
 
-## Documentation
+## Features
 
-Primary project documentation is now under `/docs`:
+- **Medicine Management:** Searchable database of medicine brands, generics, and indications.
+- **Lab Test Registry:** Detailed information on lab tests, specimens, and normal ranges.
+- **AI Integration:** Semantic search and embeddings via Ollama.
+- **Modern Stack:** Built with Express 5, Prisma ORM, and PostgreSQL.
+- **API Documentation:** Interactive Swagger UI documentation.
+- **Robust Validation:** Request validation using Zod.
 
-- `docs/README.md` (index)
-- `docs/setup.md`
-- `docs/api.md`
-- `docs/architecture.md`
+## Tech Stack
 
-## Current Scope
-
-Implemented modules in this repository:
-
-- `auth`
-- `role`
-- `tenant`
-
-Currently exposed API routes:
-
-- `GET /` - basic root status response
-- `POST /api/v1/medicine-ai/ask`
-- `POST /api/v1/auth/register`
-- `POST /api/v1/auth/login`
-- `POST /api/v1/auth/refresh-token`
-- `GET /api/v1/roles`
-- `POST /api/v1/roles`
-- `POST /api/v1/roles/:roleId/permissions`
-- `POST /api/v1/tenants`
-- `GET /docs` - Swagger UI
-
-`/api/v1/roles` and `/api/v1/tenants` are mounted after the global `auth` middleware, so they require a bearer access token. Some route-level permission checks are also enforced:
-
-- `POST /api/v1/roles` requires `ROLE:CREATE`
-- `POST /api/v1/tenants` requires `TENANT:CREATE`
-
-## Stack
-
-- Node.js 20+
-- TypeScript
-- Express 5
-- Prisma with PostgreSQL
-- Zod
-- Pino
+- **Runtime:** Node.js 20+
+- **Framework:** Express.js 5
+- **Language:** TypeScript
+- **ORM:** Prisma
+- **Database:** PostgreSQL (supports `pgvector`)
+- **AI:** Ollama
+- **Logging:** Pino
+- **Documentation:** Swagger UI / OpenAPI 3
 
 ## Getting Started
 
-### 1. Install dependencies
+### 1. Prerequisites
+
+- Node.js (>=20.11.0)
+- npm
+- PostgreSQL
+- Ollama (running locally for AI features)
+
+### 2. Installation
 
 ```bash
 npm install
 ```
 
-### 2. Configure environment
+### 3. Environment Setup
 
-Start from `.env.example` and make sure the runtime includes all variables required by `src/config/env.config.ts`.
-
-Required runtime variables:
+Create a `.env` file in the root directory and configure the following variables:
 
 ```env
 NODE_ENV=development
@@ -66,14 +47,10 @@ PORT=4000
 HOST=0.0.0.0
 CORS_ENABLED=true
 CORS_ORIGINS=*
-TRUST_PROXY=false
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/hospital_management?schema=public
+DATABASE_URL=postgresql://user:password@localhost:5432/medicine_db?schema=public
 RATE_LIMIT_WINDOW_MS=60000
 RATE_LIMIT_MAX_REQUESTS=120
-JWT_ACCESS_SECRET=dev-access-secret-change-me
-JWT_REFRESH_SECRET=dev-refresh-secret-change-me
-JWT_EXPIRES_IN=15m
-JWT_REFRESH_EXPIRES_IN=7d
+JWT_ACCESS_SECRET=your-secret-key
 LOG_LEVEL=info
 HTTP_LOG_LEVEL=info
 OLLAMA_BASE_URL=http://127.0.0.1:11434
@@ -82,68 +59,63 @@ OLLAMA_EMBEDDING_MODEL=nomic-embed-text
 MEDICINE_RAG_MATCH_COUNT=5
 ```
 
-### 3. Prepare the database
+### 4. Database Initialization
 
 ```bash
+# Generate Prisma client
 npm run prisma:generate
+
+# Run migrations
 npm run prisma:migrate:dev
+
+# Seed lab tests
+npm run seed:lab-tests
 ```
 
-Optional seed flow:
+### 5. AI Embedding Sync (Optional)
 
-```bash
-npx prisma db seed
-```
-
-To build vector search context for medicine Q&A after seeding:
+To enable semantic search features, sync medicine embeddings with Ollama:
 
 ```bash
 npm run medicine:embeddings:sync
 ```
 
-### 4. Run the app
+### 6. Run the Application
 
 ```bash
+# Development mode
 npm run dev
-```
 
-Production build:
-
-```bash
+# Production build
 npm run build
 npm start
 ```
 
-## Useful Commands
+## API Documentation
 
-```bash
-npm run dev
-npm run build
-npm run typecheck
-npm run lint
-npm run format
-npm run prisma:migrate:dev
-npm run prisma:migrate:deploy
-npm run prisma:studio
-```
+Once the server is running, you can access the interactive Swagger UI at:
+`http://localhost:4000/docs`
 
-## Project Layout
+## Project Structure
 
 ```text
 src/
-  bootstrap/
-  config/
-  docs/
-  middlewares/
-  modules/
-  routes/
-  shared/
-  workers/
-prisma/
-  migrations/
-  seeds/
-  schema.prisma
-  *.prisma
+├── bootstrap/    # App initialization and core clients
+├── config/       # Environment and middleware configs
+├── docs/         # OpenAPI specifications
+├── middlewares/  # Express middlewares
+├── modules/      # Feature modules (medicine, lab-test)
+├── routes/       # API route definitions (/api/v1)
+├── shared/       # Shared utilities, services, and errors
+└── types/        # Global TypeScript types
 ```
 
-Legacy references are still available in `PROJECT_DOCUMENTATION.md` and `DOCS.md`.
+## Available Scripts
+
+- `npm run dev`: Start development server.
+- `npm run build`: Build for production.
+- `npm run typecheck`: Run TypeScript compiler check.
+- `npm run lint`: Lint the codebase.
+- `npm run format`: Format code with Prettier.
+- `npm run prisma:studio`: Open Prisma Studio.
+- `npm run medicine:embeddings:sync`: Sync AI embeddings.

@@ -4,126 +4,74 @@ This document provides essential information about the `medicine-backen` project
 
 ## 1. Project Overview
 
-`medicine-backen` is a Node.js backend service built with TypeScript, designed to manage medical data, specifically related to medicines and lab tests. It provides a robust API for handling various aspects of medical information, potentially serving a doctor prescription or a broader healthcare management system.
+`medicine-backen` is a Node.js backend service built with TypeScript and Express 5, designed to manage medical data related to medicines and lab tests. It features AI-powered semantic search capabilities using Ollama and PostgreSQL with `pgvector`.
 
 ## 2. Tech Stack
 
-The project leverages a modern and efficient tech stack:
+The project leverages the following tech stack:
 
-*   **Backend Framework:** Express.js
+*   **Backend Framework:** Express.js 5
 *   **Language:** TypeScript
 *   **ORM:** Prisma (with PostgreSQL adapter)
-*   **Database:** PostgreSQL
+*   **Database:** PostgreSQL (with `pgvector` for semantic search)
+*   **AI Integration:** Ollama (for embeddings and text generation)
 *   **API Documentation:** OpenAPI/Swagger UI (`swagger-ui-express`)
 *   **Logging:** Pino Logger
-*   **Environment Management:** `dotenv`
-*   **Linting:** ESLint
-*   **Code Formatting:** Prettier
-*   **Cloud Services:** AWS S3 (for storage, indicated by `@aws-sdk/client-s3`)
+*   **Environment Management:** `dotenv` / Zod-based validation
+*   **Linting/Formatting:** ESLint, Prettier
 
 ## 3. Key Modules and Features
 
-The application is structured into modular components:
+### 3.1. Domain Modules
+*   **`medicine` module:** Handles searching for medicine brands, generics, and indications. Supports both standard case-insensitive matching and vector-based semantic search.
+*   **`lab-test` module:** Manages lab test-related data (specimen, preparation, normal ranges).
 
-*   **`medicine` module:** Handles all operations related to medicine data (CRUD, validation, routing).
-*   **`lab-test` module:** Manages lab test-related data and operations.
-*   **Prisma ORM:** Used for database interactions, schema management, and migrations.
-*   **API Endpoints:** Defined and documented using OpenAPI, with routes organized under `src/modules/*/route.ts` and aggregated in `src/routes/index.ts`.
-*   **Middleware:** Includes authentication (`auth.ts`), authorization (`authorize.ts`), request validation (`validateRequest.ts`), rate limiting (`rateLimiter.ts`), and global error handling (`globalErrorHandler.ts`).
-*   **Data Seeding:** Custom scripts for seeding initial data (`prisma/seed.ts`, `prisma/seed-lab-tests.ts`).
-*   **Logging:** Centralized logging with Pino.
+### 3.2. Core Features & Infrastructure
+*   **AI & Vector Sync:** `OllamaService` handles interaction with local Ollama models. The `sync-medicine-embeddings.ts` script generates embeddings for medicine generics and stores them in a `medicine_embeddings` table using the `vector` type.
+*   **Prisma ORM:** Advanced multi-file schema setup (`medicine.prisma`, `labTest.prisma`) merged into a single client.
+*   **Global Error Handling:** Centralized system with specialized handlers for Prisma, Zod, and JWT errors.
+*   **Middleware:** Includes request context management, rate limiting, and request validation.
 
 ## 4. Development Setup and Common Commands
 
 ### 4.1. Prerequisites
 
 *   Node.js (>=20.11.0)
-*   npm (or yarn)
-*   Docker (recommended for PostgreSQL setup)
+*   npm
+*   PostgreSQL (with `pgvector` extension)
+*   Ollama (running locally for AI features)
 
-### 4.2. Local Setup
+### 4.2. Common Commands
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <repository_url>
-    cd medicine-backend
-    ```
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-3.  **Environment Configuration:**
-    Create a `.env` file in the project root by copying `.env.example` and filling in the necessary values (especially database connection strings).
-    ```bash
-    cp .env.example .env
-    ```
-4.  **Database Setup (using Docker Compose for example):**
-    Ensure PostgreSQL is running. You might use a `docker-compose.yml` file if one exists in the project or set it up individually.
+*   **Development:** `npm run dev`
+*   **Build/Start:** `npm run build` / `npm start`
+*   **Type Checking:** `npm run typecheck`
+*   **Linter/Format:** `npm run lint` / `npm run format`
+*   **Prisma:** `npm run prisma:migrate:dev`, `npm run prisma:studio`
+*   **Lab Test Seeding:** `npm run seed:lab-tests`
+*   **Medicine AI Sync:** `npm run medicine:embeddings:sync`
 
-    *   **Run Prisma Migrations:** This will create the database schema based on `prisma/schema.prisma`.
-        ```bash
-        npm run prisma:migrate:dev
-        ```
-    *   **Seed Database (Optional):** Populate the database with initial data.
-        ```bash
-        npm run seed:lab-tests
-        # If there's a general seed script in prisma/seed.ts, it might be run via `npx prisma db seed` or a custom script.
-        ```
+## 5. Project Structure
 
-### 4.3. Running the Application
-
-*   **Development Mode (with live reload):**
-    ```bash
-    npm run dev
-    ```
-*   **Build the application:**
-    ```bash
-    npm run build
-    ```
-*   **Start the compiled application:**
-    ```bash
-    npm start
-    ```
-
-### 4.4. Code Quality
-
-*   **Run Linter:**
-    ```bash
-    npm run lint
-    npm run lint:fix # To automatically fix fixable issues
-    ```
-*   **Format Code:**
-    ```bash
-    npm run format
-    ```
-*   **Type Checking:**
-    ```bash
-    npm run typecheck
-    ```
-
-### 4.5. Prisma Commands
-
-*   **Generate Prisma Client:**
-    ```bash
-    npm run prisma:generate
-    ```
-*   **Format Prisma Schema:**
-    ```bash
-    npm run prisma:format
-    ```
-*   **Validate Prisma Schema:**
-    ```bash
-    npm run prisma:validate
-    ```
-
-## 5. API Documentation
-
-The API documentation is available via Swagger UI. Once the server is running, you can typically access it at `/api-docs` (e.g., `http://localhost:3000/api-docs`), as suggested by `swagger-ui-express` and the `src/docs` directory.
+```text
+src/
+├── bootstrap/          # Server initialization, logger, prisma client
+├── config/             # Environment, CORS, and rate-limit configurations
+├── docs/               # OpenAPI/Swagger specifications and schemas
+├── middlewares/        # Express middlewares (auth, validation, errors)
+├── modules/            # Domain-specific modules (medicine, lab-test)
+├── routes/             # API route aggregation (/api/v1)
+├── shared/             # Cross-cutting concerns
+│   ├── errors/         # Custom AppError and error handlers
+│   ├── services/       # Ollama service and AI logic
+│   ├── utils/          # Pagination, response, and validation helpers
+│   └── scripts/        # Data sync and maintenance scripts
+└── types/              # Global TypeScript and Express type definitions
+```
 
 ## 6. Important Notes for Gemini CLI
 
-*   **Convention Adherence:** Please adhere strictly to the existing coding style, architectural patterns, and file naming conventions.
-*   **Tooling:** Prefer using `npm` scripts for common operations as defined in `package.json`.
-*   **Database:** Any database changes should be handled through Prisma migrations.
-
-This guide should provide a solid foundation for the Gemini CLI to interact with and manage the `medicine-backen` project.
+*   **Convention Adherence:** Follow the established modular structure. Each module must contain its own controller, service, repository, and validation logic.
+*   **Database:** Use Prisma for all relational data. Raw SQL should only be used for specialized vector operations (e.g., `pgvector` similarity searches).
+*   **AI Service:** Always check if Ollama is running before attempting to use `OllamaService` or the embedding sync script.
+*   **Surgical Updates:** When modifying files, preserve the existing import style (e.g., `@/` aliases) and ensure Zod schemas are updated if the data structure changes.
