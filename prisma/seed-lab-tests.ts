@@ -93,19 +93,24 @@ const assertMeiliTaskSucceeded = (task: MeiliTaskResult) => {
 const indexLabTests = async (documents: LabTestSearchDocument[]) => {
   if (documents.length === 0) return;
 
-  const index = await getLabTestIndex();
+  try {
+    const index = await getLabTestIndex();
 
-  const documentsTask = index.addDocuments(documents, { primaryKey: 'slug' });
-  assertMeiliTaskSucceeded(await documentsTask.waitTask({ timeout: 30_000 }));
+    const documentsTask = index.addDocuments(documents, { primaryKey: 'slug' });
+    assertMeiliTaskSucceeded(await documentsTask.waitTask({ timeout: 30_000 }));
 
-  const settingsTask = index.updateSettings({
-    searchableAttributes: ['name', 'shortName', 'slug', 'category', 'description', 'specimen'],
-    filterableAttributes: ['category', 'specimen', 'isActive'],
-    displayedAttributes: ['*'],
-  });
-  assertMeiliTaskSucceeded(await settingsTask.waitTask({ timeout: 30_000 }));
+    const settingsTask = index.updateSettings({
+      searchableAttributes: ['name', 'shortName', 'slug', 'category', 'description', 'specimen'],
+      filterableAttributes: ['category', 'specimen', 'isActive'],
+      displayedAttributes: ['*'],
+    });
+    assertMeiliTaskSucceeded(await settingsTask.waitTask({ timeout: 30_000 }));
 
-  console.log(`Indexed ${documents.length} lab tests in Meilisearch`);
+    console.log(`Indexed ${documents.length} lab tests in Meilisearch`);
+  } catch (error) {
+    console.warn('Failed to index lab tests in Meilisearch. Is it running?');
+    console.warn(error instanceof Error ? error.message : String(error));
+  }
 };
 
 export const importLabTests = async (client: PrismaClient) => {

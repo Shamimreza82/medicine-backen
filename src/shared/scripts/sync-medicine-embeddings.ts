@@ -21,26 +21,26 @@ type ExistingEmbeddingRow = {
   checksum: string;
 };
 
-const medicineSourceInclude = Prisma.validator<Prisma.GenericInclude>()({
-  detail: true,
+const medicineSourceInclude = Prisma.validator<Prisma.DrugGenericInclude>()({
   brands: {
     include: {
-      manufacturer: true,
-      products: true,
+      company: true,
     },
   },
-  indications: {
+  indicationGenerics: {
     include: {
-      disease: true,
+      indication: true,
     },
   },
-  sideEffects: true,
-  contraindications: true,
+  therapeuticGenerics: {
+    include: {
+      therapeutic: true,
+    },
+  },
   pregnancyCategory: true,
-  lactationWarning: true,
 });
 
-type GenericSource = Prisma.GenericGetPayload<{
+type GenericSource = Prisma.DrugGenericGetPayload<{
   include: typeof medicineSourceInclude;
 }>;
 
@@ -53,43 +53,25 @@ const joinNonEmpty = (items: Array<string | null | undefined>) =>
 const truncateList = (values: string[], limit = 8) => values.slice(0, limit).join(', ');
 
 const buildGenericContent = (generic: GenericSource) => {
-  const indications = generic.indications.map((item) => item.disease.name);
-  const sideEffects = generic.sideEffects.map((item) => item.effect);
-  const contraindications = generic.contraindications.map((item) => item.condition);
+  const indications = generic.indicationGenerics.map((item) => item.indication.name);
   const brandNames = generic.brands.map((item) => item.name);
-  const productSummaries = generic.brands.flatMap((brand) =>
-    brand.products.map((product) => `${brand.name} ${product.strength} ${product.dosageForm}`),
-  );
 
   return [
     `Generic name: ${generic.name}`,
-    generic.scientificName ? `Scientific name: ${generic.scientificName}` : null,
-    joinNonEmpty([
-      generic.drugClass ? `Drug class: ${generic.drugClass}` : null,
-      generic.therapeuticClass ? `Therapeutic class: ${generic.therapeuticClass}` : null,
-    ]),
-    generic.description ? `Description: ${generic.description}` : null,
-    generic.mechanismOfAction ? `Mechanism of action: ${generic.mechanismOfAction}` : null,
-    generic.dosageGuideline ? `Dosage guideline: ${generic.dosageGuideline}` : null,
-    generic.detail?.overview ? `Overview: ${generic.detail.overview}` : null,
-    generic.detail?.indicationSummary ? `Indication summary: ${generic.detail.indicationSummary}` : null,
-    generic.detail?.adultDose ? `Adult dose: ${generic.detail.adultDose}` : null,
-    generic.detail?.childDose ? `Child dose: ${generic.detail.childDose}` : null,
-    generic.detail?.administration ? `Administration: ${generic.detail.administration}` : null,
-    generic.detail?.monitoring ? `Monitoring: ${generic.detail.monitoring}` : null,
-    generic.detail?.precaution ? `Precaution: ${generic.detail.precaution}` : null,
-    generic.detail?.storageCondition ? `Storage: ${generic.detail.storageCondition}` : null,
-    indications.length > 0 ? `Indications: ${truncateList(indications)}` : null,
-    sideEffects.length > 0 ? `Side effects: ${truncateList(sideEffects)}` : null,
-    contraindications.length > 0 ? `Contraindications: ${truncateList(contraindications)}` : null,
+    generic.indication ? `Indication: ${generic.indication}` : null,
+    generic.modeOfAction ? `Mechanism of action: ${generic.modeOfAction}` : null,
+    generic.adultDose ? `Adult dose: ${generic.adultDose}` : null,
+    generic.childDose ? `Child dose: ${generic.childDose}` : null,
+    generic.administration ? `Administration: ${generic.administration}` : null,
+    generic.precaution ? `Precaution: ${generic.precaution}` : null,
+    generic.sideEffect ? `Side effects: ${generic.sideEffect}` : null,
+    generic.interaction ? `Interactions: ${generic.interaction}` : null,
+    indications.length > 0 ? `Mapped Indications: ${truncateList(indications)}` : null,
     generic.pregnancyCategory
-      ? `Pregnancy: category ${generic.pregnancyCategory.category}; ${joinNonEmpty([generic.pregnancyCategory.warning, generic.pregnancyCategory.recommendation])}`
+      ? `Pregnancy Category: ${generic.pregnancyCategory.name}; ${generic.pregnancyCategory.description}`
       : null,
-    generic.lactationWarning
-      ? `Lactation: ${generic.lactationWarning.riskLevel}; ${joinNonEmpty([generic.lactationWarning.warning, generic.lactationWarning.recommendation])}`
-      : null,
+    generic.pregnancyCategoryNote ? `Pregnancy Note: ${generic.pregnancyCategoryNote}` : null,
     brandNames.length > 0 ? `Brands: ${truncateList(brandNames)}` : null,
-    productSummaries.length > 0 ? `Products: ${truncateList(productSummaries)}` : null,
   ]
     .map((line) => line?.trim())
     .filter((line): line is string => Boolean(line))
@@ -101,14 +83,13 @@ const buildGenericDocument = (generic: GenericSource): GenericDocument => {
 
   return {
     sourceType: 'GENERIC',
-    sourceId: generic.id,
+    sourceId: String(generic.id),
     title: generic.name,
     content,
     checksum: createHash('sha256').update(content).digest('hex'),
     metadata: {
-      slug: generic.slug,
+      id: generic.id,
       name: generic.name,
-      scientificName: generic.scientificName,
     },
   };
 };
@@ -171,11 +152,8 @@ const deleteStaleEmbeddings = async (activeSourceIds: string[]) => {
 };
 
 const run = async () => {
-  const generics = await prisma.generic.findMany({
+  const generics = await prisma.drugGeneric.findMany({
     include: medicineSourceInclude,
-    where: {
-      isActive: true,
-    },
     orderBy: {
       name: 'asc',
     },
@@ -212,7 +190,7 @@ const run = async () => {
     console.log(`Synced embedding for ${document.title}`);
   }
 
-  await deleteStaleEmbeddings(generics.map((generic) => generic.id));
+  await deleteStaleEmbeddings(generics.map((generic) => String(generic.id)));
 
   console.log(`Embedding sync completed. Synced: ${syncedCount}, skipped: ${skippedCount}`);
 };
