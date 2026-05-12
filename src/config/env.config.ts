@@ -12,7 +12,7 @@ export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
-  CORS_ENABLED: z.coerce.boolean(),
+  CORS_ENABLED: z.coerce.boolean().default(true),
   HOST: z.string().min(1).default('0.0.0.0'),
   DATABASE_URL: z.string().default(''),
   CORS_ORIGINS: z.string().default('*'),
