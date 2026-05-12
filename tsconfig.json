@@ -6,9 +6,6 @@
     "lib": [
       "ES2022"
     ],
-    "types": [
-      "node"
-    ],
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
