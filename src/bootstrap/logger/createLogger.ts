@@ -41,7 +41,7 @@ export const createLogger = (fileName: string, level: Level = envConfig.logLevel
   };
 
   // On Vercel or similar serverless environments, always log to stdout
-  const useFileTransport = isProduction && !process.env.VERCEL;
+  const useFileTransport = isProduction && !process.env['VERCEL'];
 
   return pino(
     options,

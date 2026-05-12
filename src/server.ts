@@ -5,7 +5,7 @@ import { envConfig } from './config/env.config';
 
 const app = createApp();
 
-if (process.env.VERCEL) {
+if (process.env['VERCEL']) {
   // For Vercel, we just export the app
   module.exports = app;
 } else {
