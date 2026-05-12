@@ -145,13 +145,61 @@ export class MedicineRepository {
   }
 
   async getBrandById(id: number) {
-    return prisma.drugBrand.findUnique({
+    const brand = await prisma.drugBrand.findUnique({
       where: { id },
       include: {
         company: true,
-        generic: true,
+        generic: {
+          include: {
+            pregnancyCategory: true,
+            therapeuticGenerics: {
+              include: {
+                therapeutic: true,
+              },
+            },
+          },
+        },
       },
     });
+
+    if (!brand) return null;
+
+    // Fetch other forms of the same brand (same generic and same company)
+    const otherForms = await prisma.drugBrand.findMany({
+      where: {
+        genericId: brand.genericId,
+        companyId: brand.companyId,
+        id: { not: id },
+      },
+      select: {
+        id: true,
+        name: true,
+        form: true,
+        strength: true,
+      },
+      orderBy: [{ form: 'asc' }, { strength: 'asc' }],
+    });
+
+    // Fetch generic alternatives (different companies, same generic)
+    const genericAlternatives = await prisma.drugBrand.findMany({
+      where: {
+        genericId: brand.genericId,
+        companyId: { not: brand.companyId },
+      },
+      take: 10,
+      include: {
+        company: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return {
+      ...brand,
+      otherForms,
+      genericAlternatives,
+    };
   }
 
   async getGenericById(id: number) {
