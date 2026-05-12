@@ -1,5 +1,5 @@
 export const labTestPaths = {
-  '/lab-test/search': {
+  '/lab-tests/search': {
     get: {
       tags: ['Lab Tests'],
       summary: 'Search for lab tests',
@@ -46,12 +46,7 @@ export const labTestPaths = {
           description: 'Successful search',
           content: {
             'application/json': {
-              schema: {
-                type: 'array',
-                items: {
-                  $ref: '#/components/schemas/LabTest', // Placeholder: assuming a LabTest schema will be defined
-                },
-              },
+              schema: { $ref: '#/components/schemas/PaginatedLabTests' },
             },
           },
         },

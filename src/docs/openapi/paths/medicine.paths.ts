@@ -62,6 +62,39 @@ export const medicinePaths = {
       responses: {
         '200': {
           description: 'Successful retrieval of brands',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/PaginatedBrands' },
+            },
+          },
+        },
+      },
+    },
+  },
+  '/medicines/brands/{id}': {
+    get: {
+      tags: ['Medicine'],
+      summary: 'Get brand by ID',
+      operationId: 'getBrandById',
+      parameters: [
+        {
+          in: 'path',
+          name: 'id',
+          schema: { type: 'integer' },
+          required: true,
+        },
+      ],
+      responses: {
+        '200': {
+          description: 'Successful retrieval of brand',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/Brand' },
+            },
+          },
+        },
+        '404': {
+          description: 'Brand not found',
         },
       },
     },
@@ -94,6 +127,39 @@ export const medicinePaths = {
       responses: {
         '200': {
           description: 'Successful retrieval of generics',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/PaginatedGenerics' },
+            },
+          },
+        },
+      },
+    },
+  },
+  '/medicines/generics/{id}': {
+    get: {
+      tags: ['Medicine'],
+      summary: 'Get generic by ID',
+      operationId: 'getGenericById',
+      parameters: [
+        {
+          in: 'path',
+          name: 'id',
+          schema: { type: 'integer' },
+          required: true,
+        },
+      ],
+      responses: {
+        '200': {
+          description: 'Successful retrieval of generic',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/Generic' },
+            },
+          },
+        },
+        '404': {
+          description: 'Generic not found',
         },
       },
     },
@@ -126,6 +192,39 @@ export const medicinePaths = {
       responses: {
         '200': {
           description: 'Successful retrieval of indications',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/PaginatedIndications' },
+            },
+          },
+        },
+      },
+    },
+  },
+  '/medicines/indications/{id}': {
+    get: {
+      tags: ['Medicine'],
+      summary: 'Get indication by ID',
+      operationId: 'getIndicationById',
+      parameters: [
+        {
+          in: 'path',
+          name: 'id',
+          schema: { type: 'integer' },
+          required: true,
+        },
+      ],
+      responses: {
+        '200': {
+          description: 'Successful retrieval of indication',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/Indication' },
+            },
+          },
+        },
+        '404': {
+          description: 'Indication not found',
         },
       },
     },
@@ -158,6 +257,39 @@ export const medicinePaths = {
       responses: {
         '200': {
           description: 'Successful retrieval of companies',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/PaginatedCompanies' },
+            },
+          },
+        },
+      },
+    },
+  },
+  '/medicines/companies/{id}': {
+    get: {
+      tags: ['Medicine'],
+      summary: 'Get company by ID',
+      operationId: 'getCompanyById',
+      parameters: [
+        {
+          in: 'path',
+          name: 'id',
+          schema: { type: 'integer' },
+          required: true,
+        },
+      ],
+      responses: {
+        '200': {
+          description: 'Successful retrieval of company',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/Company' },
+            },
+          },
+        },
+        '404': {
+          description: 'Company not found',
         },
       },
     },

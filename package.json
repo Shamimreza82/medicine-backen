@@ -16,6 +16,7 @@
     "create:module": "tsx src/shared/scripts/create-module.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:reset": "npx prisma migrate reset",
     "prisma:format": "prisma format",

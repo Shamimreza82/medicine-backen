@@ -11,17 +11,33 @@ export const labTestSchemas = {
     },
   },
 
-  // Response Schemas (Placeholders - these would typically come from actual data models)
   LabTest: {
     type: 'object',
     description: 'Represents a lab test item.',
     properties: {
-      id: { type: 'string', format: 'uuid' },
+      id: { type: 'string' },
       name: { type: 'string' },
-      category: { type: 'string' },
-      specimen: { type: 'string' },
-      // Add other relevant properties of a LabTest
+      slug: { type: 'string' },
+      shortName: { type: 'string', nullable: true },
+      category: { type: 'string', nullable: true },
+      description: { type: 'string', nullable: true },
+      specimen: { type: 'string', nullable: true },
+      preparation: { type: 'string', nullable: true },
+      normalRange: { type: 'string', nullable: true },
+      unit: { type: 'string', nullable: true },
+      isActive: { type: 'boolean' },
     },
     required: ['id', 'name'],
+  },
+
+  PaginatedLabTests: {
+    type: 'object',
+    properties: {
+      data: {
+        type: 'array',
+        items: { $ref: '#/components/schemas/LabTest' },
+      },
+      meta: { $ref: '#/components/schemas/PaginationMeta' },
+    },
   },
 };
