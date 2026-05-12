@@ -44,12 +44,6 @@ type GenericSource = Prisma.DrugGenericGetPayload<{
   include: typeof medicineSourceInclude;
 }>;
 
-const joinNonEmpty = (items: (string | null | undefined)[]) =>
-  items
-    .map((item) => item?.trim())
-    .filter((item): item is string => Boolean(item))
-    .join('; ');
-
 const truncateList = (values: string[], limit = 8) => values.slice(0, limit).join(', ');
 
 const buildGenericContent = (generic: GenericSource) => {

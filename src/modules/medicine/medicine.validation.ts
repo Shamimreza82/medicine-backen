@@ -10,3 +10,11 @@ export const searchMedicineSchema = z.object({
   query: searchMedicineQuerySchema,
 });
 
+export const medicineIdSchema = z.object({
+  id: z.coerce.number().int().positive(),
+});
+
+export const getMedicineSchema = z.object({
+  params: medicineIdSchema,
+});
+

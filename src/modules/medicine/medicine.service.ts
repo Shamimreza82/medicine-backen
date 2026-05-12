@@ -1,3 +1,4 @@
+import { AppError } from '@/shared/errors/AppError';
 import { paginateResponse } from '@/shared/utils/paginateResponse';
 
 import { medicineRepository } from './medicine.repository';
@@ -25,18 +26,59 @@ export class MedicineService {
     return paginateResponse(indications, total, query.page, query.limit);
   }
 
+  async searchCompanies(query: MedicineSearchQuery) {
+    const companies = await medicineRepository.searchCompanies(query);
+    const total = await medicineRepository.countCompanies(query.q || '');
+
+    return paginateResponse(companies, total, query.page, query.limit);
+  }
+
   async combinedSearch(query: MedicineSearchQuery) {
-    const [brands, generics, indications] = await Promise.all([
+    const [brands, generics, indications, companies] = await Promise.all([
       medicineRepository.searchBrands({ ...query, limit: 5 }),
       medicineRepository.searchGenerics({ ...query, limit: 5 }),
       medicineRepository.searchIndications({ ...query, limit: 5 }),
+      medicineRepository.searchCompanies({ ...query, limit: 5 }),
     ]);
 
     return {
       brands,
       generics,
       indications,
+      companies,
     };
+  }
+
+  async getBrandById(id: number) {
+    const brand = await medicineRepository.getBrandById(id);
+    if (!brand) {
+      throw new AppError(404, 'Brand not found');
+    }
+    return brand;
+  }
+
+  async getGenericById(id: number) {
+    const generic = await medicineRepository.getGenericById(id);
+    if (!generic) {
+      throw new AppError(404, 'Generic not found');
+    }
+    return generic;
+  }
+
+  async getCompanyById(id: number) {
+    const company = await medicineRepository.getCompanyById(id);
+    if (!company) {
+      throw new AppError(404, 'Company not found');
+    }
+    return company;
+  }
+
+  async getIndicationById(id: number) {
+    const indication = await medicineRepository.getIndicationById(id);
+    if (!indication) {
+      throw new AppError(404, 'Indication not found');
+    }
+    return indication;
   }
 }
 

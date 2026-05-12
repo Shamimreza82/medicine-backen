@@ -14,6 +14,7 @@ export default [
       '.turbo/**',
       '*.d.ts',
       'prisma/seeds/**',
+      'medicine-frontend/**',
     ],
   },
   js.configs.recommended,
@@ -82,6 +83,12 @@ export default [
       '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: false }],
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    },
+  },
+  {
+    files: ['prisma/**/*.ts', 'src/shared/scripts/**/*.ts'],
+    rules: {
+      'no-console': 'off',
     },
   },
   eslintConfigPrettier,

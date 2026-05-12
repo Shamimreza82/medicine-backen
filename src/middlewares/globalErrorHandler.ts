@@ -5,7 +5,6 @@ import { TokenExpiredError } from 'jsonwebtoken';
 import multer from 'multer';
 import { ZodError } from 'zod';
 
-import { envConfig } from '@/config/env.config';
 import { AppError } from '@/shared/errors/AppError';
 import { handleAppError } from '@/shared/errors/handlers/appError.handler';
 import { handleJwtError } from '@/shared/errors/handlers/jwtError.handler';
@@ -18,10 +17,6 @@ import { sendError } from '@/shared/utils/sendError';
 
 const globalErrorHandler = (err: unknown, req: Request, res: Response, _next: NextFunction) => {
   const requestLogger = getRequestLogger(req);
-
-  if (envConfig.nodeEnv === 'development') {
-    console.error('ERROR 💥', err);
-  }
 
   requestLogger.error(
     {

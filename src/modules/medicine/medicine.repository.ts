@@ -79,6 +79,27 @@ export class MedicineRepository {
     });
   }
 
+  async searchCompanies(query: MedicineSearchQuery) {
+    const q = this.formatQuery(query.q);
+    const limit = Number(query.limit) || 10;
+    const page = Number(query.page) || 1;
+    const skip = (Math.max(1, page) - 1) * limit;
+
+    return prisma.company.findMany({
+      where: {
+        name: {
+          contains: q,
+          mode: 'insensitive' as const,
+        },
+      },
+      take: limit,
+      skip,
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
   async countBrands(q: string) {
     return prisma.drugBrand.count({
       where: {
@@ -109,6 +130,61 @@ export class MedicineRepository {
           mode: 'insensitive' as const,
         },
       },
+    });
+  }
+
+  async countCompanies(q: string) {
+    return prisma.company.count({
+      where: {
+        name: {
+          contains: this.formatQuery(q),
+          mode: 'insensitive' as const,
+        },
+      },
+    });
+  }
+
+  async getBrandById(id: number) {
+    return prisma.drugBrand.findUnique({
+      where: { id },
+      include: {
+        company: true,
+        generic: true,
+      },
+    });
+  }
+
+  async getGenericById(id: number) {
+    return prisma.drugGeneric.findUnique({
+      where: { id },
+      include: {
+        pregnancyCategory: true,
+        therapeuticGenerics: {
+          include: {
+            therapeutic: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getCompanyById(id: number) {
+    return prisma.company.findUnique({
+      where: { id },
+      include: {
+        brands: {
+          include: {
+            generic: true,
+          },
+          take: 50, // Limit brands for now
+        },
+      },
+    });
+  }
+
+  async getIndicationById(id: number) {
+    return prisma.indication.findUnique({
+      where: { id },
     });
   }
 }

@@ -1,4 +1,5 @@
 node_modules/
+medicine-frontend/
 dist/
 coverage/
 .nyc_output/

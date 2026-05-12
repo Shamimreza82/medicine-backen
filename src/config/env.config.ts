@@ -1,9 +1,8 @@
-
-import { AppError } from '@/shared/errors/AppError';
-
 import 'dotenv/config';
 import { StatusCodes } from 'http-status-codes';
 import { z } from 'zod';
+
+import { AppError } from '@/shared/errors/AppError';
 
 
 

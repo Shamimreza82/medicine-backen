@@ -7,26 +7,26 @@ import { batchInsert } from '../helpers/batch';
 
 const DATA_ROOT = path.join(process.cwd(), 'data/medicine_data');
 
-const loadJson = async (fileName: string) => {
+const loadJson = async (fileName: string): Promise<Record<string, string>[]> => {
   const filePath = path.join(DATA_ROOT, fileName);
   const rawData = await fs.readFile(filePath, 'utf8');
-  return JSON.parse(rawData);
+  return JSON.parse(rawData) as Record<string, string>[];
 };
 
 export const importCompanies = async (prisma: PrismaClient) => {
   const data = await loadJson('t_company_name.json');
-  const cleaned = data.map((item: any) => ({
-    id: parseInt(item.company_id),
+  const cleaned = data.map((item) => ({
+    id: parseInt(item.company_id, 10),
     name: item.company_name.trim(),
-    order: parseInt(item.company_order || '0'),
+    order: parseInt(item.company_order ?? '0', 10),
   }));
   await batchInsert(prisma, 'company', cleaned);
 };
 
 export const importPregnancyCategories = async (prisma: PrismaClient) => {
   const data = await loadJson('t_pregnancy_category.json');
-  const cleaned = data.map((item: any) => ({
-    id: parseInt(item.pregnancy_id),
+  const cleaned = data.map((item) => ({
+    id: parseInt(item.pregnancy_id, 10),
     name: item.pregnancy_name,
     description: item.pregnancy_description,
   }));
@@ -41,15 +41,15 @@ export const importDrugGenerics = async (prisma: PrismaClient) => {
   });
   const validCategoryIds = new Set(validCategories.map((c) => c.id));
 
-  const cleaned = data.map((item: any) => {
-    let pregnancyCategoryId = item.pregnancy_category_id ? parseInt(item.pregnancy_category_id) : null;
+  const cleaned = data.map((item) => {
+    let pregnancyCategoryId = item.pregnancy_category_id ? parseInt(item.pregnancy_category_id, 10) : null;
 
     if (pregnancyCategoryId !== null && !validCategoryIds.has(pregnancyCategoryId)) {
       pregnancyCategoryId = null;
     }
 
     return {
-      id: parseInt(item.generic_id),
+      id: parseInt(item.generic_id, 10),
       name: item.generic_name.trim(),
       indication: item.indication,
       administration: item.administration,
@@ -78,16 +78,16 @@ export const importDrugBrands = async (prisma: PrismaClient) => {
   const validGenericIds = new Set(validGenerics.map((g) => g.id));
 
   const cleaned = data
-    .filter((item: any) => {
-      const companyId = parseInt(item.company_id);
-      const genericId = parseInt(item.generic_id);
+    .filter((item) => {
+      const companyId = parseInt(item.company_id, 10);
+      const genericId = parseInt(item.generic_id, 10);
       return validCompanyIds.has(companyId) && validGenericIds.has(genericId);
     })
-    .map((item: any) => ({
-      id: parseInt(item.brand_id),
+    .map((item) => ({
+      id: parseInt(item.brand_id, 10),
       name: item.brand_name.trim(),
-      companyId: parseInt(item.company_id),
-      genericId: parseInt(item.generic_id),
+      companyId: parseInt(item.company_id, 10),
+      genericId: parseInt(item.generic_id, 10),
       form: item.form,
       packSize: item.packsize,
       price: item.price,
@@ -98,8 +98,8 @@ export const importDrugBrands = async (prisma: PrismaClient) => {
 
 export const importHerbalGenerics = async (prisma: PrismaClient) => {
   const data = await loadJson('t_herbal_generic.json');
-  const cleaned = data.map((item: any) => ({
-    id: parseInt(item.generic_id),
+  const cleaned = data.map((item) => ({
+    id: parseInt(item.generic_id, 10),
     name: item.generic_name.trim(),
     composition: item.composition,
     indication: item.indication,
@@ -126,16 +126,16 @@ export const importHerbalBrands = async (prisma: PrismaClient) => {
   const validGenericIds = new Set(validGenerics.map((g) => g.id));
 
   const cleaned = data
-    .filter((item: any) => {
-      const companyId = parseInt(item.company_id);
-      const genericId = parseInt(item.generic_id);
+    .filter((item) => {
+      const companyId = parseInt(item.company_id, 10);
+      const genericId = parseInt(item.generic_id, 10);
       return validCompanyIds.has(companyId) && validGenericIds.has(genericId);
     })
-    .map((item: any) => ({
-      id: parseInt(item.brand_id),
+    .map((item) => ({
+      id: parseInt(item.brand_id, 10),
       name: item.brand_name.trim(),
-      companyId: parseInt(item.company_id),
-      genericId: parseInt(item.generic_id),
+      companyId: parseInt(item.company_id, 10),
+      genericId: parseInt(item.generic_id, 10),
       form: item.form,
       packSize: item.packsize,
       price: item.price,
@@ -146,8 +146,8 @@ export const importHerbalBrands = async (prisma: PrismaClient) => {
 
 export const importIndications = async (prisma: PrismaClient) => {
   const data = await loadJson('t_indication.json');
-  const cleaned = data.map((item: any) => ({
-    id: parseInt(item.indication_id),
+  const cleaned = data.map((item) => ({
+    id: parseInt(item.indication_id, 10),
     name: item.indication_name.trim(),
   }));
   await batchInsert(prisma, 'indication', cleaned);
@@ -163,25 +163,25 @@ export const importIndicationGenericMap = async (prisma: PrismaClient) => {
   const validIndicationIds = new Set(validIndications.map((i) => i.id));
 
   const cleaned = data
-    .filter((item: any) => {
-      const genericId = parseInt(item.generic_id);
-      const indicationId = parseInt(item.indication_id);
+    .filter((item) => {
+      const genericId = parseInt(item.generic_id, 10);
+      const indicationId = parseInt(item.indication_id, 10);
       return validGenericIds.has(genericId) && validIndicationIds.has(indicationId);
     })
-    .map((item: any) => ({
-      id: parseInt(item.id),
-      genericId: parseInt(item.generic_id),
-      indicationId: parseInt(item.indication_id),
+    .map((item) => ({
+      id: parseInt(item.id, 10),
+      genericId: parseInt(item.generic_id, 10),
+      indicationId: parseInt(item.indication_id, 10),
     }));
   await batchInsert(prisma, 'indicationGeneric', cleaned);
 };
 
 export const importSystemic = async (prisma: PrismaClient) => {
   const data = await loadJson('t_systemic.json');
-  const cleaned = data.map((item: any) => {
-    const parentId = parseInt(item.systemic_parent_id || '0');
+  const cleaned = data.map((item) => {
+    const parentId = parseInt(item.systemic_parent_id ?? '0', 10);
     return {
-      id: parseInt(item.systemic_id),
+      id: parseInt(item.systemic_id, 10),
       name: item.systemic_name.trim(),
       parentId: parentId === 0 ? null : parentId,
     };
@@ -196,14 +196,14 @@ export const importTherapeutics = async (prisma: PrismaClient) => {
   const validSystemicIds = new Set(validSystemics.map((s) => s.id));
 
   const cleaned = data
-    .filter((item: any) => {
-      const systemicId = parseInt(item.therapitic_systemic_class_id);
+    .filter((item) => {
+      const systemicId = parseInt(item.therapitic_systemic_class_id, 10);
       return validSystemicIds.has(systemicId);
     })
-    .map((item: any) => ({
-      id: parseInt(item.therapitic_id),
+    .map((item) => ({
+      id: parseInt(item.therapitic_id, 10),
       name: item.therapitic_name.trim(),
-      systemicClassId: parseInt(item.therapitic_systemic_class_id),
+      systemicClassId: parseInt(item.therapitic_systemic_class_id, 10),
     }));
   await batchInsert(prisma, 'therapeutic', cleaned);
 };
@@ -218,15 +218,15 @@ export const importTherapeuticGenericMap = async (prisma: PrismaClient) => {
   const validTherapeuticIds = new Set(validTherapeutics.map((t) => t.id));
 
   const cleaned = data
-    .filter((item: any) => {
-      const genericId = parseInt(item.generic_id);
-      const therapeuticId = parseInt(item.therapitic_id);
+    .filter((item) => {
+      const genericId = parseInt(item.generic_id, 10);
+      const therapeuticId = parseInt(item.therapitic_id, 10);
       return validGenericIds.has(genericId) && validTherapeuticIds.has(therapeuticId);
     })
-    .map((item: any) => ({
-      id: parseInt(item.id),
-      genericId: parseInt(item.generic_id),
-      therapeuticId: parseInt(item.therapitic_id),
+    .map((item) => ({
+      id: parseInt(item.id, 10),
+      genericId: parseInt(item.generic_id, 10),
+      therapeuticId: parseInt(item.therapitic_id, 10),
     }));
   await batchInsert(prisma, 'therapeuticGeneric', cleaned);
 };
@@ -241,14 +241,14 @@ export const importSponsoredBrands = async (prisma: PrismaClient) => {
   const validGenericIds = new Set(validGenerics.map((g) => g.id));
 
   const cleaned = data
-    .filter((item: any) => {
-      const brandId = parseInt(item.brand_id);
-      const genericId = parseInt(item.generic_id);
+    .filter((item) => {
+      const brandId = parseInt(item.brand_id, 10);
+      const genericId = parseInt(item.generic_id, 10);
       return validBrandIds.has(brandId) && validGenericIds.has(genericId);
     })
-    .map((item: any) => ({
-      brandId: parseInt(item.brand_id),
-      genericId: parseInt(item.generic_id),
+    .map((item) => ({
+      brandId: parseInt(item.brand_id, 10),
+      genericId: parseInt(item.generic_id, 10),
     }));
   await batchInsert(prisma, 'sponsoredBrand', cleaned);
 };

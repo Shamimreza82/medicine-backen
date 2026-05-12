@@ -5,9 +5,9 @@ import { PrismaClient } from '@prisma/client';
  * Splits data into chunks to prevent memory overflows and database timeouts.
  */
 export const batchInsert = async (
-  prisma: any,
+  prisma: PrismaClient,
   model: string,
-  data: any[],
+  data: unknown[],
   chunkSize = 5000
 ) => {
   if (!data.length) return;
@@ -17,7 +17,8 @@ export const batchInsert = async (
   let count = 0;
   for (let i = 0; i < data.length; i += chunkSize) {
     const chunk = data.slice(i, i + chunkSize);
-    const result = await prisma[model].createMany({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await (prisma as any)[model].createMany({
       data: chunk,
       skipDuplicates: true,
     });

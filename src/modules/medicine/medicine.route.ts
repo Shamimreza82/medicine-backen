@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { validateRequest } from '@/middlewares/validateRequest';
 
 import { medicineController } from './medicine.controller';
-import { searchMedicineSchema } from './medicine.validation';
+import { getMedicineSchema, searchMedicineSchema } from './medicine.validation';
 
 const router = Router();
 
@@ -14,15 +14,45 @@ router.get(
 );
 
 router.get(
+  '/brands/:id',
+  validateRequest(getMedicineSchema),
+  medicineController.getBrandById,
+);
+
+router.get(
   '/generics',
   validateRequest(searchMedicineSchema),
   medicineController.searchGenerics,
 );
 
 router.get(
+  '/generics/:id',
+  validateRequest(getMedicineSchema),
+  medicineController.getGenericById,
+);
+
+router.get(
   '/indications',
   validateRequest(searchMedicineSchema),
   medicineController.searchIndications,
+);
+
+router.get(
+  '/indications/:id',
+  validateRequest(getMedicineSchema),
+  medicineController.getIndicationById,
+);
+
+router.get(
+  '/companies',
+  validateRequest(searchMedicineSchema),
+  medicineController.searchCompanies,
+);
+
+router.get(
+  '/companies/:id',
+  validateRequest(getMedicineSchema),
+  medicineController.getCompanyById,
 );
 
 router.get(

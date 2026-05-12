@@ -40,6 +40,13 @@ export const medicineSchemas = {
       name: { type: 'string' },
     },
   },
+  Company: {
+    type: 'object',
+    properties: {
+      id: { type: 'integer' },
+      name: { type: 'string' },
+    },
+  },
   CombinedSearchResponse: {
     type: 'object',
     properties: {
@@ -54,6 +61,10 @@ export const medicineSchemas = {
       indications: {
         type: 'array',
         items: { $ref: '#/components/schemas/Indication' },
+      },
+      companies: {
+        type: 'array',
+        items: { $ref: '#/components/schemas/Company' },
       },
     },
   },

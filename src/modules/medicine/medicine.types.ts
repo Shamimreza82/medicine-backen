@@ -34,8 +34,14 @@ export interface IndicationResponse {
   name: string;
 }
 
+export interface CompanyResponse {
+  id: number;
+  name: string;
+}
+
 export interface CombinedSearchResponse {
   brands: BrandResponse[];
   generics: GenericResponse[];
   indications: IndicationResponse[];
+  companies: CompanyResponse[];
 }

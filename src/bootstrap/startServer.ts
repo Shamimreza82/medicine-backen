@@ -23,7 +23,7 @@ const shutdown = async (server: Server, signal: string): Promise<void> => {
   logger.info('Shutdown completed');
 };
 
-export const startServer = async (): Promise<Server> => {
+export const startServer = (): Server => {
   const app = createApp();
 
   const server = app.listen(appConfig.port, appConfig.host, () => {

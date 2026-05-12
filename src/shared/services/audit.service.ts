@@ -19,7 +19,7 @@ interface TAuditLogInput {
   userAgent?: string;
 }
 
-export async function auditLog(data: TAuditLogInput) {
+export function auditLog(data: TAuditLogInput) {
   logAuditEvent({
     action: data.action,
     entity: data.entity,

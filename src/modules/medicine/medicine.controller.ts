@@ -40,12 +40,63 @@ export class MedicineController {
     });
   });
 
+  searchCompanies = catchAsync(async (req: Request, res: Response) => {
+    const query = req.query as unknown as MedicineSearchQuery;
+    const result = await medicineService.searchCompanies(query);
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Companies retrieved successfully',
+      data: result.data,
+      meta: result.meta,
+    });
+  });
+
   combinedSearch = catchAsync(async (req: Request, res: Response) => {
     const query = req.query as unknown as MedicineSearchQuery;
     const result = await medicineService.combinedSearch(query);
     sendResponse(res, 200, {
       success: true,
       message: 'Search results retrieved successfully',
+      data: result,
+    });
+  });
+
+  getBrandById = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await medicineService.getBrandById(Number(id));
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Brand retrieved successfully',
+      data: result,
+    });
+  });
+
+  getGenericById = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await medicineService.getGenericById(Number(id));
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Generic retrieved successfully',
+      data: result,
+    });
+  });
+
+  getCompanyById = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await medicineService.getCompanyById(Number(id));
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Company retrieved successfully',
+      data: result,
+    });
+  });
+
+  getIndicationById = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await medicineService.getIndicationById(Number(id));
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Indication retrieved successfully',
       data: result,
     });
   });
