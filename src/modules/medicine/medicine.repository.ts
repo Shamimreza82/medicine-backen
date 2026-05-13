@@ -49,9 +49,26 @@ export class MedicineRepository {
     const [data, total] = await Promise.all([
       prisma.drugBrand.findMany({
         where,
-        include: {
-          company: true,
-          generic: true,
+        select: {
+          id: true,
+          name: true,
+          form: true,
+          strength: true,
+          price: true,
+          packSize: true,
+          isSponsored: true,
+          company: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          generic: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
         take: limit,
         skip,
@@ -87,6 +104,11 @@ export class MedicineRepository {
     const [data, total] = await Promise.all([
       prisma.drugGeneric.findMany({
         where,
+        select: {
+          id: true,
+          name: true,
+          indication: true,
+        },
         take: limit,
         skip,
         orderBy: {
@@ -99,7 +121,16 @@ export class MedicineRepository {
     return { data, total };
   }
 
+  private classificationTreeCache: any = null;
+  private lastCacheTime = 0;
+  private CACHE_TTL = 1000 * 60 * 60; // 1 hour
+
   async getClassificationTree() {
+    const now = Date.now();
+    if (this.classificationTreeCache && now - this.lastCacheTime < this.CACHE_TTL) {
+      return this.classificationTreeCache;
+    }
+
     const [systemics, therapeutics] = await Promise.all([
       prisma.systemic.findMany({
         orderBy: { name: 'asc' },
@@ -135,6 +166,8 @@ export class MedicineRepository {
       }
     });
 
+    this.classificationTreeCache = roots;
+    this.lastCacheTime = now;
     return roots;
   }
 
@@ -152,6 +185,10 @@ export class MedicineRepository {
     const [data, total] = await Promise.all([
       prisma.indication.findMany({
         where,
+        select: {
+          id: true,
+          name: true,
+        },
         take: limit,
         skip,
         orderBy: {
@@ -178,6 +215,10 @@ export class MedicineRepository {
     const [data, total] = await Promise.all([
       prisma.company.findMany({
         where,
+        select: {
+          id: true,
+          name: true,
+        },
         take: limit,
         skip,
         orderBy: {
@@ -194,7 +235,12 @@ export class MedicineRepository {
     const brand = await prisma.drugBrand.findUnique({
       where: { id },
       include: {
-        company: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         generic: {
           include: {
             pregnancyCategory: true,
@@ -233,8 +279,17 @@ export class MedicineRepository {
         companyId: { not: brand.companyId },
       },
       take: 10,
-      include: {
-        company: true,
+      select: {
+        id: true,
+        name: true,
+        form: true,
+        strength: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: {
         name: 'asc',
@@ -265,12 +320,20 @@ export class MedicineRepository {
   async getCompanyById(id: number) {
     return prisma.company.findUnique({
       where: { id },
+      select: {
+        id: true,
+        name: true,
+      },
     });
   }
 
   async getIndicationById(id: number) {
     return prisma.indication.findUnique({
       where: { id },
+      select: {
+        id: true,
+        name: true,
+      },
     });
   }
 }

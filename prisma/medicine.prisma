@@ -1,8 +1,7 @@
 model Company {
-  id    Int    @id
-  name  String
-  order Int    @default(0)
-
+  id           Int           @id
+  name         String
+  order        Int           @default(0)
   brands       DrugBrand[]
   herbalBrands HerbalBrand[]
 
@@ -10,41 +9,39 @@ model Company {
 }
 
 model DrugGeneric {
-  id                    Int     @id
+  id                    Int                  @id
   name                  String
   indication            String?
   administration        String?
-  adultDose             String? @map("adult_dose")
-  childDose             String? @map("child_dose")
-  contraIndication      String? @map("contra_indication")
+  adultDose             String?              @map("adult_dose")
+  childDose             String?              @map("child_dose")
+  contraIndication      String?              @map("contra_indication")
   interaction           String?
-  modeOfAction          String? @map("mode_of_action")
+  modeOfAction          String?              @map("mode_of_action")
   precaution            String?
-  pregnancyCategoryId   Int?    @map("pregnancy_category_id")
-  pregnancyCategoryNote String? @map("pregnancy_category_note")
-  renalDose             String? @map("renal_dose")
-  sideEffect            String? @map("side_effect")
-
-  pregnancyCategory   PregnancyCategory?   @relation(fields: [pregnancyCategoryId], references: [id])
-  brands              DrugBrand[]
-  indicationGenerics  IndicationGeneric[]
-  therapeuticGenerics TherapeuticGeneric[]
-  sponsoredBrands     SponsoredBrand[]
+  pregnancyCategoryId   Int?                 @map("pregnancy_category_id")
+  pregnancyCategoryNote String?              @map("pregnancy_category_note")
+  renalDose             String?              @map("renal_dose")
+  sideEffect            String?              @map("side_effect")
+  brands                DrugBrand[]
+  pregnancyCategory     PregnancyCategory?   @relation(fields: [pregnancyCategoryId], references: [id])
+  indicationGenerics    IndicationGeneric[]
+  sponsoredBrands       SponsoredBrand[]
+  therapeuticGenerics   TherapeuticGeneric[]
 
   @@map("t_drug_generic")
 }
 
 model DrugBrand {
-  id          Int     @id
-  name        String
-  companyId   Int     @map("company_id")
-  genericId   Int     @map("generic_id")
-  form        String?
-  packSize    String? @map("packsize")
-  price       String?
-  strength    String?
-  isSponsored Boolean @default(false) @map("is_sponsored")
-
+  id              Int              @id
+  name            String
+  companyId       Int              @map("company_id")
+  genericId       Int              @map("generic_id")
+  form            String?
+  packSize        String?          @map("packsize")
+  price           String?
+  strength        String?
+  isSponsored     Boolean          @default(false) @map("is_sponsored")
   company         Company          @relation(fields: [companyId], references: [id])
   generic         DrugGeneric      @relation(fields: [genericId], references: [id])
   sponsoredBrands SponsoredBrand[]
@@ -53,37 +50,35 @@ model DrugBrand {
 }
 
 model HerbalGeneric {
-  id                 Int     @id
+  id                 Int           @id
   name               String
   composition        String?
   contraindication   String?
   description        String?
   dosage             String?
-  drugInteraction    String? @map("drug_interaction")
+  drugInteraction    String?       @map("drug_interaction")
   indication         String?
-  modeOfActions      String? @map("mode_of_actions")
+  modeOfActions      String?       @map("mode_of_actions")
   precaution         String?
-  pregnancyLactation String? @map("pregnancy_lactation")
-  sideEffects        String? @map("side_effects")
-  therapeuticClass   String? @map("therapeutic_class")
-
-  brands HerbalBrand[]
+  pregnancyLactation String?       @map("pregnancy_lactation")
+  sideEffects        String?       @map("side_effects")
+  therapeuticClass   String?       @map("therapeutic_class")
+  brands             HerbalBrand[]
 
   @@map("t_herbal_generic")
 }
 
 model HerbalBrand {
-  id        Int     @id
+  id        Int           @id
   name      String
-  companyId Int     @map("company_id")
-  genericId Int     @map("generic_id")
+  companyId Int           @map("company_id")
+  genericId Int           @map("generic_id")
   form      String?
-  packSize  String? @map("packsize")
+  packSize  String?       @map("packsize")
   price     String?
   strength  String?
-
-  company Company       @relation(fields: [companyId], references: [id])
-  generic HerbalGeneric @relation(fields: [genericId], references: [id])
+  company   Company       @relation(fields: [companyId], references: [id])
+  generic   HerbalGeneric @relation(fields: [genericId], references: [id])
 
   @@map("t_herbal_brand")
 }
@@ -106,10 +101,9 @@ model PregnancyCategory {
 }
 
 model Systemic {
-  id       Int    @id
-  name     String
-  parentId Int?   @map("systemic_parent_id")
-
+  id           Int           @id
+  name         String
+  parentId     Int?          @map("systemic_parent_id")
   parent       Systemic?     @relation("SystemicHierarchy", fields: [parentId], references: [id])
   children     Systemic[]    @relation("SystemicHierarchy")
   therapeutics Therapeutic[]
@@ -118,10 +112,9 @@ model Systemic {
 }
 
 model Therapeutic {
-  id              Int    @id
-  name            String
-  systemicClassId Int    @map("systemic_category_id")
-
+  id                  Int                  @id
+  name                String
+  systemicClassId     Int                  @map("systemic_category_id")
   systemicClass       Systemic             @relation(fields: [systemicClassId], references: [id])
   therapeuticGenerics TherapeuticGeneric[]
 
@@ -129,33 +122,30 @@ model Therapeutic {
 }
 
 model IndicationGeneric {
-  id           Int @id
-  genericId    Int @map("generic_id")
-  indicationId Int @map("indication_id")
-
-  generic    DrugGeneric @relation(fields: [genericId], references: [id])
-  indication Indication  @relation(fields: [indicationId], references: [id])
+  id           Int         @id
+  genericId    Int         @map("generic_id")
+  indicationId Int         @map("indication_id")
+  generic      DrugGeneric @relation(fields: [genericId], references: [id])
+  indication   Indication  @relation(fields: [indicationId], references: [id])
 
   @@map("t_indication_generic_index")
 }
 
 model TherapeuticGeneric {
-  id            Int @id
-  genericId     Int @map("generic_id")
-  therapeuticId Int @map("therapitic_id")
-
-  generic     DrugGeneric @relation(fields: [genericId], references: [id])
-  therapeutic Therapeutic @relation(fields: [therapeuticId], references: [id])
+  id            Int         @id
+  genericId     Int         @map("generic_id")
+  therapeuticId Int         @map("therapitic_id")
+  generic       DrugGeneric @relation(fields: [genericId], references: [id])
+  therapeutic   Therapeutic @relation(fields: [therapeuticId], references: [id])
 
   @@map("t_therapitic_generic")
 }
 
 model SponsoredBrand {
-  brandId   Int @map("brand_id")
-  genericId Int @map("generic_id")
-
-  brand   DrugBrand   @relation(fields: [brandId], references: [id])
-  generic DrugGeneric @relation(fields: [genericId], references: [id])
+  brandId   Int         @map("brand_id")
+  genericId Int         @map("generic_id")
+  brand     DrugBrand   @relation(fields: [brandId], references: [id])
+  generic   DrugGeneric @relation(fields: [genericId], references: [id])
 
   @@id([brandId, genericId])
   @@map("t_sponsored_brand")

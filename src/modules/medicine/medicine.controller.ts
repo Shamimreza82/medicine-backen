@@ -53,6 +53,7 @@ export class MedicineController {
 
   getClassificationTree = catchAsync(async (req: Request, res: Response) => {
     const result = await medicineService.getClassificationTree();
+    res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
     sendResponse(res, 200, {
       success: true,
       message: 'Classification tree retrieved successfully',

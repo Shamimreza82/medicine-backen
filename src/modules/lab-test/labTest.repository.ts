@@ -46,6 +46,15 @@ export const LabTestRepository = {
       prisma.labTest.count({ where }),
       prisma.labTest.findMany({
         where,
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          shortName: true,
+          category: true,
+          specimen: true,
+          isActive: true,
+        },
         orderBy: [{ name: 'asc' }],
         skip,
         take: limit,
