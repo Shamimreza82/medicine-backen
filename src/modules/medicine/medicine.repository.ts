@@ -76,6 +76,14 @@ export class MedicineRepository {
       },
     };
 
+    if (query.therapeuticId) {
+      where.therapeuticGenerics = {
+        some: {
+          therapeuticId: Number(query.therapeuticId),
+        },
+      };
+    }
+
     const [data, total] = await Promise.all([
       prisma.drugGeneric.findMany({
         where,
@@ -89,6 +97,45 @@ export class MedicineRepository {
     ]);
 
     return { data, total };
+  }
+
+  async getClassificationTree() {
+    const [systemics, therapeutics] = await Promise.all([
+      prisma.systemic.findMany({
+        orderBy: { name: 'asc' },
+      }),
+      prisma.therapeutic.findMany({
+        orderBy: { name: 'asc' },
+      }),
+    ]);
+
+    const systemicMap = new Map<number, any>();
+    const roots: any[] = [];
+
+    systemics.forEach((s) => {
+      systemicMap.set(s.id, { ...s, children: [], therapeutics: [] });
+    });
+
+    therapeutics.forEach((t) => {
+      const parent = systemicMap.get(t.systemicClassId);
+      if (parent) {
+        parent.therapeutics.push(t);
+      }
+    });
+
+    systemics.forEach((s) => {
+      const node = systemicMap.get(s.id);
+      if (s.parentId) {
+        const parent = systemicMap.get(s.parentId);
+        if (parent) {
+          parent.children.push(node);
+        }
+      } else {
+        roots.push(node);
+      }
+    });
+
+    return roots;
   }
 
   async searchIndications(query: MedicineSearchQuery) {

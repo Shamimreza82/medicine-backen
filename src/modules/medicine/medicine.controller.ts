@@ -51,6 +51,15 @@ export class MedicineController {
     });
   });
 
+  getClassificationTree = catchAsync(async (req: Request, res: Response) => {
+    const result = await medicineService.getClassificationTree();
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Classification tree retrieved successfully',
+      data: result,
+    });
+  });
+
   combinedSearch = catchAsync(async (req: Request, res: Response) => {
     const query = req.query as unknown as MedicineSearchQuery;
     const result = await medicineService.combinedSearch(query);

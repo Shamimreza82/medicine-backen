@@ -25,6 +25,10 @@ export class MedicineService {
     return paginateResponse(data, total, Number(query.page), Number(query.limit));
   }
 
+  async getClassificationTree() {
+    return medicineRepository.getClassificationTree();
+  }
+
   async combinedSearch(query: MedicineSearchQuery) {
     const [brands, generics, indications, companies] = await Promise.all([
       medicineRepository.searchBrands({ ...query, limit: 5 }),

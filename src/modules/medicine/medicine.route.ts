@@ -56,6 +56,11 @@ router.get(
 );
 
 router.get(
+  '/classifications',
+  medicineController.getClassificationTree,
+);
+
+router.get(
   '/search',
   validateRequest(searchMedicineSchema),
   medicineController.combinedSearch,
