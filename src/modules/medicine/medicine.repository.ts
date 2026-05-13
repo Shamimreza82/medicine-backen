@@ -1,4 +1,7 @@
+import { Prisma } from '@prisma/client';
+
 import { prisma } from '@/bootstrap/prisma';
+import { calculatePagination } from '@/shared/utils/pagination';
 
 import { MedicineSearchQuery } from './medicine.types';
 
@@ -13,135 +16,131 @@ export class MedicineRepository {
   }
 
   async searchBrands(query: MedicineSearchQuery) {
+    const { limit, skip } = calculatePagination(query);
     const q = this.formatQuery(query.q);
-    const limit = Number(query.limit) || 10;
-    const page = Number(query.page) || 1;
-    const skip = (Math.max(1, page) - 1) * limit;
 
-    return prisma.drugBrand.findMany({
-      where: {
-        name: {
-          contains: q,
-          mode: 'insensitive' as const,
+    const where: Prisma.DrugBrandWhereInput = {};
+
+    if (q) {
+      where.name = {
+        contains: q,
+        mode: 'insensitive',
+      };
+    }
+
+    if (query.companyId) {
+      where.companyId = Number(query.companyId);
+    }
+
+    if (query.genericId) {
+      where.genericId = Number(query.genericId);
+    }
+
+    if (query.indicationId) {
+      where.generic = {
+        indicationGenerics: {
+          some: {
+            indicationId: Number(query.indicationId),
+          },
         },
-      },
-      include: {
-        company: true,
-        generic: true,
-      },
-      take: limit,
-      skip,
-      orderBy: {
-        name: 'asc',
-      },
-    });
+      };
+    }
+
+    const [data, total] = await Promise.all([
+      prisma.drugBrand.findMany({
+        where,
+        include: {
+          company: true,
+          generic: true,
+        },
+        take: limit,
+        skip,
+        orderBy: {
+          name: 'asc',
+        },
+      }),
+      prisma.drugBrand.count({ where }),
+    ]);
+
+    return { data, total };
   }
 
   async searchGenerics(query: MedicineSearchQuery) {
+    const { limit, skip } = calculatePagination(query);
     const q = this.formatQuery(query.q);
-    const limit = Number(query.limit) || 10;
-    const page = Number(query.page) || 1;
-    const skip = (Math.max(1, page) - 1) * limit;
 
-    return prisma.drugGeneric.findMany({
-      where: {
-        name: {
-          contains: q,
-          mode: 'insensitive' as const,
+    const where: Prisma.DrugGenericWhereInput = {
+      name: {
+        contains: q,
+        mode: 'insensitive',
+      },
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.drugGeneric.findMany({
+        where,
+        take: limit,
+        skip,
+        orderBy: {
+          name: 'asc',
         },
-      },
-      take: limit,
-      skip,
-      orderBy: {
-        name: 'asc',
-      },
-    });
+      }),
+      prisma.drugGeneric.count({ where }),
+    ]);
+
+    return { data, total };
   }
 
   async searchIndications(query: MedicineSearchQuery) {
+    const { limit, skip } = calculatePagination(query);
     const q = this.formatQuery(query.q);
-    const limit = Number(query.limit) || 10;
-    const page = Number(query.page) || 1;
-    const skip = (Math.max(1, page) - 1) * limit;
 
-    return prisma.indication.findMany({
-      where: {
-        name: {
-          contains: q,
-          mode: 'insensitive' as const,
+    const where: Prisma.IndicationWhereInput = {
+      name: {
+        contains: q,
+        mode: 'insensitive',
+      },
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.indication.findMany({
+        where,
+        take: limit,
+        skip,
+        orderBy: {
+          name: 'asc',
         },
-      },
-      take: limit,
-      skip,
-      orderBy: {
-        name: 'asc',
-      },
-    });
+      }),
+      prisma.indication.count({ where }),
+    ]);
+
+    return { data, total };
   }
 
   async searchCompanies(query: MedicineSearchQuery) {
+    const { limit, skip } = calculatePagination(query);
     const q = this.formatQuery(query.q);
-    const limit = Number(query.limit) || 10;
-    const page = Number(query.page) || 1;
-    const skip = (Math.max(1, page) - 1) * limit;
 
-    return prisma.company.findMany({
-      where: {
-        name: {
-          contains: q,
-          mode: 'insensitive' as const,
-        },
+    const where: Prisma.CompanyWhereInput = {
+      name: {
+        contains: q,
+        mode: 'insensitive',
       },
-      take: limit,
-      skip,
-      orderBy: {
-        name: 'asc',
-      },
-    });
-  }
+    };
 
-  async countBrands(q: string) {
-    return prisma.drugBrand.count({
-      where: {
-        name: {
-          contains: this.formatQuery(q),
-          mode: 'insensitive' as const,
+    const [data, total] = await Promise.all([
+      prisma.company.findMany({
+        where,
+        take: limit,
+        skip,
+        orderBy: {
+          name: 'asc',
         },
-      },
-    });
-  }
+      }),
+      prisma.company.count({ where }),
+    ]);
 
-  async countGenerics(q: string) {
-    return prisma.drugGeneric.count({
-      where: {
-        name: {
-          contains: this.formatQuery(q),
-          mode: 'insensitive' as const,
-        },
-      },
-    });
-  }
-
-  async countIndications(q: string) {
-    return prisma.indication.count({
-      where: {
-        name: {
-          contains: this.formatQuery(q),
-          mode: 'insensitive' as const,
-        },
-      },
-    });
-  }
-
-  async countCompanies(q: string) {
-    return prisma.company.count({
-      where: {
-        name: {
-          contains: this.formatQuery(q),
-          mode: 'insensitive' as const,
-        },
-      },
-    });
+    return { data, total };
   }
 
   async getBrandById(id: number) {
@@ -219,14 +218,6 @@ export class MedicineRepository {
   async getCompanyById(id: number) {
     return prisma.company.findUnique({
       where: { id },
-      include: {
-        brands: {
-          include: {
-            generic: true,
-          },
-          take: 50, // Limit brands for now
-        },
-      },
     });
   }
 

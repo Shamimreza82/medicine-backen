@@ -1,4 +1,9 @@
+import { Prisma } from '@prisma/client';
+
 import { prisma } from '@/bootstrap/prisma';
+import { calculatePagination } from '@/shared/utils/pagination';
+
+import { LabTestSearchQuery } from './labTest.types';
 
 export const LabTestRepository = {
   privateFormatQuery(q: string | undefined): string {
@@ -9,46 +14,44 @@ export const LabTestRepository = {
     return search;
   },
 
-  search(
-    query: string,
-    category: string | undefined,
-    specimen: string | undefined,
-    limit: number,
-    page: number,
-  ) {
-    const q = this.privateFormatQuery(query);
-    const where = {
+  async search(query: LabTestSearchQuery) {
+    const { limit, skip } = calculatePagination(query);
+    const q = this.privateFormatQuery(query.q);
+
+    const where: Prisma.LabTestWhereInput = {
       isActive: true,
       ...(q
         ? {
             OR: [
-              { name: { contains: q, mode: 'insensitive' as const } },
-              { slug: { contains: q, mode: 'insensitive' as const } },
-              { shortName: { contains: q, mode: 'insensitive' as const } },
-              { description: { contains: q, mode: 'insensitive' as const } },
+              { name: { contains: q, mode: 'insensitive' } },
+              { slug: { contains: q, mode: 'insensitive' } },
+              { shortName: { contains: q, mode: 'insensitive' } },
+              { description: { contains: q, mode: 'insensitive' } },
             ],
           }
         : {}),
-      ...(category
+      ...(query.category
         ? {
-            category: { equals: category, mode: 'insensitive' as const },
+            category: { equals: query.category, mode: 'insensitive' },
           }
         : {}),
-      ...(specimen
+      ...(query.specimen
         ? {
-            specimen: { equals: specimen, mode: 'insensitive' as const },
+            specimen: { equals: query.specimen, mode: 'insensitive' },
           }
         : {}),
     };
 
-    return prisma.$transaction([
+    const [total, data] = await Promise.all([
       prisma.labTest.count({ where }),
       prisma.labTest.findMany({
         where,
         orderBy: [{ name: 'asc' }],
-        skip: (Math.max(1, page) - 1) * limit,
+        skip,
         take: limit,
       }),
     ]);
+
+    return { data, total };
   },
 };

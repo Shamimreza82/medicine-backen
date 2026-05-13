@@ -6,31 +6,23 @@ import { MedicineSearchQuery } from './medicine.types';
 
 export class MedicineService {
   async searchBrands(query: MedicineSearchQuery) {
-    const brands = await medicineRepository.searchBrands(query);
-    const total = await medicineRepository.countBrands(query.q || '');
-
-    return paginateResponse(brands, total, query.page, query.limit);
+    const { data, total } = await medicineRepository.searchBrands(query);
+    return paginateResponse(data, total, Number(query.page), Number(query.limit));
   }
 
   async searchGenerics(query: MedicineSearchQuery) {
-    const generics = await medicineRepository.searchGenerics(query);
-    const total = await medicineRepository.countGenerics(query.q || '');
-
-    return paginateResponse(generics, total, query.page, query.limit);
+    const { data, total } = await medicineRepository.searchGenerics(query);
+    return paginateResponse(data, total, Number(query.page), Number(query.limit));
   }
 
   async searchIndications(query: MedicineSearchQuery) {
-    const indications = await medicineRepository.searchIndications(query);
-    const total = await medicineRepository.countIndications(query.q || '');
-
-    return paginateResponse(indications, total, query.page, query.limit);
+    const { data, total } = await medicineRepository.searchIndications(query);
+    return paginateResponse(data, total, Number(query.page), Number(query.limit));
   }
 
   async searchCompanies(query: MedicineSearchQuery) {
-    const companies = await medicineRepository.searchCompanies(query);
-    const total = await medicineRepository.countCompanies(query.q || '');
-
-    return paginateResponse(companies, total, query.page, query.limit);
+    const { data, total } = await medicineRepository.searchCompanies(query);
+    return paginateResponse(data, total, Number(query.page), Number(query.limit));
   }
 
   async combinedSearch(query: MedicineSearchQuery) {
@@ -42,10 +34,10 @@ export class MedicineService {
     ]);
 
     return {
-      brands,
-      generics,
-      indications,
-      companies,
+      brands: brands.data,
+      generics: generics.data,
+      indications: indications.data,
+      companies: companies.data,
     };
   }
 
