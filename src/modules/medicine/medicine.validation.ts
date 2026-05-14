@@ -8,6 +8,7 @@ export const searchMedicineQuerySchema = z.object({
   genericId: z.coerce.number().int().optional(),
   indicationId: z.coerce.number().int().optional(),
   therapeuticId: z.coerce.number().int().optional(),
+  letter: z.string().length(1).optional(),
 });
 
 export const searchMedicineSchema = z.object({

@@ -22,10 +22,22 @@ export class MedicineRepository {
     const where: Prisma.DrugBrandWhereInput = {};
 
     if (q) {
-      where.name = {
-        contains: q,
-        mode: 'insensitive',
-      };
+      where.OR = [
+        {
+          name: {
+            contains: q,
+            mode: 'insensitive',
+          },
+        },
+        {
+          generic: {
+            name: {
+              contains: q,
+              mode: 'insensitive',
+            },
+          },
+        },
+      ];
     }
 
     if (query.companyId) {
@@ -86,12 +98,21 @@ export class MedicineRepository {
     const { limit, skip } = calculatePagination(query);
     const q = this.formatQuery(query.q);
 
-    const where: Prisma.DrugGenericWhereInput = {
-      name: {
+    const where: Prisma.DrugGenericWhereInput = {};
+
+    if (q) {
+      where.name = {
         contains: q,
         mode: 'insensitive',
-      },
-    };
+      };
+    }
+
+    if (query.letter) {
+      where.name = {
+        startsWith: query.letter,
+        mode: 'insensitive',
+      };
+    }
 
     if (query.therapeuticId) {
       where.therapeuticGenerics = {
