@@ -76,6 +76,11 @@ export class MedicineService {
     }
     return indication;
   }
+
+  async getDistinctForms(query: MedicineSearchQuery) {
+    const { data, total } = await medicineRepository.getDistinctForms(query);
+    return paginateResponse(data, total, Number(query.page), Number(query.limit));
+  }
 }
 
 export const medicineService = new MedicineService();

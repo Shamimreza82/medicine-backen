@@ -9,6 +9,7 @@ export const searchMedicineQuerySchema = z.object({
   indicationId: z.coerce.number().int().optional(),
   therapeuticId: z.coerce.number().int().optional(),
   letter: z.string().length(1).optional(),
+  form: z.string().trim().optional(),
 });
 
 export const searchMedicineSchema = z.object({
@@ -22,4 +23,3 @@ export const medicineIdSchema = z.object({
 export const getMedicineSchema = z.object({
   params: medicineIdSchema,
 });
-

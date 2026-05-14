@@ -61,6 +61,11 @@ router.get(
 );
 
 router.get(
+  '/dosage-forms',
+  medicineController.getDistinctForms,
+);
+
+router.get(
   '/search',
   validateRequest(searchMedicineSchema),
   medicineController.combinedSearch,

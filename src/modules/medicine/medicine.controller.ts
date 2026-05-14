@@ -110,6 +110,17 @@ export class MedicineController {
       data: result,
     });
   });
+
+  getDistinctForms = catchAsync(async (req: Request, res: Response) => {
+    const query = req.query as unknown as MedicineSearchQuery;
+    const result = await medicineService.getDistinctForms(query);
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Dosage forms retrieved successfully',
+      data: result.data,
+      meta: result.meta,
+    });
+  });
 }
 
 export const medicineController = new MedicineController();

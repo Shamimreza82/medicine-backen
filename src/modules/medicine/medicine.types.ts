@@ -19,6 +19,12 @@ export interface BrandResponse {
   generic: {
     id: number;
     name: string;
+    therapeuticGenerics?: Array<{
+      therapeutic: {
+        id: number;
+        name: string;
+      };
+    }>;
   };
 }
 
@@ -27,6 +33,12 @@ export interface GenericResponse {
   name: string;
   indication: string | null;
   therapeuticClass?: string | null;
+  therapeuticGenerics?: Array<{
+    therapeutic: {
+      id: number;
+      name: string;
+    };
+  }>;
 }
 
 export interface IndicationResponse {

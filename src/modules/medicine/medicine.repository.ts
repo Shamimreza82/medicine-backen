@@ -48,6 +48,13 @@ export class MedicineRepository {
       where.genericId = Number(query.genericId);
     }
 
+    if (query.form) {
+      where.form = {
+        equals: query.form,
+        mode: 'insensitive',
+      };
+    }
+
     if (query.indicationId) {
       where.generic = {
         indicationGenerics: {
@@ -79,6 +86,16 @@ export class MedicineRepository {
             select: {
               id: true,
               name: true,
+              therapeuticGenerics: {
+                select: {
+                  therapeutic: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -122,6 +139,14 @@ export class MedicineRepository {
       };
     }
 
+    if (query.indicationId) {
+      where.indicationGenerics = {
+        some: {
+          indicationId: Number(query.indicationId),
+        },
+      };
+    }
+
     const [data, total] = await Promise.all([
       prisma.drugGeneric.findMany({
         where,
@@ -129,6 +154,16 @@ export class MedicineRepository {
           id: true,
           name: true,
           indication: true,
+          therapeuticGenerics: {
+            select: {
+              therapeutic: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
         },
         take: limit,
         skip,
@@ -349,13 +384,84 @@ export class MedicineRepository {
   }
 
   async getIndicationById(id: number) {
-    return prisma.indication.findUnique({
+    const indication = await prisma.indication.findUnique({
       where: { id },
       select: {
         id: true,
         name: true,
       },
     });
+
+    if (!indication) return null;
+
+    // Fetch unique therapeutics associated with this indication through generics
+    const therapeutics = await prisma.therapeutic.findMany({
+      where: {
+        therapeuticGenerics: {
+          some: {
+            generic: {
+              indicationGenerics: {
+                some: {
+                  indicationId: id,
+                },
+              },
+            },
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return {
+      ...indication,
+      therapeutics,
+    };
+  }
+
+  async getDistinctForms(query: MedicineSearchQuery) {
+    const { limit, skip } = calculatePagination(query);
+    const q = this.formatQuery(query.q);
+
+    const [drugForms, herbalForms] = await Promise.all([
+      prisma.drugBrand.findMany({
+        distinct: ['form'],
+        select: { form: true },
+        where: { 
+          form: { 
+            not: null,
+            contains: q,
+            mode: 'insensitive'
+          } 
+        },
+      }),
+      prisma.herbalBrand.findMany({
+        distinct: ['form'],
+        select: { form: true },
+        where: { 
+          form: { 
+            not: null,
+            contains: q,
+            mode: 'insensitive'
+          } 
+        },
+      }),
+    ]);
+
+    const allForms = Array.from(new Set([
+      ...drugForms.map((f) => f.form as string),
+      ...herbalForms.map((f) => f.form as string),
+    ])).filter(Boolean).sort();
+
+    const total = allForms.length;
+    const data = allForms.slice(skip, skip + limit);
+
+    return { data, total };
   }
 }
 
