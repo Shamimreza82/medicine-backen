@@ -428,35 +428,52 @@ export class MedicineRepository {
     const { limit, skip } = calculatePagination(query);
     const q = this.formatQuery(query.q);
 
-    const [drugForms, herbalForms] = await Promise.all([
-      prisma.drugBrand.findMany({
-        distinct: ['form'],
-        select: { form: true },
-        where: { 
-          form: { 
+    const [drugFormCounts, herbalFormCounts] = await Promise.all([
+      prisma.drugBrand.groupBy({
+        by: ['form'],
+        _count: {
+          _all: true,
+        },
+        where: {
+          form: {
             not: null,
             contains: q,
-            mode: 'insensitive'
-          } 
+            mode: 'insensitive',
+          },
         },
       }),
-      prisma.herbalBrand.findMany({
-        distinct: ['form'],
-        select: { form: true },
-        where: { 
-          form: { 
+      prisma.herbalBrand.groupBy({
+        by: ['form'],
+        _count: {
+          _all: true,
+        },
+        where: {
+          form: {
             not: null,
             contains: q,
-            mode: 'insensitive'
-          } 
+            mode: 'insensitive',
+          },
         },
       }),
     ]);
 
-    const allForms = Array.from(new Set([
-      ...drugForms.map((f) => f.form as string),
-      ...herbalForms.map((f) => f.form as string),
-    ])).filter(Boolean).sort();
+    const formMap = new Map<string, number>();
+
+    drugFormCounts.forEach((f) => {
+      if (f.form) {
+        formMap.set(f.form, (formMap.get(f.form) || 0) + f._count._all);
+      }
+    });
+
+    herbalFormCounts.forEach((f) => {
+      if (f.form) {
+        formMap.set(f.form, (formMap.get(f.form) || 0) + f._count._all);
+      }
+    });
+
+    const allForms = Array.from(formMap.entries())
+      .map(([form, count]) => ({ form, count }))
+      .sort((a, b) => a.form.localeCompare(b.form));
 
     const total = allForms.length;
     const data = allForms.slice(skip, skip + limit);
