@@ -15,6 +15,17 @@ export class MedicineRepository {
     return search;
   }
 
+  async getStats() {
+    const [brands, generics, companies, indications] = await Promise.all([
+      prisma.drugBrand.count(),
+      prisma.drugGeneric.count(),
+      prisma.company.count(),
+      prisma.indication.count(),
+    ]);
+
+    return { brands, generics, companies, indications };
+  }
+
   async searchBrands(query: MedicineSearchQuery) {
     const { limit, skip } = calculatePagination(query);
     const q = this.formatQuery(query.q);
@@ -51,6 +62,13 @@ export class MedicineRepository {
     if (query.form) {
       where.form = {
         equals: query.form,
+        mode: 'insensitive',
+      };
+    }
+
+    if (query.letter) {
+      where.name = {
+        startsWith: query.letter,
         mode: 'insensitive',
       };
     }
@@ -177,6 +195,99 @@ export class MedicineRepository {
     return { data, total };
   }
 
+  async createCompany(data: Prisma.CompanyCreateInput) {
+    if (!data.id) {
+      const lastCompany = await prisma.company.findFirst({
+        orderBy: { id: 'desc' },
+        select: { id: true },
+      });
+      data.id = (lastCompany?.id ?? 0) + 1;
+    }
+
+    return prisma.company.create({
+      data,
+    });
+  }
+
+  async updateCompany(id: number, data: Prisma.CompanyUpdateInput) {
+    return prisma.company.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async createIndication(data: Prisma.IndicationCreateInput) {
+    if (!data.id) {
+      const lastIndication = await prisma.indication.findFirst({
+        orderBy: { id: 'desc' },
+        select: { id: true },
+      });
+      data.id = (lastIndication?.id ?? 0) + 1;
+    }
+
+    return prisma.indication.create({
+      data,
+    });
+  }
+
+  async updateIndication(id: number, data: Prisma.IndicationUpdateInput) {
+    return prisma.indication.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async createBrand(data: Prisma.DrugBrandCreateInput) {
+    if (!data.id) {
+      const lastBrand = await prisma.drugBrand.findFirst({
+        orderBy: { id: 'desc' },
+        select: { id: true },
+      });
+      data.id = (lastBrand?.id ?? 0) + 1;
+    }
+
+    return prisma.drugBrand.create({
+      data,
+      include: {
+        company: true,
+        generic: true,
+      },
+    });
+  }
+
+  async updateBrand(id: number, data: Prisma.DrugBrandUpdateInput) {
+    return prisma.drugBrand.update({
+      where: { id },
+      data,
+      include: {
+        company: true,
+        generic: true,
+      },
+    });
+  }
+
+  async createGeneric(data: Prisma.DrugGenericCreateInput) {
+    // If ID is not provided, calculate the next one
+    if (!data.id) {
+      const lastGeneric = await prisma.drugGeneric.findFirst({
+        orderBy: { id: 'desc' },
+        select: { id: true },
+      });
+      data.id = (lastGeneric?.id ?? 0) + 1;
+    }
+
+    return prisma.drugGeneric.create({
+      data,
+    });
+  }
+
+  async updateGeneric(id: number, data: Prisma.DrugGenericUpdateInput) {
+    return prisma.drugGeneric.update({
+      where: { id },
+      data,
+    });
+  }
+
   private classificationTreeCache: any = null;
   private lastCacheTime = 0;
   private CACHE_TTL = 1000 * 60 * 60; // 1 hour
@@ -231,12 +342,21 @@ export class MedicineRepository {
     const { limit, skip } = calculatePagination(query);
     const q = this.formatQuery(query.q);
 
-    const where: Prisma.IndicationWhereInput = {
-      name: {
+    const where: Prisma.IndicationWhereInput = {};
+
+    if (q) {
+      where.name = {
         contains: q,
         mode: 'insensitive',
-      },
-    };
+      };
+    }
+
+    if (query.letter) {
+      where.name = {
+        startsWith: query.letter,
+        mode: 'insensitive',
+      };
+    }
 
     const [data, total] = await Promise.all([
       prisma.indication.findMany({
@@ -261,12 +381,21 @@ export class MedicineRepository {
     const { limit, skip } = calculatePagination(query);
     const q = this.formatQuery(query.q);
 
-    const where: Prisma.CompanyWhereInput = {
-      name: {
+    const where: Prisma.CompanyWhereInput = {};
+
+    if (q) {
+      where.name = {
         contains: q,
         mode: 'insensitive',
-      },
-    };
+      };
+    }
+
+    if (query.letter) {
+      where.name = {
+        startsWith: query.letter,
+        mode: 'insensitive',
+      };
+    }
 
     const [data, total] = await Promise.all([
       prisma.company.findMany({
@@ -285,6 +414,12 @@ export class MedicineRepository {
     ]);
 
     return { data, total };
+  }
+
+  async getPregnancyCategories() {
+    return prisma.pregnancyCategory.findMany({
+      orderBy: { name: 'asc' },
+    });
   }
 
   async getBrandById(id: number) {
@@ -428,32 +563,54 @@ export class MedicineRepository {
     const { limit, skip } = calculatePagination(query);
     const q = this.formatQuery(query.q);
 
+    const drugWhere: Prisma.DrugBrandWhereInput = {
+      form: {
+        not: null,
+      },
+    };
+
+    const herbalWhere: Prisma.HerbalBrandWhereInput = {
+      form: {
+        not: null,
+      },
+    };
+
+    if (q) {
+      drugWhere.form = {
+        contains: q,
+        mode: 'insensitive',
+      };
+      herbalWhere.form = {
+        contains: q,
+        mode: 'insensitive',
+      };
+    }
+
+    if (query.letter) {
+      drugWhere.form = {
+        startsWith: query.letter,
+        mode: 'insensitive',
+      };
+      herbalWhere.form = {
+        startsWith: query.letter,
+        mode: 'insensitive',
+      };
+    }
+
     const [drugFormCounts, herbalFormCounts] = await Promise.all([
       prisma.drugBrand.groupBy({
         by: ['form'],
         _count: {
           _all: true,
         },
-        where: {
-          form: {
-            not: null,
-            contains: q,
-            mode: 'insensitive',
-          },
-        },
+        where: drugWhere,
       }),
       prisma.herbalBrand.groupBy({
         by: ['form'],
         _count: {
           _all: true,
         },
-        where: {
-          form: {
-            not: null,
-            contains: q,
-            mode: 'insensitive',
-          },
-        },
+        where: herbalWhere,
       }),
     ]);
 

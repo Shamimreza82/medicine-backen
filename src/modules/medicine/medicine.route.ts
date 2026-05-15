@@ -3,7 +3,18 @@ import { Router } from 'express';
 import { validateRequest } from '@/middlewares/validateRequest';
 
 import { medicineController } from './medicine.controller';
-import { getMedicineSchema, searchMedicineSchema } from './medicine.validation';
+import {
+  createBrandSchema,
+  createCompanySchema,
+  createGenericSchema,
+  createIndicationSchema,
+  getMedicineSchema,
+  searchMedicineSchema,
+  updateBrandSchema,
+  updateCompanySchema,
+  updateGenericSchema,
+  updateIndicationSchema,
+} from './medicine.validation';
 
 const router = Router();
 
@@ -14,9 +25,26 @@ router.get(
 );
 
 router.get(
+  '/stats',
+  medicineController.getStats,
+);
+
+router.get(
   '/brands/:id',
   validateRequest(getMedicineSchema),
   medicineController.getBrandById,
+);
+
+router.post(
+  '/brands',
+  validateRequest(createBrandSchema),
+  medicineController.createBrand,
+);
+
+router.patch(
+  '/brands/:id',
+  validateRequest(updateBrandSchema),
+  medicineController.updateBrand,
 );
 
 router.get(
@@ -31,6 +59,18 @@ router.get(
   medicineController.getGenericById,
 );
 
+router.post(
+  '/generics',
+  validateRequest(createGenericSchema),
+  medicineController.createGeneric,
+);
+
+router.patch(
+  '/generics/:id',
+  validateRequest(updateGenericSchema),
+  medicineController.updateGeneric,
+);
+
 router.get(
   '/indications',
   validateRequest(searchMedicineSchema),
@@ -43,6 +83,18 @@ router.get(
   medicineController.getIndicationById,
 );
 
+router.post(
+  '/indications',
+  validateRequest(createIndicationSchema),
+  medicineController.createIndication,
+);
+
+router.patch(
+  '/indications/:id',
+  validateRequest(updateIndicationSchema),
+  medicineController.updateIndication,
+);
+
 router.get(
   '/companies',
   validateRequest(searchMedicineSchema),
@@ -53,6 +105,23 @@ router.get(
   '/companies/:id',
   validateRequest(getMedicineSchema),
   medicineController.getCompanyById,
+);
+
+router.post(
+  '/companies',
+  validateRequest(createCompanySchema),
+  medicineController.createCompany,
+);
+
+router.patch(
+  '/companies/:id',
+  validateRequest(updateCompanySchema),
+  medicineController.updateCompany,
+);
+
+router.get(
+  '/pregnancy-categories',
+  medicineController.getPregnancyCategories,
 );
 
 router.get(

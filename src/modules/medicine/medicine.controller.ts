@@ -18,6 +18,34 @@ export class MedicineController {
     });
   });
 
+  getStats = catchAsync(async (req: Request, res: Response) => {
+    const result = await medicineService.getStats();
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Dashboard stats retrieved successfully',
+      data: result,
+    });
+  });
+
+  createBrand = catchAsync(async (req: Request, res: Response) => {
+    const result = await medicineService.createBrand(req.body);
+    sendResponse(res, 201, {
+      success: true,
+      message: 'Brand created successfully',
+      data: result,
+    });
+  });
+
+  updateBrand = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await medicineService.updateBrand(Number(id), req.body);
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Brand updated successfully',
+      data: result,
+    });
+  });
+
   searchGenerics = catchAsync(async (req: Request, res: Response) => {
     const query = req.query as unknown as MedicineSearchQuery;
     const result = await medicineService.searchGenerics(query);
@@ -26,6 +54,25 @@ export class MedicineController {
       message: 'Generics retrieved successfully',
       data: result.data,
       meta: result.meta,
+    });
+  });
+
+  createGeneric = catchAsync(async (req: Request, res: Response) => {
+    const result = await medicineService.createGeneric(req.body);
+    sendResponse(res, 201, {
+      success: true,
+      message: 'Generic created successfully',
+      data: result,
+    });
+  });
+
+  updateGeneric = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await medicineService.updateGeneric(Number(id), req.body);
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Generic updated successfully',
+      data: result,
     });
   });
 
@@ -40,6 +87,25 @@ export class MedicineController {
     });
   });
 
+  createIndication = catchAsync(async (req: Request, res: Response) => {
+    const result = await medicineService.createIndication(req.body);
+    sendResponse(res, 201, {
+      success: true,
+      message: 'Indication created successfully',
+      data: result,
+    });
+  });
+
+  updateIndication = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await medicineService.updateIndication(Number(id), req.body);
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Indication updated successfully',
+      data: result,
+    });
+  });
+
   searchCompanies = catchAsync(async (req: Request, res: Response) => {
     const query = req.query as unknown as MedicineSearchQuery;
     const result = await medicineService.searchCompanies(query);
@@ -48,6 +114,34 @@ export class MedicineController {
       message: 'Companies retrieved successfully',
       data: result.data,
       meta: result.meta,
+    });
+  });
+
+  createCompany = catchAsync(async (req: Request, res: Response) => {
+    const result = await medicineService.createCompany(req.body);
+    sendResponse(res, 201, {
+      success: true,
+      message: 'Company created successfully',
+      data: result,
+    });
+  });
+
+  updateCompany = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await medicineService.updateCompany(Number(id), req.body);
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Company updated successfully',
+      data: result,
+    });
+  });
+
+  getPregnancyCategories = catchAsync(async (req: Request, res: Response) => {
+    const result = await medicineService.getPregnancyCategories();
+    sendResponse(res, 200, {
+      success: true,
+      message: 'Pregnancy categories retrieved successfully',
+      data: result,
     });
   });
 
