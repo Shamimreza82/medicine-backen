@@ -23,7 +23,7 @@ export const createLabTestSchema = z.object({
     normalRange: z.string().trim().optional(),
     unit: z.string().trim().optional(),
     isActive: z.boolean().optional().default(true),
-    metadata: z.record(z.unknown()).optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
   }),
 });
 
@@ -38,7 +38,7 @@ export const updateLabTestSchema = z.object({
     normalRange: z.string().trim().optional(),
     unit: z.string().trim().optional(),
     isActive: z.boolean().optional(),
-    metadata: z.record(z.unknown()).optional(),
+    metadata: z.record(z.string(), z.unknown()).optional(),
   }),
 });
 

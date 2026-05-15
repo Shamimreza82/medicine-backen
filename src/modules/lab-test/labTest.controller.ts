@@ -19,7 +19,7 @@ const searchLabTests = catchAsync(async (req, res) => {
 
 const getLabTestById = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await LabTestService.getLabTestById(id);
+  const result = await LabTestService.getLabTestById(id as string);
 
   sendResponse(res, 200, {
     success: true,
@@ -40,7 +40,7 @@ const createLabTest = catchAsync(async (req, res) => {
 
 const updateLabTest = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await LabTestService.updateLabTest(id, req.body);
+  const result = await LabTestService.updateLabTest(id as string, req.body);
 
   sendResponse(res, 200, {
     success: true,
@@ -51,7 +51,7 @@ const updateLabTest = catchAsync(async (req, res) => {
 
 const deleteLabTest = catchAsync(async (req, res) => {
   const { id } = req.params;
-  await LabTestService.deleteLabTest(id);
+  await LabTestService.deleteLabTest(id as string);
 
   sendResponse(res, 200, {
     success: true,
@@ -83,9 +83,9 @@ const exportToCsv = catchAsync(async (req, res) => {
   
   let csvContent = headers.join(',') + '\n';
 
-  data.forEach((test: any) => {
+  data.forEach((test: Record<string, any>) => {
     const row = headers.map(header => {
-      let value = (test as any)[header];
+      let value = test[header];
       
       if (header === 'metadata') {
         value = value ? JSON.stringify(value).replace(/"/g, '""') : '';
