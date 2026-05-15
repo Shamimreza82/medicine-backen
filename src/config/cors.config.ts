@@ -9,10 +9,14 @@ const parseOrigins = (origins: string): string[] => {
     .filter(Boolean);
 };
 
-const allowedOrigins = parseOrigins(envConfig.corsOrigins);
+const allowedOrigins = [
+  ...parseOrigins(envConfig.corsOrigins),
+  'https://medicine-server-frontend.vercel.app',
+];
 
 export const corsConfig: CorsOptions = {
   origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) {
       return callback(null, true);
     }
@@ -21,12 +25,22 @@ export const corsConfig: CorsOptions = {
       return callback(null, true);
     }
 
-    return callback(new Error('CORS origin not allowed'));
+    return callback(null, false); // Return false instead of Error to avoid triggering error handlers
   },
 
   credentials: true,
 
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'Accept',
+    'X-Requested-With',
+    'Access-Control-Allow-Origin',
+  ],
+
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+
+  maxAge: 86400, // 24 hours
 };

@@ -15,7 +15,7 @@ const envSchema = z.object({
   CORS_ENABLED: z.coerce.boolean().default(true),
   HOST: z.string().min(1).default('0.0.0.0'),
   DATABASE_URL: z.string().default(''),
-  CORS_ORIGINS: z.string().default('*'),
+  CORS_ORIGINS: z.string().default('*,https://medicine-server-frontend.vercel.app'),
   TRUST_PROXY: z
     .string()
     .optional()
