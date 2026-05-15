@@ -172,6 +172,18 @@ export class MedicineRepository {
           id: true,
           name: true,
           indication: true,
+          administration: true,
+          adultDose: true,
+          childDose: true,
+          contraIndication: true,
+          interaction: true,
+          modeOfAction: true,
+          precaution: true,
+          pregnancyCategoryId: true,
+          pregnancyCategoryNote: true,
+          renalDose: true,
+          sideEffect: true,
+          pregnancyCategory: true,
           therapeuticGenerics: {
             select: {
               therapeutic: {

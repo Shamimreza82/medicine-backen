@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '@/bootstrap/prisma';
 import { AppError } from '@/shared/errors/AppError';
 import { paginateResponse } from '@/shared/utils/paginateResponse';
+import { adminRepository } from '../admin/admin.repository';
 
 import { LabTestRepository } from './labTest.repository';
 
@@ -28,17 +29,35 @@ export const LabTestService = {
     if (!data.slug && data.name) {
       data.slug = data.name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
     }
-    return LabTestRepository.create(data);
+    const result = await LabTestRepository.create(data);
+    await adminRepository.createAuditLog({
+      action: 'Added New Lab Test',
+      target: result.name,
+      userName: 'Admin',
+    });
+    return result;
   },
 
   async updateLabTest(id: string, data: Prisma.LabTestUpdateInput) {
     await this.getLabTestById(id);
-    return LabTestRepository.update(id, data);
+    const result = await LabTestRepository.update(id, data);
+    await adminRepository.createAuditLog({
+      action: 'Updated Lab Test',
+      target: result.name,
+      userName: 'Admin',
+    });
+    return result;
   },
 
   async deleteLabTest(id: string) {
-    await this.getLabTestById(id);
-    return LabTestRepository.delete(id);
+    const existing = await this.getLabTestById(id);
+    const result = await LabTestRepository.delete(id);
+    await adminRepository.createAuditLog({
+      action: 'Deleted Lab Test',
+      target: existing.name,
+      userName: 'Admin',
+    });
+    return result;
   },
 
   async bulkUploadLabTests(fileBuffer: Buffer) {
@@ -61,10 +80,6 @@ export const LabTestService = {
       }
 
       // Check if already exists
-      const existing = await LabTestRepository.search({ q: `"${name}"` }); 
-      // Note: LabTestRepository.search uses name: { contains: q }, but we want exact match for skip
-      // Better to add a findByName to repository or use Prisma directly
-      
       const exactMatch = await prisma.labTest.findUnique({ where: { name } });
 
       if (exactMatch) {
@@ -105,6 +120,13 @@ export const LabTestService = {
       }
     }
 
+    await adminRepository.createAuditLog({
+      action: 'Bulk Uploaded Lab Tests',
+      target: `${successCount} tests`,
+      userName: 'Admin',
+      details: `Success: ${successCount}, Skipped: ${skippedCount}`,
+    });
+
     return { successCount, skippedCount };
   },
 
@@ -112,6 +134,3 @@ export const LabTestService = {
     return LabTestRepository.search({ limit: 10000 }); // Fetch up to 10k records for export
   },
 };
-
-
-

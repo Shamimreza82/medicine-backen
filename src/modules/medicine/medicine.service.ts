@@ -2,6 +2,7 @@ import { AppError } from '@/shared/errors/AppError';
 import { paginateResponse } from '@/shared/utils/paginateResponse';
 
 import { LabTestRepository } from '../lab-test/labTest.repository';
+import { adminRepository } from '../admin/admin.repository';
 import { medicineRepository } from './medicine.repository';
 import { MedicineSearchQuery } from './medicine.types';
 
@@ -22,12 +23,24 @@ export class MedicineService {
   }
 
   async createBrand(data: any) {
-    return medicineRepository.createBrand(data);
+    const result = await medicineRepository.createBrand(data);
+    await adminRepository.createAuditLog({
+      action: 'Added New Brand',
+      target: result.name,
+      userName: 'Admin',
+    });
+    return result;
   }
 
   async updateBrand(id: number, data: any) {
     await this.getBrandById(id);
-    return medicineRepository.updateBrand(id, data);
+    const result = await medicineRepository.updateBrand(id, data);
+    await adminRepository.createAuditLog({
+      action: 'Updated Brand',
+      target: result.name,
+      userName: 'Admin',
+    });
+    return result;
   }
 
   async searchGenerics(query: MedicineSearchQuery) {
@@ -36,13 +49,24 @@ export class MedicineService {
   }
 
   async createGeneric(data: any) {
-    return medicineRepository.createGeneric(data);
+    const result = await medicineRepository.createGeneric(data);
+    await adminRepository.createAuditLog({
+      action: 'Added New Generic',
+      target: result.name,
+      userName: 'Admin',
+    });
+    return result;
   }
 
   async updateGeneric(id: number, data: any) {
-    // Check if generic exists
-    await this.getGenericById(id);
-    return medicineRepository.updateGeneric(id, data);
+    const existing = await this.getGenericById(id);
+    const result = await medicineRepository.updateGeneric(id, data);
+    await adminRepository.createAuditLog({
+      action: 'Updated Generic',
+      target: result.name,
+      userName: 'Admin',
+    });
+    return result;
   }
 
   async searchIndications(query: MedicineSearchQuery) {
@@ -51,12 +75,24 @@ export class MedicineService {
   }
 
   async createIndication(data: any) {
-    return medicineRepository.createIndication(data);
+    const result = await medicineRepository.createIndication(data);
+    await adminRepository.createAuditLog({
+      action: 'Added New Indication',
+      target: result.name,
+      userName: 'Admin',
+    });
+    return result;
   }
 
   async updateIndication(id: number, data: any) {
     await this.getIndicationById(id);
-    return medicineRepository.updateIndication(id, data);
+    const result = await medicineRepository.updateIndication(id, data);
+    await adminRepository.createAuditLog({
+      action: 'Updated Indication',
+      target: result.name,
+      userName: 'Admin',
+    });
+    return result;
   }
 
   async searchCompanies(query: MedicineSearchQuery) {
@@ -65,12 +101,24 @@ export class MedicineService {
   }
 
   async createCompany(data: any) {
-    return medicineRepository.createCompany(data);
+    const result = await medicineRepository.createCompany(data);
+    await adminRepository.createAuditLog({
+      action: 'Added New Company',
+      target: result.name,
+      userName: 'Admin',
+    });
+    return result;
   }
 
   async updateCompany(id: number, data: any) {
     await this.getCompanyById(id);
-    return medicineRepository.updateCompany(id, data);
+    const result = await medicineRepository.updateCompany(id, data);
+    await adminRepository.createAuditLog({
+      action: 'Updated Company',
+      target: result.name,
+      userName: 'Admin',
+    });
+    return result;
   }
 
   async getPregnancyCategories() {
