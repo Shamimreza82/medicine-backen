@@ -19,7 +19,6 @@ export const LabTestRepository = {
     const q = this.privateFormatQuery(query.q);
 
     const where: Prisma.LabTestWhereInput = {
-      isActive: true,
       ...(q
         ? {
             OR: [
@@ -46,15 +45,6 @@ export const LabTestRepository = {
       prisma.labTest.count({ where }),
       prisma.labTest.findMany({
         where,
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          shortName: true,
-          category: true,
-          specimen: true,
-          isActive: true,
-        },
         orderBy: [{ name: 'asc' }],
         skip,
         take: limit,
@@ -63,4 +53,30 @@ export const LabTestRepository = {
 
     return { data, total };
   },
+
+  async findById(id: string) {
+    return prisma.labTest.findUnique({
+      where: { id },
+    });
+  },
+
+  async create(data: Prisma.LabTestCreateInput) {
+    return prisma.labTest.create({
+      data,
+    });
+  },
+
+  async update(id: string, data: Prisma.LabTestUpdateInput) {
+    return prisma.labTest.update({
+      where: { id },
+      data,
+    });
+  },
+
+  async delete(id: string) {
+    return prisma.labTest.delete({
+      where: { id },
+    });
+  },
 };
+

@@ -11,3 +11,34 @@ export const searchLabTestQuerySchema = z.object({
 export const searchLabTestSchema = z.object({
   query: searchLabTestQuerySchema,
 });
+
+export const createLabTestSchema = z.object({
+  body: z.object({
+    name: z.string().trim().min(1, 'Name is required'),
+    shortName: z.string().trim().optional(),
+    category: z.string().trim().optional(),
+    description: z.string().trim().optional(),
+    specimen: z.string().trim().optional(),
+    preparation: z.string().trim().optional(),
+    normalRange: z.string().trim().optional(),
+    unit: z.string().trim().optional(),
+    isActive: z.boolean().optional().default(true),
+    metadata: z.record(z.unknown()).optional(),
+  }),
+});
+
+export const updateLabTestSchema = z.object({
+  body: z.object({
+    name: z.string().trim().min(1).optional(),
+    shortName: z.string().trim().optional(),
+    category: z.string().trim().optional(),
+    description: z.string().trim().optional(),
+    specimen: z.string().trim().optional(),
+    preparation: z.string().trim().optional(),
+    normalRange: z.string().trim().optional(),
+    unit: z.string().trim().optional(),
+    isActive: z.boolean().optional(),
+    metadata: z.record(z.unknown()).optional(),
+  }),
+});
+
