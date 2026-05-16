@@ -32,6 +32,10 @@ export interface GenericResponse {
   id: number;
   name: string;
   indication: string | null;
+  administration: string | null;
+  adultDose: string | null;
+  childDose: string | null;
+  renalDose: string | null;
   therapeuticClass?: string | null;
   therapeuticGenerics?: Array<{
     therapeutic: {
