@@ -33,30 +33,7 @@ export class MedicineRepository {
     const where: Prisma.DrugBrandWhereInput = {};
 
     if (q) {
-      where.OR = [
-        {
-          name: {
-            contains: q,
-            mode: 'insensitive',
-          },
-        },
-        {
-          generic: {
-            name: {
-              contains: q,
-              mode: 'insensitive',
-            },
-          },
-        },
-        {
-          company: {
-            name: {
-              contains: q,
-              mode: 'insensitive',
-            },
-          },
-        },
-      ];
+      where.name = { startsWith: q, mode: 'insensitive' };
     }
 
     if (query.companyId) {
@@ -157,7 +134,7 @@ export class MedicineRepository {
 
     if (q) {
       where.name = {
-        contains: q,
+        startsWith: q,
         mode: 'insensitive',
       };
     }
@@ -378,7 +355,7 @@ export class MedicineRepository {
 
     if (q) {
       where.name = {
-        contains: q,
+        startsWith: q,
         mode: 'insensitive',
       };
     }
@@ -417,7 +394,7 @@ export class MedicineRepository {
 
     if (q) {
       where.name = {
-        contains: q,
+        startsWith: q,
         mode: 'insensitive',
       };
     }
@@ -609,11 +586,11 @@ export class MedicineRepository {
 
     if (q) {
       drugWhere.form = {
-        contains: q,
+        startsWith: q,
         mode: 'insensitive',
       };
       herbalWhere.form = {
-        contains: q,
+        startsWith: q,
         mode: 'insensitive',
       };
     }
