@@ -57,6 +57,54 @@ export const medicineSchemas = {
       name: { type: 'string' },
     },
   },
+  CreateBrand: {
+    type: 'object',
+    required: ['name', 'companyId', 'genericId'],
+    properties: {
+      name: { type: 'string' },
+      companyId: { type: 'integer' },
+      genericId: { type: 'integer' },
+      form: { type: 'string' },
+      packSize: { type: 'string' },
+      price: { type: 'string' },
+      strength: { type: 'string' },
+      isSponsored: { type: 'boolean' },
+    },
+  },
+  CreateGeneric: {
+    type: 'object',
+    required: ['name'],
+    properties: {
+      name: { type: 'string' },
+      indication: { type: 'string' },
+      administration: { type: 'string' },
+      adultDose: { type: 'string' },
+      childDose: { type: 'string' },
+      renalDose: { type: 'string' },
+      contraIndication: { type: 'string' },
+      precaution: { type: 'string' },
+      sideEffect: { type: 'string' },
+      interaction: { type: 'string' },
+      modeOfAction: { type: 'string' },
+      pregnancyCategoryId: { type: 'integer', nullable: true },
+      pregnancyCategoryNote: { type: 'string' },
+    },
+  },
+  CreateIndication: {
+    type: 'object',
+    required: ['name'],
+    properties: {
+      name: { type: 'string' },
+    },
+  },
+  CreateCompany: {
+    type: 'object',
+    required: ['name'],
+    properties: {
+      name: { type: 'string' },
+      order: { type: 'integer' },
+    },
+  },
   CombinedSearchResponse: {
     type: 'object',
     properties: {
