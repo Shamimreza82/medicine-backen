@@ -10,6 +10,9 @@ export const searchMedicineQuerySchema = z.object({
   therapeuticId: z.coerce.number().int().optional(),
   letter: z.string().length(1).optional(),
   form: z.string().trim().optional(),
+  strength: z.string().trim().optional(),
+  sortBy: z.enum(['name', 'price']).optional().default('name'),
+  sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
 });
 
 export const searchMedicineSchema = z.object({

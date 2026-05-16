@@ -48,6 +48,14 @@ export class MedicineRepository {
             },
           },
         },
+        {
+          company: {
+            name: {
+              contains: q,
+              mode: 'insensitive',
+            },
+          },
+        },
       ];
     }
 
@@ -62,6 +70,13 @@ export class MedicineRepository {
     if (query.form) {
       where.form = {
         equals: query.form,
+        mode: 'insensitive',
+      };
+    }
+
+    if (query.strength) {
+      where.strength = {
+        contains: query.strength,
         mode: 'insensitive',
       };
     }
@@ -81,6 +96,13 @@ export class MedicineRepository {
           },
         },
       };
+    }
+
+    const orderBy: Prisma.DrugBrandOrderByWithRelationInput = {};
+    if (query.sortBy === 'price') {
+      orderBy.price = query.sortOrder;
+    } else {
+      orderBy.name = query.sortOrder || 'asc';
     }
 
     const [data, total] = await Promise.all([
@@ -119,9 +141,7 @@ export class MedicineRepository {
         },
         take: limit,
         skip,
-        orderBy: {
-          name: 'asc',
-        },
+        orderBy,
       }),
       prisma.drugBrand.count({ where }),
     ]);
